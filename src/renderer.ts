@@ -53,6 +53,12 @@ export class Renderer {
       case 'expression':
         return this.renderExpression(node.expression || '', context);
 
+      case 'helperExpression':
+        return this.renderHelperExpression(node, context, stampdown);
+
+      case 'subexpression':
+        return this.renderSubexpression(node, context, stampdown);
+
       case 'partial':
         return this.renderPartialNode(node, context, stampdown);
 
@@ -95,6 +101,94 @@ export class Renderer {
       console.error(`Error evaluating expression "${expression}":`, error);
       return '';
     }
+  }
+
+  /**
+   * Render a helper expression (helper with arguments in expression context)
+   * Example: {{helper arg1 (subhelper arg2)}}
+   * @param {ASTNode} node - The helper expression node
+   * @param {Context} context - The template context
+   * @param {Stampdown} stampdown - The Stampdown instance
+   * @returns {string} - The rendered helper result
+   * @private
+   */
+  private renderHelperExpression(node: ASTNode, context: Context, stampdown: Stampdown): string {
+    const helperName = node.helperName || '';
+    const helper = this.helperRegistry.get(helperName);
+
+    if (!helper) {
+      console.warn(`Helper "${helperName}" not found`);
+      return '';
+    }
+
+    // Evaluate arguments (including subexpressions)
+    const args = (node.args || []).map((arg) => this.evaluateArgument(arg, context, stampdown));
+
+    // Helper expressions don't have blocks, so fn and inverse are empty
+    const options = {
+      fn: (): string => '',
+      inverse: (): string => '',
+      hash: {},
+    };
+
+    return helper(context, options, ...args);
+  }
+
+  /**
+   * Render a subexpression (evaluate and return result as value, not string)
+   * Subexpressions are used as arguments to other helpers
+   * @param {ASTNode} node - The subexpression node
+   * @param {Context} context - The template context
+   * @param {Stampdown} stampdown - The Stampdown instance
+   * @returns {string} - The evaluated subexpression result
+   * @private
+   */
+  private renderSubexpression(node: ASTNode, context: Context, stampdown: Stampdown): string {
+    const helperName = node.helperName || '';
+    const helper = this.helperRegistry.get(helperName);
+
+    if (!helper) {
+      console.warn(`Helper "${helperName}" not found in subexpression`);
+      return '';
+    }
+
+    // Evaluate arguments (including nested subexpressions)
+    const args = (node.args || []).map((arg) => this.evaluateArgument(arg, context, stampdown));
+
+    // Subexpressions don't have blocks
+    const options = {
+      fn: (): string => '',
+      inverse: (): string => '',
+      hash: {},
+    };
+
+    return helper(context, options, ...args);
+  }
+
+  /**
+   * Evaluate an argument (can be a string expression or a subexpression node)
+   * @param {unknown} arg - The argument to evaluate
+   * @param {Context} context - The template context
+   * @param {Stampdown} stampdown - The Stampdown instance
+   * @returns {unknown} - The evaluated argument value
+   * @private
+   */
+  private evaluateArgument(arg: unknown, context: Context, stampdown: Stampdown): unknown {
+    // If it's a subexpression node, evaluate it
+    if (typeof arg === 'object' && arg !== null && (arg as ASTNode).type === 'subexpression') {
+      return this.renderSubexpression(arg as ASTNode, context, stampdown);
+    }
+
+    // If it's a string, try to evaluate as expression
+    if (typeof arg === 'string') {
+      try {
+        return this.evaluator.evaluate(arg, context);
+      } catch {
+        return arg;
+      }
+    }
+
+    return arg;
   }
 
   /**
@@ -258,25 +352,12 @@ export class Renderer {
       return '';
     }
 
-    // Evaluate hash parameters
+    // Evaluate hash parameters (can include subexpressions)
     const evaluatedHash: Context = {};
     if (node.hash) {
       for (const [key, value] of Object.entries(node.hash)) {
-        const valueStr = String(value);
-        try {
-          // Try to evaluate the value as an expression
-          const evaluated = this.evaluator.evaluate(valueStr, context);
-          // If evaluation succeeded and returned a value, use it
-          if (evaluated !== undefined) {
-            evaluatedHash[key] = evaluated;
-          } else {
-            // If the variable doesn't exist, treat as literal string
-            evaluatedHash[key] = valueStr;
-          }
-        } catch {
-          // If evaluation fails completely, treat as literal string
-          evaluatedHash[key] = valueStr;
-        }
+        // Use evaluateArgument to handle subexpressions in hash values
+        evaluatedHash[key] = this.evaluateArgument(value, context, stampdown);
       }
     }
 
@@ -286,17 +367,8 @@ export class Renderer {
       hash: evaluatedHash,
     };
 
-    const args = (node.args || []).map((arg) => {
-      if (typeof arg === 'string') {
-        // Try to evaluate as expression
-        try {
-          return this.evaluator.evaluate(arg, context);
-        } catch {
-          return arg;
-        }
-      }
-      return arg;
-    });
+    // Use evaluateArgument to handle subexpressions
+    const args = (node.args || []).map((arg) => this.evaluateArgument(arg, context, stampdown));
 
     return helper(context, options, ...args);
   }

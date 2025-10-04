@@ -11,8 +11,11 @@ import type { Context } from './types';
 export class ExpressionEvaluator {
   /**
    * Evaluate an expression in the given context
-   * Supports dot notation for nested property access (e.g., "user.name")
-   * Also handles literal values: numbers, strings (quoted), booleans, null, undefined
+   * Supports:
+   * - Dot notation for nested property access (e.g., "user.name")
+   * - Literal values: numbers, strings (quoted), booleans, null, undefined
+   * - Comparison operators: ===, !==, ==, !=, >, <, >=, <=
+   * - Logical operators: &&, ||, !
    * @param {string} expression - The expression to evaluate
    * @param {Context} context - The context containing variables
    * @returns {unknown} - The evaluated result or undefined if not found
@@ -20,9 +23,59 @@ export class ExpressionEvaluator {
   evaluate(expression: string, context: Context): unknown {
     const trimmed = expression.trim();
 
+    // Check for logical OR operator (||) - lowest precedence
+    if (trimmed.includes('||')) {
+      const parts = this.splitByOperator(trimmed, '||');
+      if (parts.length > 1) {
+        for (const part of parts) {
+          const result = this.evaluate(part, context);
+          if (this.isTruthy(result)) {
+            return result;
+          }
+        }
+        return false;
+      }
+    }
+
+    // Check for logical AND operator (&&)
+    if (trimmed.includes('&&')) {
+      const parts = this.splitByOperator(trimmed, '&&');
+      if (parts.length > 1) {
+        let lastResult: unknown = true;
+        for (const part of parts) {
+          const result = this.evaluate(part, context);
+          if (!this.isTruthy(result)) {
+            return false;
+          }
+          lastResult = result;
+        }
+        return lastResult;
+      }
+    }
+
+    // Check for comparison operators (must check longer operators first)
+    // ===, !==, ==, !=, >=, <=, >, <
+    const comparisonOps = ['===', '!==', '==', '!=', '>=', '<=', '>', '<'];
+    for (const op of comparisonOps) {
+      if (trimmed.includes(op)) {
+        const parts = this.splitByOperator(trimmed, op);
+        if (parts.length === 2) {
+          const left = this.evaluate(parts[0], context);
+          const right = this.evaluate(parts[1], context);
+          return this.compareValues(left, right, op);
+        }
+      }
+    }
+
+    // Check for logical NOT operator (!)
+    if (trimmed.startsWith('!') && trimmed.length > 1) {
+      const value = this.evaluate(trimmed.slice(1), context);
+      return !this.isTruthy(value);
+    }
+
     // Handle literals
-    // Numbers (integer or decimal)
-    if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
+    // Numbers (integer or decimal, including scientific notation)
+    if (/^-?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(trimmed)) {
       return Number(trimmed);
     }
 
@@ -55,5 +108,98 @@ export class ExpressionEvaluator {
     }
 
     return value;
+  }
+
+  /**
+   * Split expression by operator, respecting quoted strings
+   * @param {string} expression - The expression to split
+   * @param {string} operator - The operator to split by
+   * @returns {string[]} - Array of parts
+   * @private
+   */
+  private splitByOperator(expression: string, operator: string): string[] {
+    const parts: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    let quoteChar = '';
+    let i = 0;
+
+    while (i < expression.length) {
+      const char = expression[i];
+
+      // Handle quotes
+      if ((char === '"' || char === "'") && (i === 0 || expression[i - 1] !== '\\')) {
+        if (!inQuotes) {
+          inQuotes = true;
+          quoteChar = char;
+        } else if (char === quoteChar) {
+          inQuotes = false;
+          quoteChar = '';
+        }
+        current += char;
+        i++;
+        continue;
+      }
+
+      // Check for operator outside quotes
+      if (!inQuotes && expression.slice(i, i + operator.length) === operator) {
+        parts.push(current.trim());
+        current = '';
+        i += operator.length;
+        continue;
+      }
+
+      current += char;
+      i++;
+    }
+
+    if (current.trim()) {
+      parts.push(current.trim());
+    }
+
+    return parts.length > 1 ? parts : [expression];
+  }
+
+  /**
+   * Compare two values using the given operator
+   * @param {unknown} left - Left operand
+   * @param {unknown} right - Right operand
+   * @param {string} operator - Comparison operator
+   * @returns {boolean} - Comparison result
+   * @private
+   */
+  private compareValues(left: unknown, right: unknown, operator: string): boolean {
+    switch (operator) {
+      case '===':
+        return left === right;
+      case '!==':
+        return left !== right;
+      case '==':
+        // eslint-disable-next-line eqeqeq
+        return left == right;
+      case '!=':
+        // eslint-disable-next-line eqeqeq
+        return left != right;
+      case '>':
+        return Number(left) > Number(right);
+      case '<':
+        return Number(left) < Number(right);
+      case '>=':
+        return Number(left) >= Number(right);
+      case '<=':
+        return Number(left) <= Number(right);
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Check if a value is truthy
+   * @param {unknown} value - Value to check
+   * @returns {boolean} - True if value is truthy
+   * @private
+   */
+  private isTruthy(value: unknown): boolean {
+    return !!value;
   }
 }

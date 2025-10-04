@@ -109,6 +109,10 @@ function isTruthy(value: unknown): boolean {
   if (value === null || value === undefined || value === false) {
     return false;
   }
+  // Handle string boolean values from helpers
+  if (value === 'false' || value === '0') {
+    return false;
+  }
   if (Array.isArray(value) && value.length === 0) {
     return false;
   }

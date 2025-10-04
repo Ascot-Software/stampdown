@@ -1,0 +1,88 @@
+# Example Stampdown Template
+# Blog Post Template
+
+{{! This is a single-line comment }}
+
+{{!--
+  This is a multi-line comment
+  Used for more detailed documentation
+--}}
+
+{{>header}}
+
+# {{title}}
+
+*Written by {{author.name}} on {{date}}*
+**Website**: [{{author.website}}]({{author.website}})
+---
+
+# List
+
+- Item 1
+- Item 2
+- Item 3
+
+1. First item
+2. Second item
+
+> Here is a blockquote.
+
+## Introduction
+
+{{introduction}}
+
+## Content
+
+{{#if hasSections}}
+  {{#each sections}}
+### {{this.title}}
+*Written by {{this.author.name}} on {{this.date}}*
+
+{{this.content}}
+
+- Tag 1
+- Tag 2
+- Tag 3
+
+1. First item
+2. Second item
+
+> Here is a blockquote.
+
+    {{#if this.subsections}}
+      {{#each this.subsections}}
+#### {{this.title}}
+
+* {{this.tag1}}
+* {{this.tag2}}
+* {{this.tag3}}
+
+> {{this.blockquote}}
+
+{{this.content}}
+      {{/each}}
+    {{/if}}
+  {{/each}}
+{{else}}
+No sections available.
+{{/if}}
+
+## Tags
+
+
+{{#if tags}}
+Tags: {{#each tags}}**{{this}}**{{#unless @last}}, {{/unless}}{{/each}}
+{{/if}}
+
+## Author Bio
+
+{{#with author}}
+**{{name}}** - {{bio}}
+
+- Website: {{website}}
+- Email: {{email}}
+{{/with}}
+
+---
+
+{{>footer}}

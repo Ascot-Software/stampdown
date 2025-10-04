@@ -97,18 +97,129 @@ export class Parser {
 
   /**
    * Parse an expression node {{expression}}
-   * @returns {ASTNode} - Expression node
+   * Can detect helper calls with subexpressions
+   * @returns {ASTNode} - Expression node or helperExpression node
    */
   private parseExpression(): ASTNode {
     this.consume('{{');
     this.skipWhitespace();
 
+    // Check if this contains a subexpression (opening paren)
+    // If so, parse as a helper expression
+    const start = this.position;
+    const identifier = this.readIdentifier();
+    this.skipWhitespace();
+
+    // Only treat as helper expression if there's a subexpression (opening paren)
+    if (identifier && this.peek('(')) {
+      // Reset and parse as helper with subexpression arguments
+      this.position = start;
+      const helperName = this.readIdentifier();
+      this.skipWhitespace();
+
+      const args: unknown[] = [];
+
+      while (!this.peek('}}')) {
+        // Check for subexpression
+        if (this.peek('(')) {
+          const subexpr = this.parseSubexpression();
+          args.push(subexpr);
+          this.skipWhitespace();
+          continue;
+        }
+
+        // Check if argument starts with a quote
+        let token: string;
+        if (this.peek('"') || this.peek("'")) {
+          const quote = this.template[this.position];
+          this.position++; // consume opening quote
+          token = this.readUntil(quote);
+          this.position++; // consume closing quote
+          token = quote + token + quote;
+        } else {
+          token = this.readUntil(/[\s}]/);
+        }
+
+        if (!token) break;
+
+        args.push(token.trim());
+        this.skipWhitespace();
+      }
+
+      this.consume('}}');
+
+      // Return as a helper call expression
+      return {
+        type: 'helperExpression',
+        helperName,
+        args,
+      };
+    }
+
+    // Otherwise, parse as a simple expression
+    this.position = start;
     const expression = this.readUntil('}}');
     this.consume('}}');
 
     return {
       type: 'expression',
       expression: expression.trim(),
+    };
+  }
+
+  /**
+   * Parse a subexpression (helper arg1 arg2...)
+   * Subexpressions allow helpers to be called within other helpers
+   * Example: (helper "arg1" arg2)
+   * @returns {ASTNode} - Subexpression node (a blockHelper node that will be evaluated)
+   * @private
+   */
+  private parseSubexpression(): ASTNode {
+    this.consume('(');
+    this.skipWhitespace();
+
+    // Read the helper name
+    const helperName = this.readIdentifier();
+    this.skipWhitespace();
+
+    // Parse arguments (can include nested subexpressions)
+    const args: unknown[] = [];
+
+    while (!this.peek(')')) {
+      // Check for nested subexpression
+      if (this.peek('(')) {
+        const nested = this.parseSubexpression();
+        args.push(nested);
+        this.skipWhitespace();
+        continue;
+      }
+
+      // Check if argument starts with a quote
+      let token: string;
+      if (this.peek('"') || this.peek("'")) {
+        const quote = this.template[this.position];
+        this.position++; // consume opening quote
+        token = this.readUntil(quote);
+        this.position++; // consume closing quote
+        // Keep the quotes for evaluator to handle
+        token = quote + token + quote;
+      } else {
+        token = this.readUntil(/[\s)]/);
+      }
+
+      if (!token) break;
+
+      args.push(token.trim());
+      this.skipWhitespace();
+    }
+
+    this.consume(')');
+
+    // Return a special node type for subexpressions
+    return {
+      type: 'subexpression',
+      helperName,
+      args,
     };
   }
 
@@ -318,7 +429,97 @@ export class Parser {
     const args: unknown[] = [];
     const hash: Record<string, unknown> = {};
 
+    // For the first argument, read the entire expression (may contain operators)
+    // This allows expressions like: {{#if name === "Alice"}} or {{#if age > 18}}
+    let isFirstArg = true;
+
     while (!this.peek('}}') && !this.peek('/}}')) {
+      // Check for subexpression (starts with opening paren)
+      if (this.peek('(')) {
+        const subexpr = this.parseSubexpression();
+        args.push(subexpr);
+        this.skipWhitespace();
+        isFirstArg = false;
+        continue;
+      }
+
+      // For the first argument, read everything until }} or /}}
+      // This allows complex expressions with operators
+      // But check for self-closing first
+      if (isFirstArg && args.length === 0 && Object.keys(hash).length === 0 && !this.peek('/}}')) {
+        // Peek ahead to see if there's a }} or /}} coming
+        let lookAhead = this.position;
+        let foundOperator = false;
+        let insideQuotes = false;
+        let quoteChar = '';
+
+        // Scan ahead to see if there are comparison operators in the expression
+        // We need to distinguish between hash parameters (key=value) and comparison operators (==, ===, etc.)
+        // We also need to skip over quoted strings
+        while (lookAhead < this.template.length) {
+          const char = this.template[lookAhead];
+
+          // Track quoted strings
+          if ((char === '"' || char === "'") && !insideQuotes) {
+            insideQuotes = true;
+            quoteChar = char;
+            lookAhead++;
+            continue;
+          } else if (insideQuotes && char === quoteChar) {
+            insideQuotes = false;
+            quoteChar = '';
+            lookAhead++;
+            continue;
+          }
+
+          // Skip characters inside quotes
+          if (insideQuotes) {
+            lookAhead++;
+            continue;
+          }
+
+          // Check for end delimiters
+          if (
+            this.template.substr(lookAhead, 2) === '}}' ||
+            this.template.substr(lookAhead, 3) === '/}}'
+          ) {
+            break;
+          }
+
+          const next = this.template[lookAhead + 1];
+          const next2 = this.template[lookAhead + 2];
+
+          // Check for multi-character operators first
+          if (
+            (char === '=' && (next === '=' || (next === '=' && next2 === '='))) || // == or ===
+            (char === '!' && next === '=') || // != or !==
+            (char === '>' && next === '=') || // >=
+            (char === '<' && next === '=') || // <=
+            (char === '&' && next === '&') || // &&
+            (char === '|' && next === '|') || // ||
+            (char === '>' && next !== '=') || // >
+            (char === '<' && next !== '=') || // <
+            (char === '!' && next !== '=') // !
+          ) {
+            foundOperator = true;
+            break;
+          }
+
+          lookAhead++;
+        }
+
+        // Only read full expression if we found operators
+        if (foundOperator) {
+          const fullExpression = this.readUntil(/[}/]/).trim();
+          if (fullExpression) {
+            args.push(fullExpression);
+            isFirstArg = false;
+          }
+          this.skipWhitespace();
+          continue;
+        }
+      }
+
       // Check if argument starts with a quote
       let token: string;
       if (this.peek('"') || this.peek("'")) {
@@ -344,24 +545,26 @@ export class Parser {
         this.consume('=');
         this.skipWhitespace();
 
-        // Read the value (could be quoted or unquoted)
-        let value: string;
-        let wasQuoted = false;
-        if (this.peek('"') || this.peek("'")) {
+        // Read the value (could be quoted or unquoted, or a subexpression)
+        let value: string | ASTNode;
+        if (this.peek('(')) {
+          value = this.parseSubexpression();
+        } else if (this.peek('"') || this.peek("'")) {
           const quote = this.template[this.position];
           this.position++; // consume opening quote
-          value = this.readUntil(quote);
+          const val = this.readUntil(quote);
           this.position++; // consume closing quote
-          wasQuoted = true;
+          // Keep the quotes so evaluator can handle it properly
+          value = quote + val + quote;
         } else {
-          value = this.readUntil(/[\s}/]/);
+          value = this.readUntil(/[\s}/]/).trim();
         }
 
-        // Only trim unquoted values
-        hash[key] = wasQuoted ? value : value.trim();
+        hash[key] = value;
       } else {
         // Regular argument
         args.push(token.trim());
+        isFirstArg = false;
       }
 
       this.skipWhitespace();
@@ -393,6 +596,14 @@ export class Parser {
         break;
       }
 
+      // Handle {{else if condition}}
+      if (this.peek('{{else') && this.peekAhead('{{else if', 10)) {
+        // Parse the entire else-if chain recursively
+        inverseChildren = this.parseElseIfChain();
+        break;
+      }
+
+      // Handle {{else}}
       if (this.peek('{{else}}')) {
         this.consume('{{else}}');
         inverseChildren = [];
@@ -432,12 +643,87 @@ export class Parser {
   }
 
   /**
+   * Parse an else-if chain into nested if blocks
+   * Handles: {{else if cond1}}...{{else if cond2}}...{{else}}...
+   * @returns {ASTNode[]} - Array containing the first else-if block (with nested inverse)
+   * @private
+   */
+  private parseElseIfChain(): ASTNode[] {
+    this.consume('{{else');
+    this.skipWhitespace();
+    this.consume('if');
+    this.skipWhitespace();
+
+    // Parse the condition - it may contain subexpressions
+    const conditionArgs: unknown[] = [];
+
+    // Check if condition starts with subexpression
+    if (this.peek('(')) {
+      const subexpr = this.parseSubexpression();
+      conditionArgs.push(subexpr);
+      this.skipWhitespace();
+    } else {
+      // Read the full condition as expression
+      const condition = this.readUntil(/[}]/).trim();
+      conditionArgs.push(condition);
+    }
+
+    this.consume('}}');
+
+    // Parse the block content for this else-if
+    const children: ASTNode[] = [];
+    while (this.position < this.template.length && !this.peek('{{/') && !this.peek('{{else')) {
+      const node = this.parseNode();
+      if (node) {
+        children.push(node);
+      }
+    }
+
+    // Create the else-if node
+    const elseIfNode: ASTNode = {
+      type: 'blockHelper',
+      helperName: 'if',
+      args: conditionArgs,
+      children,
+    };
+
+    // Check for more else-if or final else
+    if (this.peek('{{else') && this.peekAhead('{{else if', 10)) {
+      // Another else-if follows - parse recursively
+      elseIfNode.inverse = this.parseElseIfChain();
+    } else if (this.peek('{{else}}')) {
+      // Final else block
+      this.consume('{{else}}');
+      const elseChildren: ASTNode[] = [];
+      while (this.position < this.template.length && !this.peek('{{/')) {
+        const node = this.parseNode();
+        if (node) {
+          elseChildren.push(node);
+        }
+      }
+      elseIfNode.inverse = elseChildren;
+    }
+
+    return [elseIfNode];
+  }
+
+  /**
    * Check if the current position matches a string without consuming it
    * @param {string} str - The string to check for
    * @returns {boolean} - True if the string matches at current position
    */
   private peek(str: string): boolean {
     return this.template.substr(this.position, str.length) === str;
+  }
+
+  /**
+   * Check if a string matches ahead at the current position (with length check)
+   * @param {string} str - The string to check for
+   * @param {number} length - The length to check
+   * @returns {boolean} - True if the string matches at current position
+   */
+  private peekAhead(str: string, length: number): boolean {
+    return this.template.substr(this.position, length).startsWith(str);
   }
 
   /**
