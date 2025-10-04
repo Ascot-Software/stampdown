@@ -1,0 +1,199 @@
+# Grammar Test File
+
+This file tests all Stampdown syntax patterns with the refactored grammar.
+
+## Self-Closing Blocks
+
+{{#uppercase name/}}
+{{#lowercase email/}}
+{{#capitalize title/}}
+{{#add x y/}}
+{{#multiply quantity price/}}
+{{#formatDate date "YYYY-MM-DD"/}}
+
+## Block Helpers
+
+{{#if premium}}
+  Premium content
+{{else}}
+  Free content
+{{/if}}
+
+{{#unless disabled}}
+  Enabled features
+{{/unless}}
+
+{{#each items}}
+  - {{this}} ({{@index}})
+  {{#if @first}}First item{{/if}}
+  {{#if @last}}Last item{{/if}}
+{{/each}}
+
+{{#with user}}
+  Name: {{name}}
+  Email: {{email}}
+  Premium: {{premium}}
+{{/with}}
+
+## Inline Partials
+
+{{#*inline "greeting"}}
+  Hello, {{name}}!
+{{/inline}}
+
+{{> greeting}}
+
+{{#*inline "userCard"}}
+  **{{name}}** ({{email}})
+{{/inline}}
+
+## Partial Blocks
+
+{{#> layout}}
+  Main content here
+  {{> @partial-block}}
+{{/layout}}
+
+{{#> page title="Home"}}
+  Page content
+{{/page}}
+
+## Partials
+
+{{> header}}
+{{> footer}}
+{{> components/button}}
+
+{{! Dynamic partials }}
+{{> (partialName) }}
+{{> (cardType) user}}
+
+{{! Partials with context }}
+{{> userCard user}}
+{{> productCard product}}
+
+{{! Partials with hash parameters }}
+{{> button text="Save" variant=primary}}
+{{> card title="Test" class="highlight" size="large"}}
+
+## Expressions
+
+{{name}}
+{{user.name}}
+{{user.email}}
+{{product.price}}
+{{items.0.title}}
+
+## Special Variables
+
+{{@index}}
+{{@first}}
+{{@last}}
+{{@key}}
+{{@root}}
+{{@partial-block}}
+{{this}}
+
+## Literals
+
+{{! Numbers }}
+{{#add 10 20}}
+{{#multiply 3.14 2}}
+{{#round 2.5e-3 2}}
+{{#divide 100 3.5e2}}
+
+{{! Strings }}
+{{#uppercase "hello world"}}
+{{#capitalize 'test string'}}
+{{> partial "with string"}}
+{{#helper "string with \"escapes\""}}
+{{#helper 'string with \'escapes\''}}
+
+{{! Booleans }}
+{{#if true}}Always shown{{/if}}
+{{#unless false}}Also shown{{/unless}}
+
+{{! Null values }}
+{{#if null}}Not shown{{/if}}
+{{#if undefined}}Not shown{{/if}}
+
+## Hash Parameters
+
+{{#helper key1="value1" key2="value2"}}
+{{#helper key1=variable1 key2=variable2}}
+{{#helper text="Save" disabled=false count=42}}
+{{> partial title="Test" enabled=true size=10}}
+
+## Comments
+
+{{! Single-line comment }}
+
+{{!--
+  Multi-line
+  block comment
+  with multiple lines
+--}}
+
+## Nested Structures
+
+{{#each users}}
+  {{#if premium}}
+    {{#with profile}}
+      **Premium User:** {{name}}
+      {{#uppercase email/}}
+    {{/with}}
+  {{else}}
+    Regular user: {{name}}
+  {{/if}}
+{{/each}}
+
+## Unescaped Expressions
+
+{{{rawHtml}}}
+{{{user.bio}}}
+
+## Markdown Content
+
+# Heading 1
+## Heading 2
+### Heading 3
+
+**Bold text**
+*Italic text*
+~~Strikethrough~~
+
+- List item 1
+- List item 2
+  - Nested item
+
+> Blockquote
+
+`inline code`
+
+```javascript
+const code = 'block';
+```
+
+[Link text](https://example.com)
+![Image alt](image.png)
+
+---
+
+## Complex Example
+
+{{#withChat raw=chat}}
+  {{#window size=5 from="end"}}
+    {{#eachMessage}}
+      {{#ifUser}}
+        **User Query {{@index}}:**
+        {{#firstText this/}}
+      {{/ifUser}}
+      {{#ifAssistant}}
+        **Assistant Response:**
+        {{#joinText content sep=" "/}}
+      {{/ifAssistant}}
+    {{/eachMessage}}
+  {{/window}}
+
+  Token count: {{#tokenCount (renderChat this format="json")/}}
+{{/withChat}}

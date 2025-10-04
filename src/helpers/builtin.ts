@@ -1,0 +1,119 @@
+/**
+ * Built-in Helpers
+ * Provides common templating helpers similar to Handlebars
+ */
+
+import type { HelperRegistry, HelperOptions } from './registry';
+import type { Context } from '../types';
+
+/**
+ * Register all built-in helpers to the given registry
+ * @param {HelperRegistry} registry - The helper registry to register helpers to
+ * @returns {void}
+ */
+export function registerBuiltInHelpers(registry: HelperRegistry): void {
+  /**
+   * 'if' helper - Conditional rendering
+   * Renders the main block if condition is truthy, else block otherwise
+   */
+  registry.register('if', (context: Context, options: HelperOptions, condition: unknown) => {
+    if (isTruthy(condition)) {
+      return options.fn ? options.fn(context) : '';
+    } else {
+      return options.inverse ? options.inverse(context) : '';
+    }
+  });
+
+  /**
+   * 'unless' helper - Inverse conditional rendering
+   * Renders the main block if condition is falsy, else block otherwise
+   */
+  registry.register('unless', (context: Context, options: HelperOptions, condition: unknown) => {
+    if (!isTruthy(condition)) {
+      return options.fn ? options.fn(context) : '';
+    } else {
+      return options.inverse ? options.inverse(context) : '';
+    }
+  });
+
+  /**
+   * 'each' helper - Array iteration
+   * Iterates over an array and renders the block for each item
+   * Provides special variables: @index, @first, @last
+   */
+  registry.register('each', (context: Context, options: HelperOptions, items: unknown) => {
+    if (!Array.isArray(items)) {
+      return options.inverse ? options.inverse(context) : '';
+    }
+
+    if (items.length === 0) {
+      return options.inverse ? options.inverse(context) : '';
+    }
+
+    return items
+      .map((item, index) => {
+        const itemContext: Context = {
+          ...context,
+          this: item,
+          '@index': index,
+          '@first': index === 0,
+          '@last': index === items.length - 1,
+        };
+        return options.fn ? options.fn(itemContext) : '';
+      })
+      .join('');
+  });
+
+  /**
+   * 'with' helper - Context switching
+   * Changes the context for the block content
+   */
+  registry.register('with', (context: Context, options: HelperOptions, obj: unknown) => {
+    if (obj && typeof obj === 'object') {
+      const newContext = { ...context, ...obj };
+      return options.fn ? options.fn(newContext) : '';
+    }
+    return options.inverse ? options.inverse(context) : '';
+  });
+
+  /**
+   * 'log' helper - Debug logging
+   * Logs arguments to console for debugging purposes
+   */
+  registry.register('log', (_context: Context, _options: HelperOptions, ...args: unknown[]) => {
+    console.log('[Stampdown Log]', ...args);
+    return '';
+  });
+
+  /**
+   * 'lookup' helper - Dynamic property access
+   * Looks up a property on an object using a dynamic key
+   */
+  registry.register(
+    'lookup',
+    (_context: Context, _options: HelperOptions, obj: unknown, key: unknown) => {
+      if (obj && typeof obj === 'object' && typeof key === 'string') {
+        return String((obj as Record<string, unknown>)[key] ?? '');
+      }
+      return '';
+    }
+  );
+}
+
+/**
+ * Check if a value is truthy according to Handlebars semantics
+ * @param {unknown} value - The value to check
+ * @returns {boolean} - True if the value is truthy
+ */
+function isTruthy(value: unknown): boolean {
+  if (value === null || value === undefined || value === false) {
+    return false;
+  }
+  if (Array.isArray(value) && value.length === 0) {
+    return false;
+  }
+  if (value === '') {
+    return false;
+  }
+  return true;
+}
