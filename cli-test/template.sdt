@@ -1,0 +1,9 @@
+# Hello {{name}}!
+
+You are {{age}} years old.
+
+{{#if premium}}
+You have premium access!
+{{else}}
+You have free access.
+{{/if}}

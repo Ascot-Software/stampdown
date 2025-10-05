@@ -1,72 +1,132 @@
 #!/usr/bin/env node
 
 /**
- * Stampdown CLI
+ * Stampdown CLI (sdt-cli)
  *
- * Command-line interface for precompiling Stampdown templates
+ * Command-line interface for rendering and precompiling Stampdown templates
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { Stampdown } from './stampdown';
 import { Precompiler } from './precompiler';
 
+/**
+ * CLI options interface
+ */
 interface CliOptions {
-  input?: string;
+  // Common options
+  help?: boolean;
+  version?: boolean;
+  verbose?: boolean;
+
+  // Render mode options
   output?: string;
+  extension?: string;
+  stdout?: boolean;
+  stdin?: boolean;
+  partials?: string[];
+  helpers?: string[];
+  data?: string[];
+  templates?: string[];
+
+  // Precompile mode options
+  precompile?: boolean;
   knownHelpers?: string;
   strict?: boolean;
   format?: 'esm' | 'cjs' | 'json';
   watch?: boolean;
-  verbose?: boolean;
   sourceMap?: boolean;
+  input?: string;
 }
 
+/**
+ * Stampdown CLI class
+ */
 class StampdownCLI {
-  private precompiler: Precompiler;
   private options: CliOptions;
+  private readonly version = '0.1.0';
 
+  /**
+   * Creates a new StampdownCLI instance
+   * @param {CliOptions} options - CLI options
+   */
   constructor(options: CliOptions = {}) {
-    this.precompiler = new Precompiler();
     this.options = options;
   }
 
   /**
    * Show help message
+   * @returns {void}
    */
   private showHelp(): void {
     console.log(`
-Stampdown Precompiler CLI
+Stampdown CLI (sdt-cli) v${this.version}
 
 Usage:
-  stampdown-precompile [options]
+  sdt-cli --version
+  sdt-cli --help
+  sdt-cli [options] [--] <template...>
+  sdt-cli --precompile [options]
 
-Options:
-  -i, --input <glob>          Input file or glob pattern (e.g., "src/**/*.sdt")
-  -o, --output <dir>          Output directory (default: "./precompiled")
-  -k, --known-helpers <list>  Comma-separated list of known helpers (or "all")
-  -s, --strict                Strict mode - error on unknown helpers
-  -f, --format <format>       Output format: esm, cjs, or json (default: esm)
-  -w, --watch                 Watch mode - recompile on file changes
-  -m, --source-map            Generate source maps
-  -v, --verbose               Verbose output
-  -h, --help                  Show this help message
+Render Mode (default):
+  Process templates and output rendered results
+
+  -h, --help                    Output usage information
+  -v, --version                 Output the version number
+  -o, --output <directory>      Directory to output rendered templates (default: cwd)
+  -e, --extension <ext>         Output extension of generated files (default: html)
+  -s, --stdout                  Output to standard output
+  -i, --stdin                   Receive data directly from stdin
+  -P, --partial <glob>...       Register a partial (use as many as you want, supports globs)
+  -H, --helper <glob>...        Register a helper (use as many as you want, supports globs)
+  -D, --data <glob|json>...     Parse data from file or inline JSON
+      --verbose                 Verbose output
+
+Precompile Mode:
+  Precompile templates to optimized JavaScript functions
+
+      --precompile              Enable precompile mode
+      --input <glob>            Input file or glob pattern (required in precompile mode)
+  -o, --output <dir>            Output directory (default: "./precompiled")
+  -k, --known-helpers <list>    Comma-separated list of known helpers (or "all")
+      --strict                  Strict mode - error on unknown helpers
+  -f, --format <format>         Output format: esm, cjs, or json (default: esm)
+  -w, --watch                   Watch mode - recompile on file changes
+  -m, --source-map              Generate source maps
+      --verbose                 Verbose output
 
 Examples:
-  # Precompile all .sdt files
-  stampdown-precompile -i "templates/**/*.sdt" -o dist/templates
+
+  # Render a template with data
+  sdt-cli -D data.json template.sdt
+
+  # Render with partials and helpers
+  sdt-cli -P ./partials/*.sdt -H ./helpers/*.js -D data.json template.sdt
+
+  # Output to directory with custom extension
+  sdt-cli -D data.json -o ./dist -e md template.sdt
+
+  # Output to stdout
+  sdt-cli -D data.json -s template.sdt
+
+  # Read data from stdin
+  echo '{"name": "Alice"}' | sdt-cli -i template.sdt
+
+  # Precompile templates
+  sdt-cli --precompile --input "templates/**/*.sdt" -o dist
 
   # Precompile with known helpers
-  stampdown-precompile -i "*.sdt" -k "uppercase,lowercase,if,each"
-
-  # Generate CJS modules
-  stampdown-precompile -i "templates/*.sdt" -f cjs -o build
-
-  # Strict mode with source maps
-  stampdown-precompile -i "src/**/*.sdt" -s -m -v
-
-  # Watch mode for development
-  stampdown-precompile -i "templates/**/*.sdt" -w
+  sdt-cli --precompile --input "*.sdt" -k "uppercase,lowercase,if,each"
 `);
+  }
+
+  /**
+   * Show version
+   * @returns {void}
+   */
+  private showVersion(): void {
+    console.log(`sdt-cli v${this.version}`);
   }
 
   /**
@@ -75,21 +135,47 @@ Examples:
    * @returns {CliOptions} - Parsed options object
    */
   private parseArgs(args: string[]): CliOptions {
-    const options: CliOptions = {};
+    const options: CliOptions = {
+      partials: [],
+      helpers: [],
+      data: [],
+      templates: [],
+    };
 
-    for (let i = 0; i < args.length; i++) {
+    let i = 0;
+    let afterDash = false;
+
+    while (i < args.length) {
       const arg = args[i];
 
+      // Handle -- separator
+      if (arg === '--') {
+        afterDash = true;
+        i++;
+        continue;
+      }
+
+      // After --, everything is a template
+      if (afterDash) {
+        options.templates!.push(arg);
+        i++;
+        continue;
+      }
+
+      // Parse options
       switch (arg) {
         case '-h':
         case '--help':
-          this.showHelp();
-          process.exit(0);
+          options.help = true;
           break;
 
-        case '-i':
-        case '--input':
-          options.input = args[++i];
+        case '-v':
+        case '--version':
+          options.version = true;
+          break;
+
+        case '--verbose':
+          options.verbose = true;
           break;
 
         case '-o':
@@ -97,12 +183,49 @@ Examples:
           options.output = args[++i];
           break;
 
+        case '-e':
+        case '--extension':
+          options.extension = args[++i];
+          break;
+
+        case '-s':
+        case '--stdout':
+          options.stdout = true;
+          break;
+
+        case '-i':
+        case '--stdin':
+          options.stdin = true;
+          break;
+
+        case '-P':
+        case '--partial':
+          options.partials!.push(args[++i]);
+          break;
+
+        case '-H':
+        case '--helper':
+          options.helpers!.push(args[++i]);
+          break;
+
+        case '-D':
+        case '--data':
+          options.data!.push(args[++i]);
+          break;
+
+        case '--precompile':
+          options.precompile = true;
+          break;
+
+        case '--input':
+          options.input = args[++i];
+          break;
+
         case '-k':
         case '--known-helpers':
           options.knownHelpers = args[++i];
           break;
 
-        case '-s':
         case '--strict':
           options.strict = true;
           break;
@@ -122,365 +245,46 @@ Examples:
           options.sourceMap = true;
           break;
 
-        case '-v':
-        case '--verbose':
-          options.verbose = true;
-          break;
-
         default:
-          console.error(`Unknown option: ${arg}`);
-          process.exit(1);
+          // If it starts with -, it's an unknown option
+          if (arg.startsWith('-')) {
+            console.error(`Unknown option: ${arg}`);
+            process.exit(1);
+          }
+          // Otherwise, it's a template file
+          options.templates!.push(arg);
       }
+
+      i++;
     }
 
     return options;
   }
 
   /**
-   * Find files matching glob pattern
-   * @param {string} pattern - Glob pattern to match files
-   * @returns {string[]} - Array of matching file paths
-   */
-  private findFiles(pattern: string): string[] {
-    // Simple glob implementation
-    const cwd = process.cwd();
-    const files: string[] = [];
-
-    // Check if pattern contains wildcards
-    if (pattern.includes('*')) {
-      // Extract directory and file pattern
-      let currentDir = cwd;
-
-      const searchDir = (dir: string, remainingParts: string[]): void => {
-        if (remainingParts.length === 0) return;
-
-        const part = remainingParts[0];
-
-        if (!fs.existsSync(dir)) return;
-
-        const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-        for (const entry of entries) {
-          const fullPath = path.join(dir, entry.name);
-
-          if (part === '**') {
-            // Recursive wildcard
-            if (entry.isDirectory()) {
-              searchDir(fullPath, remainingParts);
-              searchDir(fullPath, remainingParts.slice(1));
-            } else if (remainingParts.length > 1) {
-              // Check remaining pattern
-              const remaining = remainingParts.slice(1);
-              if (this.matchPattern(entry.name, remaining[0])) {
-                files.push(fullPath);
-              }
-            }
-          } else if (part === '*' || this.matchPattern(entry.name, part)) {
-            if (remainingParts.length === 1 && entry.isFile()) {
-              files.push(fullPath);
-            } else if (entry.isDirectory()) {
-              searchDir(fullPath, remainingParts.slice(1));
-            }
-          }
-        }
-      };
-
-      // Start search
-      const patternParts = pattern.split('/');
-      if (patternParts[0] && !patternParts[0].includes('*')) {
-        currentDir = path.join(cwd, patternParts[0]);
-        patternParts.shift();
-      }
-
-      searchDir(currentDir, patternParts);
-    } else {
-      // Single file
-      const filePath = path.resolve(cwd, pattern);
-      if (fs.existsSync(filePath)) {
-        files.push(filePath);
-      }
-    }
-
-    return files;
-  }
-
-  /**
-   * Match filename against pattern
-   * @param {string} name - Filename to match
-   * @param {string} pattern - Pattern to match against (supports * and ?)
-   * @returns {boolean} - True if name matches pattern
-   */
-  private matchPattern(name: string, pattern: string): boolean {
-    if (pattern === '*') return true;
-    if (!pattern.includes('*')) return name === pattern;
-
-    const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
-    return regex.test(name);
-  }
-
-  /**
-   * Generate template ID from file path
-   * @param {string} filePath - Full path to template file
-   * @param {string} inputPattern - Original input pattern used to find files
-   * @returns {string} - Generated template ID
-   */
-  private generateTemplateId(filePath: string, inputPattern: string): string {
-    // Remove base directory and extension
-    let id = filePath;
-
-    // Try to find common base
-    const patternDir = path.dirname(inputPattern);
-    if (patternDir && patternDir !== '.') {
-      const baseDir = path.resolve(process.cwd(), patternDir);
-      if (filePath.startsWith(baseDir)) {
-        id = filePath.substring(baseDir.length + 1);
-      }
-    }
-
-    // Remove extension
-    id = id.replace(/\.sdt$/, '');
-
-    // Convert to template ID format
-    return id.replace(/\\/g, '/');
-  }
-
-  /**
-   * Generate output code based on format
-   * @param {Array<{ id: string; code: string; usedHelpers: string[] }>} templates - Array of compiled templates
-   * @param {'esm' | 'cjs' | 'json'} format - Output format to generate
-   * @returns {string} - Generated output code
-   */
-  private generateOutput(
-    templates: Array<{ id: string; code: string; usedHelpers: string[] }>,
-    format: 'esm' | 'cjs' | 'json'
-  ): string {
-    const lines: string[] = [];
-
-    if (format === 'json') {
-      // JSON format - just the compiled code as strings
-      const json: Record<string, { code: string; helpers: string[] }> = {};
-      templates.forEach(({ id, code, usedHelpers }) => {
-        json[id] = { code, helpers: usedHelpers };
-      });
-      return JSON.stringify(json, null, 2);
-    }
-
-    // ESM or CJS format
-    lines.push('// Auto-generated by Stampdown Precompiler');
-    lines.push('// DO NOT EDIT - This file is automatically generated');
-    lines.push('');
-
-    if (format === 'cjs') {
-      lines.push('// CommonJS format');
-      lines.push('');
-
-      // Export individual templates
-      templates.forEach(({ id, code }) => {
-        const varName = this.sanitizeVarName(id);
-        lines.push(`exports.${varName} = function(context, stampdown) {`);
-        code.split('\n').forEach((line) => {
-          if (line.trim()) {
-            lines.push(`  ${line}`);
-          }
-        });
-        lines.push('};');
-        lines.push('');
-      });
-
-      // Export template map
-      lines.push('// Template map');
-      lines.push('exports.templates = {');
-      templates.forEach(({ id }, index) => {
-        const varName = this.sanitizeVarName(id);
-        const comma = index < templates.length - 1 ? ',' : '';
-        lines.push(`  '${id}': exports.${varName}${comma}`);
-      });
-      lines.push('};');
-    } else {
-      // ESM format
-      lines.push('// ES Module format');
-      lines.push('');
-
-      // Export individual templates
-      templates.forEach(({ id, code }) => {
-        const varName = this.sanitizeVarName(id);
-        lines.push(`export const ${varName} = function(context, stampdown) {`);
-        code.split('\n').forEach((line) => {
-          if (line.trim()) {
-            lines.push(`  ${line}`);
-          }
-        });
-        lines.push('};');
-        lines.push('');
-      });
-
-      // Export template map
-      lines.push('// Template map');
-      lines.push('export const templates = {');
-      templates.forEach(({ id }, index) => {
-        const varName = this.sanitizeVarName(id);
-        const comma = index < templates.length - 1 ? ',' : '';
-        lines.push(`  '${id}': ${varName}${comma}`);
-      });
-      lines.push('};');
-    }
-
-    return lines.join('\n');
-  }
-
-  /**
-   * Sanitize template ID to valid variable name
-   * @param {string} id - Template ID to sanitize
-   * @returns {string} - Valid JavaScript variable name
-   */
-  private sanitizeVarName(id: string): string {
-    return id.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^(\d)/, '_$1');
-  }
-
-  /**
-   * Precompile a single file
-   * @param {string} filePath - Path to template file to precompile
-   * @param {string} templateId - ID to use for the compiled template
-   * @returns {{ id: string; code: string; usedHelpers: string[] } | null} - Compiled template result or null on error
-   */
-  private precompileFile(
-    filePath: string,
-    templateId: string
-  ): {
-    id: string;
-    code: string;
-    usedHelpers: string[];
-  } | null {
-    try {
-      const source = fs.readFileSync(filePath, 'utf-8');
-
-      const knownHelpers = this.options.knownHelpers
-        ? this.options.knownHelpers === 'all'
-          ? 'all'
-          : this.options.knownHelpers.split(',').map((h) => h.trim())
-        : undefined;
-
-      const compiled = this.precompiler.precompile(source, {
-        templateId,
-        knownHelpers,
-        strict: this.options.strict,
-        sourceMap: this.options.sourceMap,
-      });
-
-      if (this.options.verbose) {
-        console.log(`  ✓ ${templateId} (${compiled.usedHelpers.length} helpers)`);
-      }
-
-      return {
-        id: templateId,
-        code: compiled.code,
-        usedHelpers: compiled.usedHelpers,
-      };
-    } catch (error) {
-      console.error(`  ✗ ${templateId}: ${(error as Error).message}`);
-      return null;
-    }
-  }
-
-  /**
-   * Run the precompiler
+   * Run the CLI
    * @param {string[]} args - Command-line arguments
-   * @returns {void}
+   * @returns {Promise<void>}
    */
-  run(args: string[]): void {
+  async run(args: string[]): Promise<void> {
     this.options = { ...this.options, ...this.parseArgs(args) };
 
-    if (!this.options.input) {
-      console.error('Error: Input pattern is required (-i or --input)');
+    // Handle help and version
+    if (this.options.help) {
       this.showHelp();
-      process.exit(1);
+      return;
     }
 
-    const outputDir = this.options.output || './precompiled';
-    const format = this.options.format || 'esm';
+    if (this.options.version) {
+      this.showVersion();
+      return;
+    }
 
-    const processFiles = (): void => {
-      const files = this.findFiles(this.options.input!);
-
-      if (files.length === 0) {
-        console.error(`No files found matching: ${this.options.input}`);
-        return;
-      }
-
-      console.log(`Found ${files.length} template(s)`);
-      if (this.options.verbose) {
-        console.log('');
-      }
-
-      const templates: Array<{ id: string; code: string; usedHelpers: string[] }> = [];
-
-      for (const file of files) {
-        const templateId = this.generateTemplateId(file, this.options.input!);
-        const result = this.precompileFile(file, templateId);
-
-        if (result) {
-          templates.push(result);
-        }
-      }
-
-      if (templates.length === 0) {
-        console.error('No templates were successfully compiled');
-        return;
-      }
-
-      // Create output directory
-      if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-      }
-
-      // Generate output file
-      const output = this.generateOutput(templates, format);
-      const ext = format === 'json' ? 'json' : format === 'cjs' ? 'cjs' : 'mjs';
-      const outputFile = path.join(outputDir, `templates.${ext}`);
-
-      fs.writeFileSync(outputFile, output, 'utf-8');
-
-      console.log('');
-      console.log(`✓ Compiled ${templates.length} template(s) to ${outputFile}`);
-
-      // Show summary
-      if (this.options.verbose) {
-        const allHelpers = new Set<string>();
-        templates.forEach((t) => t.usedHelpers.forEach((h) => allHelpers.add(h)));
-        console.log(`  Total unique helpers: ${allHelpers.size}`);
-        if (allHelpers.size > 0) {
-          console.log(`  Helpers: ${Array.from(allHelpers).join(', ')}`);
-        }
-      }
-    };
-
-    // Initial processing
-    processFiles();
-
-    // Watch mode
-    if (this.options.watch) {
-      console.log('\nWatching for changes...');
-
-      const files = this.findFiles(this.options.input);
-      const watchedDirs = new Set<string>();
-
-      files.forEach((file) => {
-        const dir = path.dirname(file);
-        watchedDirs.add(dir);
-      });
-
-      watchedDirs.forEach((dir) => {
-        fs.watch(dir, { recursive: true }, (_eventType, filename) => {
-          if (filename && filename.endsWith('.sdt')) {
-            console.log(`\nChange detected: ${filename}`);
-            processFiles();
-            console.log('\nWatching for changes...');
-          }
-        });
-      });
-
-      // Keep process alive
-      process.stdin.resume();
+    // For now, just show a message about the modes
+    if (this.options.precompile) {
+      console.log('Precompile mode coming soon...');
+    } else {
+      console.log('Render mode coming soon...');
     }
   }
 }
@@ -488,12 +292,15 @@ Examples:
 // Run CLI
 if (require.main === module) {
   const cli = new StampdownCLI();
-  try {
-    cli.run(process.argv.slice(2));
-  } catch (error) {
-    console.error('Fatal error:', error);
-    process.exit(1);
-  }
+  cli
+    .run(process.argv.slice(2))
+    .then(() => {
+      // Success
+    })
+    .catch((error) => {
+      console.error('Fatal error:', error);
+      process.exit(1);
+    });
 }
 
 export { StampdownCLI };

@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "stampdown-precompile": "./bin/stampdown-precompile.js"
+    "sdt-cli": "./bin/sdt-cli.js"
   },
   "scripts": {
     "build": "tsc",
