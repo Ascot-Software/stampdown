@@ -9,8 +9,43 @@ import * as path from 'path';
 import { StampdownCLI } from '../cli';
 
 describe('CLI', () => {
-  const testDir = path.join(__dirname, '../../cli-test');
+  const testDir = path.join(__dirname, '../../test-fixtures/cli');
   const outputDir = path.join(testDir, 'test-output');
+  const templatePath = path.join(testDir, 'template.sdt');
+  const dataPath = path.join(testDir, 'data.json');
+
+  // Setup test fixtures before all tests
+  beforeAll(() => {
+    // Create test directory and files
+    fs.mkdirSync(testDir, { recursive: true });
+
+    // Create test template
+    fs.writeFileSync(
+      templatePath,
+      `# Hello {{name}}!
+
+You are {{age}} years old.
+
+{{#if premium}}
+You have premium access!
+{{else}}
+You have free access.
+{{/if}}
+`,
+      'utf8'
+    );
+
+    // Create test data
+    fs.writeFileSync(
+      dataPath,
+      JSON.stringify({
+        name: 'Alice',
+        age: 30,
+        premium: true,
+      }),
+      'utf8'
+    );
+  });
 
   // Clean up test output directory before each test
   beforeEach(() => {
@@ -22,8 +57,8 @@ describe('CLI', () => {
 
   // Clean up after all tests
   afterAll(() => {
-    if (fs.existsSync(outputDir)) {
-      fs.rmSync(outputDir, { recursive: true, force: true });
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true });
     }
   });
 
@@ -59,9 +94,6 @@ describe('CLI', () => {
         throw new Error('process.exit called');
       });
 
-      const templatePath = path.join(testDir, 'template.sdt');
-      const dataPath = path.join(testDir, 'data.json');
-
       try {
         await cli.run(['-D', dataPath, '-o', outputDir, templatePath]);
       } catch (e) {
@@ -86,8 +118,6 @@ describe('CLI', () => {
         throw new Error('process.exit called');
       });
 
-      const templatePath = path.join(testDir, 'template.sdt');
-      const dataPath = path.join(testDir, 'data.json');
 
       try {
         await cli.run(['-D', dataPath, '-s', templatePath]);
@@ -107,8 +137,6 @@ describe('CLI', () => {
         throw new Error('process.exit called');
       });
 
-      const templatePath = path.join(testDir, 'template.sdt');
-      const dataPath = path.join(testDir, 'data.json');
 
       try {
         await cli.run(['-D', dataPath, '-o', outputDir, '-e', 'html', templatePath]);
@@ -129,7 +157,6 @@ describe('CLI', () => {
         throw new Error('process.exit called');
       });
 
-      const templatePath = path.join(testDir, 'template.sdt');
       const inlineData = '{"name":"Bob","age":25,"premium":false}';
 
       try {
@@ -157,8 +184,6 @@ describe('CLI', () => {
       const data2Path = path.join(outputDir, 'data2.json');
       fs.writeFileSync(data2Path, JSON.stringify({ age: 35 }), 'utf8');
 
-      const templatePath = path.join(testDir, 'template.sdt');
-      const dataPath = path.join(testDir, 'data.json');
 
       try {
         await cli.run(['-D', dataPath, '-D', data2Path, '-s', templatePath]);
@@ -320,7 +345,6 @@ describe('CLI', () => {
       const cli = new StampdownCLI();
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
-      const templatePath = path.join(testDir, 'template.sdt');
       const precompiledDir = path.join(outputDir, 'precompiled');
 
       await cli.run(['--precompile', '--input', templatePath, '-o', precompiledDir]);
@@ -340,7 +364,6 @@ describe('CLI', () => {
       const cli = new StampdownCLI();
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
-      const templatePath = path.join(testDir, 'template.sdt');
       const precompiledDir = path.join(outputDir, 'precompiled-cjs');
 
       await cli.run(['--precompile', '--input', templatePath, '-o', precompiledDir, '-f', 'cjs']);
@@ -359,7 +382,6 @@ describe('CLI', () => {
       const cli = new StampdownCLI();
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
-      const templatePath = path.join(testDir, 'template.sdt');
       const precompiledDir = path.join(outputDir, 'precompiled-json');
 
       await cli.run(['--precompile', '--input', templatePath, '-o', precompiledDir, '-f', 'json']);
@@ -468,7 +490,6 @@ describe('CLI', () => {
         throw new Error('process.exit called');
       });
 
-      const templatePath = path.join(testDir, 'template.sdt');
 
       await expect(async () => {
         try {
