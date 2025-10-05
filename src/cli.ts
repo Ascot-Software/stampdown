@@ -354,7 +354,7 @@ Examples:
    */
   private matchPattern(name: string, pattern: string): boolean {
     // Convert glob pattern to regex
-    let regexPattern = pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.');
+    const regexPattern = pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.');
 
     const regex = new RegExp(`^${regexPattern}$`);
     return regex.test(name);
@@ -370,7 +370,7 @@ Examples:
     // Try to parse as inline JSON first
     if (dataSource.trim().startsWith('{')) {
       try {
-        return JSON.parse(dataSource);
+        return JSON.parse(dataSource) as Record<string, unknown>;
       } catch (e) {
         // Not valid JSON, treat as file path
       }
@@ -393,14 +393,14 @@ Examples:
       let data: Record<string, unknown>;
 
       if (ext === '.json') {
-        data = JSON.parse(content);
+        data = JSON.parse(content) as Record<string, unknown>;
       } else if (ext === '.yaml' || ext === '.yml') {
         // YAML support - for now, throw error
         throw new Error('YAML support not yet implemented. Please use JSON files.');
       } else {
         // Try JSON parse anyway
         try {
-          data = JSON.parse(content);
+          data = JSON.parse(content) as Record<string, unknown>;
         } catch (e) {
           throw new Error(`Unable to parse data file: ${file}`);
         }

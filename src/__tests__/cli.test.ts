@@ -225,7 +225,7 @@ describe('CLI', () => {
         // Expected - process.exit(0) is called
       }
 
-      const output = consoleSpy.mock.calls.map((call) => call[0]).join('\n');
+      const output = consoleSpy.mock.calls.map((call) => String(call[0])).join('\n');
       expect(output).toContain('Header: My Page');
       expect(output).toContain('Footer content');
 
