@@ -53,6 +53,9 @@ export class Renderer {
       case 'expression':
         return this.renderExpression(node.expression || '', context);
 
+      case 'assignment':
+        return this.renderAssignment(node, context);
+
       case 'helperExpression':
         return this.renderHelperExpression(node, context, stampdown);
 
@@ -99,6 +102,66 @@ export class Renderer {
       return String(result ?? '');
     } catch (error) {
       console.error(`Error evaluating expression "${expression}":`, error);
+      return '';
+    }
+  }
+
+  /**
+   * Render an assignment node (mutates context, returns empty string)
+   * Supports both simple variables and nested properties
+   * Example: {{ x = 5 }} or {{ this.fullName = `${firstName} ${lastName}` }}
+   * @param {ASTNode} node - The assignment node
+   * @param {Context} context - The template context (will be mutated)
+   * @returns {string} - Empty string (assignments don't render output)
+   * @private
+   */
+  private renderAssignment(node: ASTNode, context: Context): string {
+    const target = node.assignmentTarget || '';
+    const valueExpression = node.assignmentValue || '';
+
+    try {
+      // Evaluate the right-hand side expression
+      const value = this.evaluator.evaluate(valueExpression, context);
+
+      // Handle nested property assignment (e.g., "this.prop" or "obj.nested.prop")
+      if (target.includes('.')) {
+        const parts = target.split('.');
+        let obj: Record<string, unknown> = context;
+        let startIndex = 0;
+
+        // Handle 'this' keyword at the start
+        if (parts[0] === 'this') {
+          if (context.this && typeof context.this === 'object') {
+            obj = context.this as Record<string, unknown>;
+          } else {
+            // If context.this doesn't exist, just assign to context directly
+            obj = context;
+          }
+          startIndex = 1;
+        }
+
+        // Navigate to the parent object
+        for (let i = startIndex; i < parts.length - 1; i++) {
+          const key = parts[i];
+
+          // Ensure the intermediate object exists
+          if (!(key in obj) || typeof obj[key] !== 'object' || obj[key] === null) {
+            obj[key] = {};
+          }
+          obj = obj[key] as Record<string, unknown>;
+        }
+
+        // Set the final property
+        const finalKey = parts[parts.length - 1];
+        obj[finalKey] = value;
+      } else {
+        // Simple variable assignment
+        context[target] = value;
+      }
+
+      return ''; // Assignments don't produce output
+    } catch (error) {
+      console.error(`Error in assignment "${target} = ${valueExpression}":`, error);
       return '';
     }
   }

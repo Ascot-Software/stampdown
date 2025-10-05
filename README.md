@@ -1,6 +1,6 @@
 # Stampdown
 
-A powerful Markdown templating language with Handlebars-like expressions, partials, block helpers, and hooks.
+A powerful Markdown templating language with Handlebars-compatible expressions, advanced operators, partials, block helpers, and hooks.
 
 ## Installation
 
@@ -54,6 +54,173 @@ Special variables in `each`: `{{this}}`, `{{@index}}`, `{{@first}}`, `{{@last}}`
 **with** - Change context scope
 
 **lookup** - Dynamic property access
+
+### Advanced Expressions
+
+Stampdown now supports Handlebars-compatible advanced expression features for more powerful templates.
+
+#### Comparison Operators
+
+Use comparison operators directly in `if` conditions:
+
+```typescript
+// Equality (strict and loose)
+{{#if tier === "gold"}}Premium{{/if}}
+{{#if status !== "inactive"}}Active{{/if}}
+{{#if count == 0}}Empty{{/if}}
+
+// Numeric comparisons
+{{#if age > 18}}Adult{{else}}Minor{{/if}}
+{{#if score >= 90}}A Grade{{/if}}
+{{#if price < 100}}Affordable{{/if}}
+{{#if stock <= 5}}Low Stock{{/if}}
+
+// Logical operators
+{{#if premium && verified}}Elite{{/if}}
+{{#if trial || demo}}Trial User{{/if}}
+{{#if !disabled}}Enabled{{/if}}
+
+// Complex expressions
+{{#if (age > 18) && (verified === true)}}Access Granted{{/if}}
+```
+
+**Supported Operators:**
+- **Equality**: `===`, `!==`, `==`, `!=`
+- **Comparison**: `>`, `<`, `>=`, `<=`
+- **Logical**: `&&`, `||`, `!`
+
+#### Else-If Chaining
+
+Chain multiple conditions with `else if`:
+
+```typescript
+const template = `
+{{#if score >= 90}}
+  Grade: A
+{{else if score >= 80}}
+  Grade: B
+{{else if score >= 70}}
+  Grade: C
+{{else if score >= 60}}
+  Grade: D
+{{else}}
+  Grade: F
+{{/if}}
+`;
+
+stampdown.render(template, { score: 85 }); // "Grade: B"
+```
+
+Works with comparison operators and complex expressions:
+
+```typescript
+{{#if tier === "platinum"}}
+  Platinum Benefits
+{{else if tier === "gold" && points > 1000}}
+  Gold+ Benefits
+{{else if tier === "gold"}}
+  Gold Benefits
+{{else}}
+  Standard Benefits
+{{/if}}
+```
+
+#### Subexpressions
+
+Call helpers within helper arguments for composable logic:
+
+```typescript
+// Nested helper calls
+{{#if (gt (length items) 10)}}
+  Many items ({{length items}})
+{{else}}
+  Few items
+{{/if}}
+
+// Multiple levels of nesting
+{{#uppercase (concat firstName " " lastName)/}}
+
+// In conditions with comparisons
+{{#if (gt age 18) && verified}}
+  Verified adult
+{{/if}}
+
+// With custom helpers
+stampdown.registerHelper('double', (_ctx, _opts, n) => String(Number(n) * 2));
+stampdown.registerHelper('add', (_ctx, _opts, a, b) => String(Number(a) + Number(b)));
+
+{{#if (gt (double value) 100)}}Large{{/if}}
+{{#uppercase (add prefix suffix)/}}
+```
+
+**Subexpression syntax:** `(helperName arg1 arg2 ...)`
+
+Subexpressions work in:
+- Block helper conditions: `{{#if (helper arg)}}`
+- Regular expressions: `{{uppercase (helper arg)}}`
+- Self-closing helpers: `{{#uppercase (concat a b)/}}`
+- Nested within other subexpressions: `{{#if (gt (length arr) (add 5 3))}}`
+
+### Variable Assignment
+
+Dynamically set and modify context variables within templates:
+
+```typescript
+// Basic assignments
+{{ count = 0 }}
+{{ name = "Alice" }}
+{{ enabled = true }}
+
+// Template literals with interpolation
+{{ fullName = `${firstName} ${lastName}` }}
+{{ greeting = `Hello, ${user.name}!` }}
+
+// Arithmetic operations
+{{ total = price + tax }}
+{{ discountPrice = price * 0.8 }}
+{{ remaining = stock - sold }}
+
+// Nested property assignment
+{{ this.computed = value }}
+{{ user.displayName = `${user.first} ${user.last}` }}
+
+// Complex expressions
+{{ isEligible = age >= 18 && verified === true }}
+{{ finalPrice = basePrice + (basePrice * taxRate) }}
+```
+
+**Key Features:**
+- **No output**: Assignments modify context silently (return empty string)
+- **Context persistence**: Variables set in one place are available throughout the template
+- **Mutable context**: Works across block helpers (`#each`, `#with`, `#if`)
+- **Template literals**: JavaScript-style backtick strings with `${...}` interpolation
+- **Arithmetic support**: `+`, `-`, `*`, `/`, `%` operators
+
+**Accumulator Pattern:**
+
+```typescript
+const template = `
+{{ total = 0 }}
+{{#each items}}
+  {{ total = total + this.price }}
+{{/each}}
+Total: ${{total}}
+`;
+
+stampdown.render(template, {
+  items: [{ price: 10 }, { price: 20 }, { price: 30 }]
+});
+// Output: Total: $60
+```
+
+**Loop Enhancement:**
+
+```typescript
+{{#each users}}
+  {{ this.fullName = `${this.firstName} ${this.lastName}` }}
+  - {{this.fullName}}
+{{/each}}
+```
 
 ### Partials
 

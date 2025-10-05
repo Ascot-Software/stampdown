@@ -23,6 +23,11 @@ export class ExpressionEvaluator {
   evaluate(expression: string, context: Context): unknown {
     const trimmed = expression.trim();
 
+    // Check for template literals (backticks with ${...} interpolation)
+    if (trimmed.startsWith('`') && trimmed.endsWith('`')) {
+      return this.evaluateTemplateLiteral(trimmed, context);
+    }
+
     // Check for logical OR operator (||) - lowest precedence
     if (trimmed.includes('||')) {
       const parts = this.splitByOperator(trimmed, '||');
@@ -67,6 +72,20 @@ export class ExpressionEvaluator {
       }
     }
 
+    // Check for arithmetic operators: +, -, *, /, %
+    // Check these after comparison but before simple property access
+    const arithmeticOps = ['+', '-', '*', '/', '%'];
+    for (const op of arithmeticOps) {
+      if (trimmed.includes(op)) {
+        const parts = this.splitByOperator(trimmed, op);
+        if (parts.length === 2) {
+          const left = this.evaluate(parts[0], context);
+          const right = this.evaluate(parts[1], context);
+          return this.applyArithmetic(left, right, op);
+        }
+      }
+    }
+
     // Check for logical NOT operator (!)
     if (trimmed.startsWith('!') && trimmed.length > 1) {
       const value = this.evaluate(trimmed.slice(1), context);
@@ -99,7 +118,20 @@ export class ExpressionEvaluator {
     const path = trimmed.split('.');
     let value: unknown = context;
 
-    for (const key of path) {
+    for (let i = 0; i < path.length; i++) {
+      const key = path[i];
+
+      // Handle 'this' keyword
+      if (key === 'this' && i === 0) {
+        // If context.this exists, use it; otherwise, 'this' refers to context itself
+        if ('this' in context && context.this !== undefined) {
+          value = context.this;
+        } else {
+          value = context;
+        }
+        continue;
+      }
+
       if (value && typeof value === 'object' && key in value) {
         value = (value as Record<string, unknown>)[key];
       } else {
@@ -194,6 +226,34 @@ export class ExpressionEvaluator {
   }
 
   /**
+   * Apply an arithmetic operation to two values
+   * @param {unknown} left - Left operand
+   * @param {unknown} right - Right operand
+   * @param {string} operator - Arithmetic operator (+, -, *, /, %)
+   * @returns {number} - Arithmetic result
+   * @private
+   */
+  private applyArithmetic(left: unknown, right: unknown, operator: string): number {
+    const leftNum = Number(left);
+    const rightNum = Number(right);
+
+    switch (operator) {
+      case '+':
+        return leftNum + rightNum;
+      case '-':
+        return leftNum - rightNum;
+      case '*':
+        return leftNum * rightNum;
+      case '/':
+        return leftNum / rightNum;
+      case '%':
+        return leftNum % rightNum;
+      default:
+        return 0;
+    }
+  }
+
+  /**
    * Check if a value is truthy
    * @param {unknown} value - Value to check
    * @returns {boolean} - True if value is truthy
@@ -201,5 +261,63 @@ export class ExpressionEvaluator {
    */
   private isTruthy(value: unknown): boolean {
     return !!value;
+  }
+
+  /**
+   * Evaluate a template literal (backtick string with ${...} interpolation)
+   * Example: `Hello ${name}` or `${firstName} ${lastName}`
+   * @param {string} literal - The template literal string (including backticks)
+   * @param {Context} context - The context containing variables
+   * @returns {string} - The interpolated string result
+   * @private
+   */
+  private evaluateTemplateLiteral(literal: string, context: Context): string {
+    // Remove the backticks
+    const content = literal.slice(1, -1);
+
+    let result = '';
+    let i = 0;
+
+    while (i < content.length) {
+      // Look for ${...} interpolation
+      if (content[i] === '$' && content[i + 1] === '{') {
+        // Find the closing }
+        let depth = 1;
+        let j = i + 2;
+        while (j < content.length && depth > 0) {
+          if (content[j] === '{') depth++;
+          else if (content[j] === '}') depth--;
+          j++;
+        }
+
+        // Extract and evaluate the expression
+        const expression = content.slice(i + 2, j - 1);
+        const value = this.evaluate(expression, context);
+        result += String(value ?? '');
+
+        i = j;
+      } else if (content[i] === '\\' && i + 1 < content.length) {
+        // Handle escape sequences
+        const nextChar = content[i + 1];
+        if (nextChar === 'n') {
+          result += '\n';
+          i += 2;
+        } else if (nextChar === 't') {
+          result += '\t';
+          i += 2;
+        } else if (nextChar === '\\' || nextChar === '`' || nextChar === '$') {
+          result += nextChar;
+          i += 2;
+        } else {
+          result += content[i];
+          i++;
+        }
+      } else {
+        result += content[i];
+        i++;
+      }
+    }
+
+    return result;
   }
 }

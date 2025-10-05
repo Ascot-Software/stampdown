@@ -325,6 +325,73 @@ Test files are provided to verify syntax highlighting:
 3. Use **Developer: Inspect Editor Tokens and Scopes** (Cmd/Ctrl+Shift+P) to check scopes
 4. Ensure all partial types and self-closing blocks are correctly colored
 
+## Grammar Development Notes
+
+### Pattern Matching Approach
+
+The Stampdown TextMate grammar uses **single `match` patterns** for self-closing helpers instead of `begin/end` patterns to ensure accurate scope assignment.
+
+**Self-Closing Helper Pattern:**
+```json
+{
+  "match": "(\\{\\{)(~?\\#)([a-zA-Z_][a-zA-Z0-9_-]*)\\s+([^}]*?)\\s*(/)(~?\\}\\})"
+}
+```
+
+This requires:
+1. `{{` - Opening delimiter
+2. `~?#` - Optional whitespace control + hash
+3. Helper name
+4. At least one space
+5. Arguments (non-greedy)
+6. **Required** `/` - Self-closing slash
+7. `~?}}` - Closing delimiter
+
+**Pattern Order Priority:**
+1. Comments (highest priority)
+2. Inline partials (`{{#*inline}}`)
+3. Partial blocks (`{{#> layout}}`)
+4. End blocks (`{{/helper}}`)
+5. Else tokens (`{{else}}`)
+6. Self-closing helpers (`{{#helper args/}}`)
+7. Block helpers (`{{#helper args}}`)
+8. Partials, expressions, markdown (lowest priority)
+
+### Markdown Integration
+
+Custom markdown pattern prevents greedy matching while preserving formatting:
+
+```json
+"markdown": {
+  "patterns": [{
+    "name": "meta.embedded.block.markdown",
+    "begin": "^(?!\\s*\\{\\{)",  // Don't match lines starting with {{
+    "end": "(?=\\{\\{)|$",       // Stop at {{ or end of line
+    "patterns": [
+      {"include": "text.html.markdown#fenced_code_block"},
+      {"include": "text.html.markdown#heading"},
+      {"include": "text.html.markdown#inline"}
+      // ... specific features only
+    ]
+  }]
+}
+```
+
+This ensures:
+- ✅ Stampdown expressions are matched first
+- ✅ Markdown formatting still works (bold, italic, etc.)
+- ✅ Nested expressions in block helpers are properly highlighted
+- ✅ No greedy paragraph matching overrides Stampdown scopes
+
+### Key Lessons
+
+1. **Use `match` for complete patterns** - When the entire pattern must be present
+2. **Pattern order matters** - More specific patterns before general ones
+3. **Beware of greedy grammars** - External grammars (like markdown) can override with greedy matching
+4. **Use negative lookahead** - Prevent patterns from matching where other patterns should take precedence
+5. **Include specific features** - Don't include entire grammars, include only needed features
+6. **Verify with scope inspector** - Use "Developer: Inspect Editor Tokens and Scopes" to verify
+
 ## Documentation
 
 - **[Main Stampdown Docs](../README.md)** - Complete Stampdown documentation

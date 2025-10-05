@@ -127,6 +127,20 @@ export class Precompiler {
         helpers.add(n.helperName);
       }
 
+      // Extract helpers from helperExpression and subexpression nodes
+      if ((n.type === 'helperExpression' || n.type === 'subexpression') && n.helperName) {
+        helpers.add(n.helperName);
+      }
+
+      // Walk through arguments to find nested subexpressions
+      if (n.args) {
+        n.args.forEach((arg) => {
+          if (typeof arg === 'object' && arg !== null && (arg as ASTNode).type) {
+            walk(arg as ASTNode);
+          }
+        });
+      }
+
       if (n.children) {
         n.children.forEach(walk);
       }
@@ -220,6 +234,54 @@ export class Precompiler {
           lines.push(`${spaces}  }`);
           lines.push(`${spaces}} catch (e) {`);
           lines.push(`${spaces}  console.warn('Expression error:', e);`);
+          lines.push(`${spaces}}`);
+        }
+        break;
+
+      case 'assignment':
+        if (node.assignmentTarget && node.assignmentValue) {
+          const target = node.assignmentTarget;
+          const valueExpr = node.assignmentValue.replace(/'/g, "\\'");
+
+          lines.push(`${spaces}// Assignment: ${target} = ...`);
+          lines.push(`${spaces}try {`);
+          lines.push(
+            `${spaces}  const assignValue = stampdown.getEvaluator().evaluate('${valueExpr}', ${contextVar});`
+          );
+
+          // Handle nested property assignment
+          if (target.includes('.')) {
+            const parts = target.split('.');
+            lines.push(`${spaces}  let assignTarget = ${contextVar};`);
+
+            // Navigate to parent object
+            for (let i = 0; i < parts.length - 1; i++) {
+              const part = parts[i];
+              if (part === 'this' && i === 0) {
+                lines.push(
+                  `${spaces}  if (${contextVar}.this && typeof ${contextVar}.this === 'object') {`
+                );
+                lines.push(`${spaces}    assignTarget = ${contextVar}.this;`);
+                lines.push(`${spaces}  }`);
+              } else {
+                lines.push(
+                  `${spaces}  if (!(assignTarget['${part}']) || typeof assignTarget['${part}'] !== 'object') {`
+                );
+                lines.push(`${spaces}    assignTarget['${part}'] = {};`);
+                lines.push(`${spaces}  }`);
+                lines.push(`${spaces}  assignTarget = assignTarget['${part}'];`);
+              }
+            }
+
+            const finalKey = parts[parts.length - 1];
+            lines.push(`${spaces}  assignTarget['${finalKey}'] = assignValue;`);
+          } else {
+            // Simple variable assignment
+            lines.push(`${spaces}  ${contextVar}['${target}'] = assignValue;`);
+          }
+
+          lines.push(`${spaces}} catch (e) {`);
+          lines.push(`${spaces}  console.warn('Assignment error:', e);`);
           lines.push(`${spaces}}`);
         }
         break;
@@ -451,6 +513,100 @@ export class Precompiler {
         lines.push(
           `${spaces}stampdown.registerInlinePartial('${node.inlineName}', inlineContent_${indent});`
         );
+        break;
+
+      case 'helperExpression':
+        // Helper called in expression context (e.g., {{helper arg1 arg2}})
+        if (node.helperName) {
+          const helperName = node.helperName;
+          const helperId = this.helperCounter++;
+          const helperVar = `helper_${helperName}_${helperId}`;
+          const argsVar = `args_${helperId}`;
+
+          lines.push(`${spaces}// Helper Expression: ${helperName}`);
+          lines.push(`${spaces}const ${helperVar} = helpers.get('${helperName}');`);
+          lines.push(`${spaces}if (${helperVar}) {`);
+
+          // Generate code to evaluate arguments (handles subexpressions)
+          lines.push(`${spaces}  const ${argsVar} = [];`);
+          if (node.args && node.args.length > 0) {
+            node.args.forEach((arg, i) => {
+              if (
+                typeof arg === 'object' &&
+                arg !== null &&
+                (arg as ASTNode).type === 'subexpression'
+              ) {
+                // Generate subexpression evaluation inline
+                const subNode = arg as ASTNode;
+                const subHelperName = subNode.helperName || '';
+                const subHelperId = this.helperCounter++;
+                const subHelperVar = `subHelper_${subHelperName}_${subHelperId}`;
+                const subArgsVar = `subArgs_${subHelperId}`;
+
+                lines.push(`${spaces}  // Subexpression: ${subHelperName}`);
+                lines.push(`${spaces}  const ${subHelperVar} = helpers.get('${subHelperName}');`);
+                lines.push(`${spaces}  if (${subHelperVar}) {`);
+
+                const subArgsCode = (subNode.args || [])
+                  .map((subArg) => (typeof subArg === 'string' ? `'${subArg}'` : String(subArg)))
+                  .join(', ');
+
+                if (subArgsCode) {
+                  lines.push(`${spaces}    const ${subArgsVar} = [${subArgsCode}].map(arg => {`);
+                  lines.push(`${spaces}      if (typeof arg === 'string') {`);
+                  lines.push(
+                    `${spaces}        try { return stampdown.getEvaluator().evaluate(arg, ${contextVar}); }`
+                  );
+                  lines.push(`${spaces}        catch { return arg; }`);
+                  lines.push(`${spaces}      }`);
+                  lines.push(`${spaces}      return arg;`);
+                  lines.push(`${spaces}    });`);
+                } else {
+                  lines.push(`${spaces}    const ${subArgsVar} = [];`);
+                }
+
+                lines.push(
+                  `${spaces}    const subOptions_${subHelperId} = { fn: () => '', inverse: () => '', hash: {} };`
+                );
+                lines.push(
+                  `${spaces}    ${argsVar}[${i}] = ${subHelperVar}(${contextVar}, subOptions_${subHelperId}, ...${subArgsVar});`
+                );
+                lines.push(`${spaces}  } else {`);
+                lines.push(`${spaces}    ${argsVar}[${i}] = undefined;`);
+                lines.push(`${spaces}  }`);
+              } else {
+                // Regular argument
+                const argStr = typeof arg === 'string' ? `'${arg}'` : String(arg);
+                lines.push(`${spaces}  try {`);
+                lines.push(
+                  `${spaces}    ${argsVar}[${i}] = stampdown.getEvaluator().evaluate(${argStr}, ${contextVar});`
+                );
+                lines.push(`${spaces}  } catch {`);
+                lines.push(`${spaces}    ${argsVar}[${i}] = ${argStr};`);
+                lines.push(`${spaces}  }`);
+              }
+            });
+          }
+
+          lines.push(
+            `${spaces}  const options_${helperId} = { fn: () => '', inverse: () => '', hash: {} };`
+          );
+          lines.push(
+            `${spaces}  const result_${helperId} = ${helperVar}(${contextVar}, options_${helperId}, ...${argsVar});`
+          );
+          lines.push(
+            `${spaces}  if (result_${helperId} !== undefined && result_${helperId} !== null) {`
+          );
+          lines.push(`${spaces}    output += String(result_${helperId});`);
+          lines.push(`${spaces}  }`);
+          lines.push(`${spaces}}`);
+        }
+        break;
+
+      case 'subexpression':
+        // Subexpressions are handled inline by their parent helper
+        // This case shouldn't be reached directly as they're processed in helperExpression
+        console.warn(`Subexpression nodes should be processed by parent helper, not directly`);
         break;
 
       case 'comment':

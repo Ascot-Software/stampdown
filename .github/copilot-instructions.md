@@ -8,6 +8,8 @@ Stampdown is a powerful Markdown templating language with Handlebars-like expres
 
 **Key Features:**
 - Handlebars-compatible syntax for familiarity
+- Variable assignment with template literals and arithmetic
+- Advanced expressions (comparison operators, else-if chains, subexpressions)
 - Advanced partials (dynamic, contexts, hash parameters, blocks, inline)
 - Self-closing block syntax (`{{#.../}}`) for concise templates
 - Plugin system for extensibility
@@ -42,19 +44,18 @@ stampdown/
 │   │   └── debug.ts              # Debug utilities
 │   └── __tests__/                # Jest test suites
 │       ├── stampdown.test.ts     # Core functionality tests
+│       ├── advanced-expressions.test.ts  # Advanced expressions tests
+│       ├── variable-assignment.test.ts   # Variable assignment tests
 │       ├── parser.test.ts        # Parser tests
 │       ├── precompiler.test.ts   # Precompiler tests
 │       ├── loader.test.ts        # Template loader tests
 │       ├── partials.test.ts      # Advanced partials tests
+│       ├── llm-plugin.test.ts    # LLM plugin tests
 │       └── plugin.test.ts        # Plugin system tests
-├── docs/                         # Documentation
-│   ├── ADVANCED-PARTIALS.md      # Advanced partials guide
-│   ├── CLI.md                    # CLI reference
-│   ├── PRECOMPILER.md            # Precompiler guide
-│   ├── SELF-CLOSING.md           # Self-closing blocks guide
-│   └── WORKFLOW.md               # Integration workflow guide
+├── docs/                         # Documentation (empty - docs consolidated into README)
+│   └── (no files - all documentation in README.md)
 ├── vscode-extension/             # VS Code extension
-│   ├── README.md                 # Extension documentation
+│   ├── README.md                 # Extension documentation (includes grammar dev notes)
 │   ├── package.json              # Extension manifest
 │   ├── syntaxes/
 │   │   └── stampdown.tmLanguage.json  # TextMate grammar (939 lines)
@@ -138,6 +139,102 @@ This syntax:
 - Is 30-40% more concise than `{{#helper}}{{/helper}}`
 - Works with any helper that returns a value directly
 - Cannot be used with block helpers that need content (if, each, with, unless)
+
+### Advanced Expressions
+
+**Comparison Operators** enable direct comparisons in templates:
+
+```handlebars
+{{#if age > 18}}Adult{{/if}}
+{{#if tier === "gold"}}Premium{{/if}}
+{{#if premium && verified}}Elite{{/if}}
+```
+
+**Supported Operators:**
+- Equality: `===`, `!==`, `==`, `!=`
+- Comparison: `>`, `<`, `>=`, `<=`
+- Logical: `&&`, `||`, `!`
+
+**Else-If Chaining** allows multiple conditions:
+
+```handlebars
+{{#if score >= 90}}
+  A
+{{else if score >= 80}}
+  B
+{{else}}
+  C
+{{/if}}
+```
+
+**Subexpressions** enable nested helper calls:
+
+```handlebars
+{{#if (gt (length items) 10)}}Many items{{/if}}
+{{#uppercase (concat firstName " " lastName)/}}
+```
+
+**Implementation:**
+- `evaluator.ts` - Handles operator evaluation with precedence (||, &&, comparisons, !)
+- `parser.ts` - Parses subexpressions `(helper arg1 arg2)` and else-if chains
+- `renderer.ts` - Renders subexpressions and helper expressions
+- `precompiler.ts` - Generates optimized code for advanced expressions
+
+**Key Features:**
+- Quote-aware operator parsing (doesn't split inside strings)
+- Recursive else-if chain parsing (unlimited depth)
+- Nested subexpressions (multiple levels)
+- Full precompiler support with helper extraction
+
+### Variable Assignment
+
+**Context variable assignment** allows dynamic setting and modification of variables within templates:
+
+```handlebars
+{{ x = 5 }}
+{{ name = "Alice" }}
+{{ fullName = `${firstName} ${lastName}` }}
+{{ this.computed = value }}
+{{ total = price + tax }}
+```
+
+**Syntax:**
+- Assignment: `{{ variableName = expression }}`
+- Template literals: Backtick strings with `${...}` interpolation
+- Arithmetic: `+`, `-`, `*`, `/`, `%` operators
+- Nested properties: `this.prop`, `obj.nested.prop`
+
+**Implementation:**
+- `parser.ts` - Detects assignment pattern (`detectAssignment()` method)
+- `evaluator.ts` - Evaluates template literals (`evaluateTemplateLiteral()`) and arithmetic (`applyArithmetic()`)
+- `renderer.ts` - Mutates context directly (`renderAssignment()` method)
+- `precompiler.ts` - Generates `context[varName] = value` code
+- `helpers/builtin.ts` - Modified `each` and `with` to support context mutation
+
+**Key Features:**
+- Assignments return empty string (no output)
+- Context persistence across template
+- Works in all block helpers
+- Full arithmetic expression support
+- Template literal interpolation with `${...}`
+- Nested property assignment with automatic object creation
+
+**Usage Patterns:**
+```handlebars
+{{! Accumulator }}
+{{ total = 0 }}
+{{#each items}}
+  {{ total = total + this.price }}
+{{/each}}
+
+{{! Loop enhancement }}
+{{#each users}}
+  {{ this.fullName = `${this.firstName} ${this.lastName}` }}
+{{/each}}
+
+{{! Conditional assignment }}
+{{#if premium}}{{ discount = 20 }}{{else}}{{ discount = 0 }}{{/if}}
+```
 
 ### Partials
 
@@ -886,10 +983,12 @@ If modifying `vscode-extension/syntaxes/stampdown.tmLanguage.json`:
 - Returns `undefined` for missing properties
 
 ### Context Management
-- Immutable context passing (spread operator for new scopes)
+- Mutable context for variable assignments (direct mutation)
+- Immutable context passing for block helpers (spread operator for scoped variables)
 - Special variables prefixed with `@`
-- `this` keyword for current scope
+- `this` keyword for current scope (refers to context if not explicitly set)
 - Context stacking in block helpers
+- `each` and `with` helpers preserve original context for mutation support
 
 ### Partial Resolution Order
 1. Check inline partials (block-scoped)
@@ -934,5 +1033,14 @@ Order matters in TextMate grammars:
 
 ## Version
 
-This document reflects the codebase state as of October 3, 2025.
-All 103 tests passing (includes 31 LLM plugin tests). 100% JSDoc coverage. TypeScript strict mode enabled.
+This document reflects the codebase state as of October 4, 2025.
+All 164 tests passing (27 advanced expression tests, 34 variable assignment tests, 31 LLM plugin tests, 72 core tests). 100% JSDoc coverage. TypeScript strict mode enabled.
+
+**Recent Updates:**
+- Variable assignment: context mutation, template literals, arithmetic operations
+- Advanced expressions: comparison operators, else-if chains, subexpressions
+- Full precompiler support for assignments and advanced expressions
+- Documentation consolidated into README.md (docs/ folder empty)
+- Grammar development notes moved to vscode-extension/README.md
+- Removed examples/ folder (cleanup)
+- Enhanced `each` and `with` helpers to support context mutation

@@ -50,18 +50,45 @@ export function registerBuiltInHelpers(registry: HelperRegistry): void {
       return options.inverse ? options.inverse(context) : '';
     }
 
-    return items
-      .map((item, index) => {
-        const itemContext: Context = {
-          ...context,
-          this: item,
-          '@index': index,
-          '@first': index === 0,
-          '@last': index === items.length - 1,
-        };
-        return options.fn ? options.fn(itemContext) : '';
-      })
-      .join('');
+    // Save original values to restore after iteration
+    const originalThis = context.this;
+    const originalIndex = context['@index'];
+    const originalFirst = context['@first'];
+    const originalLast = context['@last'];
+
+    const results = items.map((item, index) => {
+      // Mutate context directly to support variable assignments
+      context.this = item;
+      context['@index'] = index;
+      context['@first'] = index === 0;
+      context['@last'] = index === items.length - 1;
+
+      return options.fn ? options.fn(context) : '';
+    });
+
+    // Restore original values
+    if (originalThis !== undefined) {
+      context.this = originalThis;
+    } else {
+      delete context.this;
+    }
+    if (originalIndex !== undefined) {
+      context['@index'] = originalIndex;
+    } else {
+      delete context['@index'];
+    }
+    if (originalFirst !== undefined) {
+      context['@first'] = originalFirst;
+    } else {
+      delete context['@first'];
+    }
+    if (originalLast !== undefined) {
+      context['@last'] = originalLast;
+    } else {
+      delete context['@last'];
+    }
+
+    return results.join('');
   });
 
   /**
@@ -70,8 +97,35 @@ export function registerBuiltInHelpers(registry: HelperRegistry): void {
    */
   registry.register('with', (context: Context, options: HelperOptions, obj: unknown) => {
     if (obj && typeof obj === 'object') {
-      const newContext = { ...context, ...obj };
-      return options.fn ? options.fn(newContext) : '';
+      // Temporarily add obj properties to context to support variable assignments
+      const objRecord = obj as Record<string, unknown>;
+      const originalValues: Record<string, unknown> = {};
+
+      // Save original values and set new ones
+      for (const key in objRecord) {
+        if (key in context) {
+          originalValues[key] = context[key];
+        }
+        context[key] = objRecord[key];
+      }
+
+      // Also set 'this' to the object
+      const originalThis = context.this;
+      context.this = obj;
+
+      const result = options.fn ? options.fn(context) : '';
+
+      // Restore original values
+      for (const key in objRecord) {
+        if (key in originalValues) {
+          context[key] = originalValues[key];
+        } else {
+          delete context[key];
+        }
+      }
+      context.this = originalThis;
+
+      return result;
     }
     return options.inverse ? options.inverse(context) : '';
   });

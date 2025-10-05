@@ -1,7 +1,0 @@
-# {{title}}
-
-{{#if subtitle}}
-## {{subtitle}}
-{{/if}}
-
-*Generated on {{date}}*

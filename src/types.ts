@@ -66,7 +66,7 @@ export type Hook = (input: string, context: Context) => string;
  * Abstract Syntax Tree node representing parsed template elements
  */
 export interface ASTNode {
-  /** Node type (e.g., 'root', 'text', 'expression', 'blockHelper', 'partial', 'partialBlock', 'inlinePartial') */
+  /** Node type (e.g., 'root', 'text', 'expression', 'blockHelper', 'partial', 'partialBlock', 'inlinePartial', 'assignment') */
   type: string;
   /** Text value for text nodes */
   value?: string;
@@ -90,6 +90,10 @@ export interface ASTNode {
   partialContext?: string;
   /** Inline partial name (for inline partial definitions) */
   inlineName?: string;
+  /** Assignment target variable name (e.g., 'varName' or 'this.prop') */
+  assignmentTarget?: string;
+  /** Assignment value expression */
+  assignmentValue?: string;
 }
 
 /**

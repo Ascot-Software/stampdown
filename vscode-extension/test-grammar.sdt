@@ -84,6 +84,26 @@ This file tests all Stampdown syntax patterns with the refactored grammar.
 {{product.price}}
 {{items.0.title}}
 
+## Variable Assignments
+
+{{! Basic assignments }}
+{{ x = 5 }}
+{{ name = "Alice" }}
+{{ active = true }}
+
+{{! Template literals }}
+{{ greeting = `Hello ${name}` }}
+{{ fullName = `${firstName} ${lastName}` }}
+
+{{! Nested property assignment }}
+{{ this.computed = value }}
+{{ user.displayName = `${user.first} ${user.last}` }}
+
+{{! Assignments with expressions }}
+{{ isAdult = age >= 18 }}
+{{ total = price + tax }}
+{{ result = a * b }}
+
 ## Special Variables
 
 {{@index}}

@@ -1,8 +1,0 @@
-
----
-
-© {{year}} {{company}}. All rights reserved.
-
-{{#if socialLinks}}
-Follow us: {{#each socialLinks}}[{{this.name}}]({{this.url}}){{#unless @last}} | {{/unless}}{{/each}}
-{{/if}}

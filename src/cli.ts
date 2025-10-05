@@ -71,6 +71,8 @@ Examples:
 
   /**
    * Parse command-line arguments
+   * @param {string[]} args - Command-line arguments to parse
+   * @returns {CliOptions} - Parsed options object
    */
   private parseArgs(args: string[]): CliOptions {
     const options: CliOptions = {};
@@ -136,6 +138,8 @@ Examples:
 
   /**
    * Find files matching glob pattern
+   * @param {string} pattern - Glob pattern to match files
+   * @returns {string[]} - Array of matching file paths
    */
   private findFiles(pattern: string): string[] {
     // Simple glob implementation
@@ -202,6 +206,9 @@ Examples:
 
   /**
    * Match filename against pattern
+   * @param {string} name - Filename to match
+   * @param {string} pattern - Pattern to match against (supports * and ?)
+   * @returns {boolean} - True if name matches pattern
    */
   private matchPattern(name: string, pattern: string): boolean {
     if (pattern === '*') return true;
@@ -213,6 +220,9 @@ Examples:
 
   /**
    * Generate template ID from file path
+   * @param {string} filePath - Full path to template file
+   * @param {string} inputPattern - Original input pattern used to find files
+   * @returns {string} - Generated template ID
    */
   private generateTemplateId(filePath: string, inputPattern: string): string {
     // Remove base directory and extension
@@ -236,6 +246,9 @@ Examples:
 
   /**
    * Generate output code based on format
+   * @param {Array<{ id: string; code: string; usedHelpers: string[] }>} templates - Array of compiled templates
+   * @param {'esm' | 'cjs' | 'json'} format - Output format to generate
+   * @returns {string} - Generated output code
    */
   private generateOutput(
     templates: Array<{ id: string; code: string; usedHelpers: string[] }>,
@@ -317,6 +330,8 @@ Examples:
 
   /**
    * Sanitize template ID to valid variable name
+   * @param {string} id - Template ID to sanitize
+   * @returns {string} - Valid JavaScript variable name
    */
   private sanitizeVarName(id: string): string {
     return id.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^(\d)/, '_$1');
@@ -324,6 +339,9 @@ Examples:
 
   /**
    * Precompile a single file
+   * @param {string} filePath - Path to template file to precompile
+   * @param {string} templateId - ID to use for the compiled template
+   * @returns {{ id: string; code: string; usedHelpers: string[] } | null} - Compiled template result or null on error
    */
   private precompileFile(
     filePath: string,
@@ -366,6 +384,8 @@ Examples:
 
   /**
    * Run the precompiler
+   * @param {string[]} args - Command-line arguments
+   * @returns {void}
    */
   run(args: string[]): void {
     this.options = { ...this.options, ...this.parseArgs(args) };

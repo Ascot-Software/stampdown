@@ -97,16 +97,34 @@ export class Parser {
 
   /**
    * Parse an expression node {{expression}}
-   * Can detect helper calls with subexpressions
-   * @returns {ASTNode} - Expression node or helperExpression node
+   * Can detect helper calls with subexpressions and variable assignments
+   * @returns {ASTNode} - Expression node, helperExpression node, or assignment node
    */
   private parseExpression(): ASTNode {
     this.consume('{{');
     this.skipWhitespace();
 
+    // Read the entire content first to check for assignment
+    const start = this.position;
+    const content = this.readUntil('}}');
+    this.position = start; // Reset position
+
+    // Check if this is an assignment (contains = but not ==, ===, !=, !==, <=, >=)
+    const assignmentMatch = this.detectAssignment(content);
+    if (assignmentMatch) {
+      const { target, value } = assignmentMatch;
+      this.position += content.length;
+      this.consume('}}');
+
+      return {
+        type: 'assignment',
+        assignmentTarget: target.trim(),
+        assignmentValue: value.trim(),
+      };
+    }
+
     // Check if this contains a subexpression (opening paren)
     // If so, parse as a helper expression
-    const start = this.position;
     const identifier = this.readIdentifier();
     this.skipWhitespace();
 
@@ -777,6 +795,74 @@ export class Parser {
       this.position++;
     }
     return this.template.substring(start, this.position);
+  }
+
+  /**
+   * Detect if a string contains an assignment (= but not ==, ===, !=, !==, <=, >=)
+   * @param {string} content - The content to check
+   * @returns {{ target: string; value: string } | null} - Assignment parts or null
+   * @private
+   */
+  private detectAssignment(content: string): { target: string; value: string } | null {
+    let inQuotes = false;
+    let quoteChar = '';
+    let inBackticks = false;
+    let depth = 0; // Track depth of ${...} in template literals
+
+    for (let i = 0; i < content.length; i++) {
+      const char = content[i];
+      const prevChar = i > 0 ? content[i - 1] : '';
+      const nextChar = i < content.length - 1 ? content[i + 1] : '';
+
+      // Handle regular quoted strings
+      if ((char === '"' || char === "'") && prevChar !== '\\' && !inBackticks) {
+        if (!inQuotes) {
+          inQuotes = true;
+          quoteChar = char;
+        } else if (char === quoteChar) {
+          inQuotes = false;
+          quoteChar = '';
+        }
+        continue;
+      }
+
+      // Handle template literals
+      if (char === '`' && prevChar !== '\\') {
+        inBackticks = !inBackticks;
+        continue;
+      }
+
+      // Track ${...} depth in template literals
+      if (inBackticks) {
+        if (char === '$' && nextChar === '{') {
+          depth++;
+          i++; // skip the {
+          continue;
+        }
+        if (char === '}' && depth > 0) {
+          depth--;
+          continue;
+        }
+      }
+
+      // Only detect assignment outside quotes and when not in ${...}
+      if (!inQuotes && !inBackticks && depth === 0 && char === '=') {
+        // Check it's not part of ==, ===, !=, !==, <=, >=
+        if (
+          nextChar !== '=' &&
+          prevChar !== '=' &&
+          prevChar !== '!' &&
+          prevChar !== '<' &&
+          prevChar !== '>'
+        ) {
+          const target = content.slice(0, i);
+          const value = content.slice(i + 1);
+          return { target, value };
+        }
+      }
+    }
+
+    return null;
   }
 
   /**

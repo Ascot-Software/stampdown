@@ -393,6 +393,12 @@
     "expression_content": {
       "patterns": [
         {
+          "include": "#assignment"
+        },
+        {
+          "include": "#template_literal"
+        },
+        {
           "include": "#string"
         },
         {
@@ -412,6 +418,67 @@
         },
         {
           "include": "#variable"
+        }
+      ]
+    },
+    "assignment": {
+      "patterns": [
+        {
+          "name": "meta.assignment.stampdown",
+          "match": "(\\b[a-zA-Z_][a-zA-Z0-9_\\.]*\\b)\\s*(=)\\s*",
+          "captures": {
+            "1": {
+              "name": "variable.other.assignment.stampdown"
+            },
+            "2": {
+              "name": "keyword.operator.assignment.stampdown"
+            }
+          }
+        }
+      ]
+    },
+    "template_literal": {
+      "patterns": [
+        {
+          "name": "string.quoted.template.stampdown",
+          "begin": "`",
+          "end": "`",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.template.begin.stampdown"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.template.end.stampdown"
+            }
+          },
+          "patterns": [
+            {
+              "name": "meta.template.expression.stampdown",
+              "begin": "\\$\\{",
+              "end": "\\}",
+              "beginCaptures": {
+                "0": {
+                  "name": "punctuation.definition.template-expression.begin.stampdown"
+                }
+              },
+              "endCaptures": {
+                "0": {
+                  "name": "punctuation.definition.template-expression.end.stampdown"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#expression_content"
+                }
+              ]
+            },
+            {
+              "name": "constant.character.escape.stampdown",
+              "match": "\\\\."
+            }
+          ]
         }
       ]
     },
