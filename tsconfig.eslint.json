@@ -3,7 +3,9 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": [],
+  "include": [
+    "packages/*/src/**/*"
+  ],
   "references": [
     { "path": "./packages/core" },
     { "path": "./packages/cli" },
