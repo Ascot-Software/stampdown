@@ -2,3 +2,6 @@
 .gitignore
 *.vsix
 node_modules/**
+../../**/*
+../**/*
+!../../packages/vscode/

@@ -1,4 +1,4 @@
-# @stampdwn/llm
+# Stampdown Prompt Engineering Plugin
 
 Specialized Stampdown plugin for LLM prompt templating with multi-provider support.
 
@@ -422,9 +422,8 @@ interface Tokenizer {
 
 ## Related Packages
 
-- [`@stampdwn/core`](../core/) - Core templating engine
-- [`@stampdwn/cli`](../cli/) - Command-line interface
-- [`@stampdwn/vscode`](../vscode/) - VS Code extension
+- [`@stampdwn/core`](https://www.npmjs.com/package/@stampdwn/core) - Core templating engine
+- [`@stampdwn/cli`](https://www.npmjs.com/package/@stampdwn/cli) - Command-line interface
 
 ## License
 

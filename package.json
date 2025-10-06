@@ -1,5 +1,5 @@
 {
-  "name": "stampdown-monorepo",
+  "name": "@stampdwn/workspace",
   "version": "0.1.0",
   "private": true,
   "description": "A Markdown templating language with Handlebars-like features",
@@ -22,8 +22,7 @@
     "template",
     "templating",
     "handlebars",
-    "expressions",
-    "monorepo"
+    "expressions"
   ],
   "author": "",
   "license": "MIT",

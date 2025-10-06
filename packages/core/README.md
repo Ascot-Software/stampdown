@@ -1,6 +1,6 @@
-# @stampdwn/core
+# Stampdown
 
-Core Stampdown templating engine with built-in helpers and standard plugins.
+Stampdown is a Markdown templating language, that is simple and extensible.
 
 ## Installation
 
@@ -201,9 +201,8 @@ const myPlugin = createPlugin({
 
 ## Related Packages
 
-- [`@stampdwn/cli`](../cli/) - Command-line interface
-- [`@stampdwn/llm`](../llm/) - LLM prompt templating plugin
-- [`@stampdwn/vscode`](../vscode/) - VS Code extension
+- [`@stampdwn/cli`](https://www.npmjs.com/package/@stampdwn/cli) - Command-line interface
+- [`@stampdwn/llm`](https://www.npmjs.com/package/@stampdwn/llm) - LLM prompt templating plugin
 
 ## License
 

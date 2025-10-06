@@ -1,12 +1,13 @@
 {
   "name": "@stampdwn/core",
-  "version": "0.1.0",
-  "description": "Core Stampdown templating engine with standard plugins",
+  "version": "0.1.1",
+  "description": "Stampdown is a Markdown templating language, that is simple and extensible.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc",

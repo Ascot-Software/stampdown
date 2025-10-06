@@ -1,4 +1,4 @@
-# @stampdwn/cli
+# Stampdown CLI
 
 Command-line interface for Stampdown template compilation and processing.
 
@@ -296,9 +296,8 @@ module.exports = {
 
 ## Related Packages
 
-- [`@stampdwn/core`](../core/) - Core templating engine
-- [`@stampdwn/llm`](../llm/) - LLM prompt templating plugin
-- [`@stampdwn/vscode`](../vscode/) - VS Code extension
+- [`@stampdwn/core`](https://www.npmjs.com/package/@stampdwn/core) - Core templating engine
+- [`@stampdwn/llm`](https://www.npmjs.com/package/@stampdwn/llm) - LLM prompt templating plugin
 
 ## License
 

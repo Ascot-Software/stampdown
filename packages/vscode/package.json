@@ -1,10 +1,14 @@
 {
-  "name": "@stampdwn/vscode",
+  "name": "stampdown-language-support",
   "displayName": "Stampdown",
-  "description": "Syntax highlighting for Stampdown template files (.sdt)",
+  "description": "Language Support for Stampdown template files (.sdt)",
   "version": "0.1.0",
   "publisher": "AscotSoftware",
   "icon": "./ext-icon.png",
+  "scripts": {
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Ascot-Software/stampdown.git",

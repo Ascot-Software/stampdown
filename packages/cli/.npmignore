@@ -1,0 +1,22 @@
+# Source files
+src/
+
+# Test files
+**/__tests__/
+*.test.ts
+*.test.js
+*.test.d.ts
+test-fixtures/
+
+# Source maps (optional - uncomment to exclude)
+# *.map
+
+# Config files
+tsconfig*.json
+jest.config.js
+eslint.config.mjs
+
+# Development files
+node_modules/
+.DS_Store
+*.log

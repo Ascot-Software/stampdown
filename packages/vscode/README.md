@@ -484,12 +484,6 @@ code test-grammar.sdt
 # Verify syntax highlighting for all patterns
 ```
 
-## Related Packages
-
-- [`@stampdwn/core`](../core/) - Core templating engine
-- [`@stampdwn/cli`](../cli/) - Command-line interface
-- [`@stampdwn/llm`](../llm/) - LLM plugin for prompt templates
-
 ## License
 
 MIT
