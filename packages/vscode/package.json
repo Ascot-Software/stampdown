@@ -1,5 +1,5 @@
 {
-  "name": "stampdown",
+  "name": "@stampdwn/vscode",
   "displayName": "Stampdown",
   "description": "Syntax highlighting for Stampdown template files (.sdt)",
   "version": "0.1.0",
@@ -7,7 +7,11 @@
   "icon": "./ext-icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stampdown/stampdown.git"
+    "url": "https://github.com/Ascot-Software/stampdown.git",
+    "directory": "packages/vscode"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "license": "MIT",
   "engines": {

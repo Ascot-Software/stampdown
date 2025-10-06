@@ -6,8 +6,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-import { Stampdown } from '../stampdown';
-import { llmPlugin } from '../plugins/llm';
+import { Stampdown } from '@stampdwn/core';
+import { llmPlugin } from '../index';
 
 describe('llm plugin', () => {
   let stampdown: Stampdown;

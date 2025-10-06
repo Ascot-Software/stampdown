@@ -10,13 +10,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import YAML from 'yaml';
-import type { Stampdown } from '../../stampdown';
+import type { Stampdown } from '@stampdwn/core';
 import type { NormChat, NormMessage, NormContent } from './types';
 import { NormChatSchema } from './types';
 import { normalizeFromAiSdk } from './adapters/ai-sdk';
 import { defaultTokenizer, type Tokenizer } from './tokenizer';
-import type { Context } from '../../types';
-import type { HelperOptions } from '../../helpers/registry';
+import type { Context } from '@stampdwn/core';
+import type { HelperOptions } from '@stampdwn/core';
 
 /**
  * Options for LLM helper registration

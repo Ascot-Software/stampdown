@@ -1,34 +1,36 @@
 {
-  "name": "stampdown",
+  "name": "stampdown-monorepo",
   "version": "0.1.0",
+  "private": true,
   "description": "A Markdown templating language with Handlebars-like features",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "bin": {
-    "sdt-cli": "./bin/sdt-cli.js"
-  },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\"",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "extension:package": "cd vscode-extension && npx @vscode/vsce package",
-    "extension:publish": "cd vscode-extension && npx @vscode/vsce publish"
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run dev --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
+    "format": "npm run format --workspaces --if-present",
+    "format:check": "npm run format:check --workspaces --if-present",
+    "test": "npm test --workspaces --if-present",
+    "test:watch": "npm run test:watch --workspaces --if-present",
+    "test:coverage": "npm run test:coverage --workspaces --if-present"
   },
   "keywords": [
     "markdown",
     "template",
     "templating",
     "handlebars",
-    "expressions"
+    "expressions",
+    "monorepo"
   ],
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ascot-Software/stampdown.git"
+  },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^20.14.0",
@@ -41,12 +43,5 @@
     "prettier": "^3.3.2",
     "ts-jest": "^29.1.5",
     "typescript": "^5.4.5"
-  },
-  "dependencies": {
-    "@ai-sdk/provider": "^2.0.0",
-    "gpt-tokenizer": "^3.0.1",
-    "marked": "^12.0.2",
-    "yaml": "^2.8.1",
-    "zod": "^4.1.11"
   }
 }

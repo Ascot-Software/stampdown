@@ -5,7 +5,7 @@
  * @module plugins/llm
  */
 
-import { createPlugin } from '../../plugin';
+import { createPlugin } from '@stampdwn/core';
 import { registerLLMHelpers } from './helpers';
 
 /**

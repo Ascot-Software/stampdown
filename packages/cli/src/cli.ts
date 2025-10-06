@@ -8,8 +8,8 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { Stampdown } from './stampdown';
-import { Precompiler } from './precompiler';
+import { Stampdown } from '@stampdwn/core';
+import { Precompiler } from '@stampdwn/core';
 
 /**
  * CLI options interface

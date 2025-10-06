@@ -14,7 +14,7 @@ export type { StampdownOptions, Context, Partial, Hook } from './types';
 export { definePlugin, createPlugin } from './plugin';
 export type { StampdownPlugin, PluginOptions, PluginConfig, PluginAPI } from './plugin';
 
-// Re-export plugins for convenience (can also import from 'stampdown/plugins/*')
+// Re-export plugins for convenience (can also import from '@stampdwn/core/plugins')
 export {
   stringHelpersPlugin,
   mathHelpersPlugin,
@@ -22,3 +22,5 @@ export {
   arrayHelpersPlugin,
   debugPlugin,
 } from './plugins';
+
+// Note: llmPlugin is now in @stampdwn/llm package
