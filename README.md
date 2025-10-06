@@ -4,18 +4,44 @@ A powerful Markdown templating language with Handlebars-compatible expressions, 
 
 ## Installation
 
+### Core Package
+
+For the main templating engine with built-in helpers and standard plugins:
+
 ```bash
-npm install stampdown
+npm install @stampdwn/core
 ```
+
+### Specialized Packages
+
+- **CLI Tool**: `npm install @stampdwn/cli`
+- **LLM Plugin**: `npm install @stampdwn/llm`
+- **VS Code Extension**: Install from VS Code marketplace or `packages/vscode/`
+
+### Legacy Installation
+
+The original `stampdown` package is deprecated. Use `@stampdwn/core` instead.
 
 ## Quick Start
 
 ```typescript
-import { Stampdown } from 'stampdown';
+import { Stampdown } from '@stampdwn/core';
 
 const stampdown = new Stampdown();
 const result = stampdown.render('Hello {{name}}!', { name: 'World' });
+console.log(result); // "Hello World!"
 ```
+
+## Packages
+
+This repository is organized as a monorepo with the following packages:
+
+| Package | Description | Version |
+|---------|-------------|---------|
+| [`@stampdwn/core`](packages/core/) | Core templating engine with built-in helpers and standard plugins | ![npm](https://img.shields.io/npm/v/@stampdwn/core) |
+| [`@stampdwn/cli`](packages/cli/) | Command-line interface for template compilation and processing | ![npm](https://img.shields.io/npm/v/@stampdwn/cli) |
+| [`@stampdwn/llm`](packages/llm/) | Specialized plugin for LLM prompt templating with multi-provider support | ![npm](https://img.shields.io/npm/v/@stampdwn/llm) |
+| [`@stampdwn/vscode`](packages/vscode/) | VS Code extension with syntax highlighting for `.sdt` files | - |
 
 ## Features
 
@@ -344,7 +370,7 @@ const stampdown = new Stampdown({
 Extend Stampdown with reusable plugin packages:
 
 ```typescript
-import { Stampdown, createPlugin } from 'stampdown';
+import { Stampdown, createPlugin } from '@stampdwn/core';
 
 // Create a plugin
 const mathPlugin = createPlugin({
@@ -397,9 +423,9 @@ Stampdown provides ready-to-use plugin packs for common operations:
 Import plugins individually:
 
 ```typescript
-import { Stampdown } from 'stampdown';
-import { stringHelpersPlugin } from 'stampdown/plugins/string-helpers';
-import { mathHelpersPlugin } from 'stampdown/plugins/math-helpers';
+import { Stampdown } from '@stampdwn/core';
+import { stringHelpersPlugin } from '@stampdwn/core/plugins';
+import { mathHelpersPlugin } from '@stampdwn/core/plugins';
 
 const stampdown = new Stampdown({
   plugins: [stringHelpersPlugin, mathHelpersPlugin]
@@ -412,8 +438,8 @@ stampdown.render('{{#multiply 6 7}}{{/multiply}}', {}); // "42"
 Or import all at once:
 
 ```typescript
-import { Stampdown } from 'stampdown';
-import { stringHelpersPlugin, mathHelpersPlugin } from 'stampdown/plugins';
+import { Stampdown } from '@stampdwn/core';
+import { stringHelpersPlugin, mathHelpersPlugin } from '@stampdwn/core/plugins';
 
 // ... use as above
 ```
@@ -425,7 +451,7 @@ For production applications, precompile your templates to optimized JavaScript f
 ### Basic Precompilation
 
 ```typescript
-import { Stampdown, Precompiler } from 'stampdown';
+import { Stampdown, Precompiler } from '@stampdwn/core';
 
 const precompiler = new Precompiler();
 const stampdown = new Stampdown();
@@ -490,7 +516,7 @@ For optimal performance, precompile templates during your build process:
 
 **precompile-templates.js**
 ```typescript
-import { Precompiler } from 'stampdown';
+import { Precompiler } from '@stampdwn/core';
 import { readFileSync, writeFileSync } from 'fs';
 import { glob } from 'glob';
 
@@ -523,7 +549,7 @@ writeFileSync('src/templates.generated.js', output.join('\n'));
 
 **Usage in your app:**
 ```typescript
-import { Stampdown } from 'stampdown';
+import { Stampdown } from '@stampdwn/core';
 import { precompiledTemplates } from './templates.generated';
 
 const stampdown = new Stampdown();
@@ -618,7 +644,7 @@ Add to your `package.json`:
 
 ```typescript
 // ESM format (default)
-import { Stampdown } from 'stampdown';
+import { Stampdown } from '@stampdwn/core';
 import { templates } from './dist/templates.mjs';
 
 const stampdown = new Stampdown();
@@ -694,7 +720,7 @@ Use dedicated template files with syntax highlighting:
 
 **Load and render:**
 ```typescript
-import { TemplateLoader } from 'stampdown';
+import { TemplateLoader } from '@stampdwn/core';
 
 const loader = new TemplateLoader();
 

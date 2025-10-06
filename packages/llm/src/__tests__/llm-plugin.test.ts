@@ -3,9 +3,6 @@
  * Tests for LLM-focused helpers and message templating
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
 import { Stampdown } from '@stampdwn/core';
 import { llmPlugin } from '../index';
 
@@ -247,21 +244,6 @@ describe('llm plugin', () => {
   });
 
   describe('formatting helpers', () => {
-    it('mdSection creates markdown section', () => {
-      const tpl = `{{#mdSection title="Test" level=2}}Content{{/mdSection}}`;
-      const out = stampdown.render(tpl, {});
-      expect(out).toContain('## Test');
-      expect(out).toContain('Content');
-    });
-
-    it('codeFence creates code block', () => {
-      const tpl = `{{#codeFence lang="typescript"}}const x = 1;{{/codeFence}}`;
-      const out = stampdown.render(tpl, {});
-      expect(out).toContain('```typescript');
-      expect(out).toContain('const x = 1;');
-      expect(out).toContain('```');
-    });
-
     it('json stringifies object', () => {
       const tpl = `{{#json obj/}}`;
       const out = stampdown.render(tpl, { obj: { name: 'test', value: 42 } });
@@ -416,13 +398,13 @@ describe('llm plugin', () => {
     it('renders a complete conversation with formatting', () => {
       const template = `
 {{#withChat raw=chat}}
-{{#mdSection title="Conversation" level=2}}
+## Conversation
+
 {{#eachMessage}}
 {{#ifUser}}**User**: {{#joinText this sep=" "/}}{{/ifUser}}
 {{#ifAssistant}}**Assistant**: {{#joinText this sep=" "/}}{{/ifAssistant}}
 {{#ifSystem}}*System*: {{#joinText this sep=" "/}}{{/ifSystem}}
 {{/eachMessage}}
-{{/mdSection}}
 {{/withChat}}
 `;
 

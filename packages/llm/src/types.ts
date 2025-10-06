@@ -1,7 +1,6 @@
 /**
  * Stampdown LLM Plugin Types
  * Normalized chat message types for multi-provider LLM interactions
- *
  * @module plugins/llm/types
  */
 

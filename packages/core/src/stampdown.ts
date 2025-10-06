@@ -163,7 +163,7 @@ export class Stampdown {
   /**
    * Register a custom helper function
    * @param {string} name - The name of the helper
-   * @param {Function} helper - The helper function
+   * @param {(context: Context, options: HelperOptions, ...args: unknown[]) => string} helper - The helper function
    * @returns {void}
    */
   registerHelper(

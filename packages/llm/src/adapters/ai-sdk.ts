@@ -1,8 +1,7 @@
 /**
  * AI SDK Adapter
- * Normalizes @ai-sdk message shapes to our internal NormChat format.
- * This is the ONLY file that imports @ai-sdk types - they never leak beyond this boundary.
- *
+ * Normalizes `@ai-sdk` message shapes to our internal NormChat format.
+ * This is the ONLY file that imports `@ai-sdk` types - they never leak beyond this boundary.
  * @module plugins/llm/adapters/ai-sdk
  * @private
  */
@@ -10,10 +9,10 @@
 import type { NormChat, NormMessage, NormContent } from '../types';
 
 /**
- * Minimal shape we expect from @ai-sdk (kept local; don't re-export)
+ * Minimal shape we expect from `@ai-sdk` (kept local; don't re-export)
  * @private
  */
-type AiSdkMessage = {
+export type AiSdkMessage = {
   role: 'system' | 'user' | 'assistant' | 'tool' | 'function';
   name?: string;
   content: Array<
@@ -25,10 +24,10 @@ type AiSdkMessage = {
 };
 
 /**
- * Payload shape from @ai-sdk providers
+ * Payload shape from `@ai-sdk` providers
  * @private
  */
-type AiSdkPayload = {
+export type AiSdkPayload = {
   provider?: string;
   model?: string;
   messages: AiSdkMessage[];
@@ -36,8 +35,8 @@ type AiSdkPayload = {
 };
 
 /**
- * Normalize an @ai-sdk payload to our internal NormChat format
- * @param {AiSdkPayload} raw - Raw payload from @ai-sdk provider
+ * Normalize an `@ai-sdk` payload to our internal NormChat format
+ * @param {AiSdkPayload} raw - Raw payload from `@ai-sdk` provider
  * @returns {NormChat} - Normalized chat object
  */
 export function normalizeFromAiSdk(raw: AiSdkPayload): NormChat {
@@ -56,8 +55,8 @@ export function normalizeFromAiSdk(raw: AiSdkPayload): NormChat {
 }
 
 /**
- * Map @ai-sdk role to normalized role
- * @param {AiSdkMessage['role']} r - Role from @ai-sdk
+ * Map `@ai-sdk` role to normalized role
+ * @param {string} r - Role from `@ai-sdk`
  * @returns {NormMessage['role']} - Normalized role
  * @private
  */
@@ -70,8 +69,8 @@ function mapRole(r: AiSdkMessage['role']): NormMessage['role'] {
 }
 
 /**
- * Map @ai-sdk content to normalized content array
- * @param {AiSdkMessage['content'][number]} c - Content item from @ai-sdk
+ * Map `@ai-sdk` content to normalized content array
+ * @param {object} c - Content item from `@ai-sdk`
  * @returns {NormContent[]} - Array of normalized content items
  * @private
  */
@@ -115,7 +114,7 @@ function mapContent(c: AiSdkMessage['content'][number]): NormContent[] {
 
 /**
  * Map provider string to normalized provider type
- * @param {string | undefined} p - Provider string from @ai-sdk
+ * @param {string | undefined} p - Provider string from `@ai-sdk`
  * @returns {NormChat['provider']} - Normalized provider
  * @private
  */

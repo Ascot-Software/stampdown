@@ -1,7 +1,6 @@
 /**
  * Stampdown Plugins
  * Individual plugin modules for extending Stampdown functionality
- *
  * @module plugins
  */
 

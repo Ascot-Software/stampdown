@@ -10,11 +10,10 @@ import type { HelperOptions } from '../helpers/registry';
 /**
  * String manipulation plugin
  * Adds helpers for uppercase, lowercase, capitalize, trim, repeat, and truncate operations
- *
  * @example
  * ```typescript
- * import { Stampdown } from 'stampdown';
- * import { stringHelpersPlugin } from 'stampdown/plugins/string-helpers';
+ * import { Stampdown } from '@stampdwn/core';
+ * import { stringHelpersPlugin } from '@stampdwn/core/plugins/string-helpers';
  *
  * const stampdown = new Stampdown({
  *   plugins: [stringHelpersPlugin]

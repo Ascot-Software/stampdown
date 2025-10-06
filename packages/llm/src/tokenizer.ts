@@ -1,7 +1,6 @@
 /**
  * Tokenizer
  * Token counting and truncation abstraction for LLM text processing
- *
  * @module plugins/llm/tokenizer
  */
 
@@ -21,10 +20,10 @@ export interface Tokenizer {
   /**
    * Truncate text to maximum token count
    * @param {string} text - Text to truncate
-   * @param {number} maxTokens - Maximum number of tokens
+   * @param {number} _maxTokens - Maximum number of tokens
    * @returns {string} - Truncated text
    */
-  truncateByTokens(text: string, maxTokens: number): string;
+  truncateByTokens(text: string, _maxTokens: number): string;
 }
 
 /**

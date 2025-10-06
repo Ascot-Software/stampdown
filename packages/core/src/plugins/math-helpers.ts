@@ -10,11 +10,10 @@ import type { HelperOptions } from '../helpers/registry';
 /**
  * Math helpers plugin
  * Adds helpers for add, subtract, multiply, divide, mod, round, min, and max operations
- *
  * @example
  * ```typescript
- * import { Stampdown } from 'stampdown';
- * import { mathHelpersPlugin } from 'stampdown/plugins/math-helpers';
+ * import { Stampdown } from '@stampdwn/core';
+ * import { mathHelpersPlugin } from '@stampdwn/core/plugins/math-helpers';
  *
  * const stampdown = new Stampdown({
  *   plugins: [mathHelpersPlugin]

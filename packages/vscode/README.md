@@ -1,30 +1,55 @@
-# VS Code Stampdown Extension
+# @stampdwn/vscode
 
-Syntax highlighting for Stampdown Template (`.sdt`) files.
-
-## Features
-
-- Syntax highlighting for expressions, block helpers, partials, and comments
-- Differentiated colors for control keywords, variables, and built-in variables
-- Special highlighting for `this`, `@index`, `@first`, `@last`, `@key`
-- Markdown syntax support within templates
-- Auto-closing pairs for brackets and helpers
-- Code folding for block helpers
+VS Code extension providing syntax highlighting and language support for Stampdown templates.
 
 ## Installation
 
-1. Copy this directory to your VS Code extensions folder:
-   - macOS/Linux: `~/.vscode/extensions/stampdown-0.1.0/`
-   - Windows: `%USERPROFILE%\.vscode\extensions\stampdown-0.1.0\`
+Install from the VS Code Marketplace or build from source.
 
-2. Reload VS Code
+### From Marketplace
+Search for "Stampdown" in the VS Code Extensions view and install.
 
-3. Open any `.sdt` file to see syntax highlighting
+### From Source
+```bash
+# Clone and build
+git clone https://github.com/your-org/stampdown
+cd stampdown/packages/vscode
+npm install
+npm run build
+
+# Install extension
+code --install-extension stampdown-0.1.0.vsix
+```
 
 Or use the provided installer from the project root:
 ```bash
 ./install-extension.sh
 ```
+
+## Features
+
+### Syntax Highlighting
+
+Complete syntax highlighting support for all Stampdown template features:
+
+- **Expressions**: `{{name}}`, `{{user.email}}`
+- **Block Helpers**: `{{#if premium}}...{{/if}}`
+- **Self-Closing Helpers**: `{{#uppercase name/}}`
+- **Partials**: `{{> header}}`, `{{> (dynamic) }}`
+- **Partial Blocks**: `{{#> layout}}...{{/layout}}`
+- **Inline Partials**: `{{#*inline "name"}}...{{/inline}}`
+- **Comments**: `{{!-- comment --}}`
+- **Variable Assignment**: `{{ x = 5 }}`, `{{ name = \`Hello \${user}\` }}`
+- **Advanced Expressions**: `{{#if age > 18}}`, `{{#unless premium && verified}}`
+
+### Language Configuration
+
+Automatic language detection and configuration:
+
+- **File Extensions**: `.sdt` files automatically use Stampdown syntax
+- **Bracket Matching**: Proper matching for `{{...}}` expressions
+- **Comment Toggle**: Use `Ctrl+/` (Cmd+/) to toggle `{{!-- --}}` comments
+- **Auto-Indentation**: Smart indentation within block helpers
 
 ## Syntax Highlighting
 
@@ -392,12 +417,81 @@ This ensures:
 5. **Include specific features** - Don't include entire grammars, include only needed features
 6. **Verify with scope inspector** - Use "Developer: Inspect Editor Tokens and Scopes" to verify
 
-## Documentation
+## Configuration
 
-- **[Main Stampdown Docs](../README.md)** - Complete Stampdown documentation
-- **[Advanced Partials](../docs/ADVANCED-PARTIALS.md)** - Detailed partial feature guide
-- **[Self-Closing Blocks](../docs/SELF-CLOSING.md)** - Self-closing syntax documentation
-- **[CLI Reference](../docs/CLI.md)** - Command-line tool guide
-- **[Precompiler Guide](../docs/PRECOMPILER.md)** - Precompilation features
+### VS Code Settings
+
+Configure Stampdown language settings in your VS Code `settings.json`:
+
+```json
+{
+  "[stampdown]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.wordWrap": "on"
+  },
+  "files.associations": {
+    "*.sdt": "stampdown",
+    "*.stampdown": "stampdown"
+  }
+}
+```
+
+### File Type Associations
+
+Associate additional file extensions with Stampdown:
+
+```json
+{
+  "files.associations": {
+    "*.tmpl": "stampdown",
+    "*.template": "stampdown",
+    "*.hbs": "stampdown"
+  }
+}
+```
+
+## Development
+
+### Building the Extension
+
+```bash
+npm install
+npm run build
+```
+
+### Packaging
+
+```bash
+npm run package
+# Creates stampdown-VERSION.vsix
+```
+
+### Installing Development Build
+
+```bash
+code --install-extension stampdown-VERSION.vsix
+```
+
+### Testing
+
+Test the grammar with various template patterns:
+
+```bash
+# Open test file
+code test-grammar.sdt
+
+# Verify syntax highlighting for all patterns
+```
+
+## Related Packages
+
+- [`@stampdwn/core`](../core/) - Core templating engine
+- [`@stampdwn/cli`](../cli/) - Command-line interface
+- [`@stampdwn/llm`](../llm/) - LLM plugin for prompt templates
+
+## License
+
+MIT
 
 ````

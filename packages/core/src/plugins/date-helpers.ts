@@ -10,11 +10,10 @@ import type { HelperOptions } from '../helpers/registry';
 /**
  * Date formatting plugin
  * Adds helpers for formatDate, now, and timeAgo operations
- *
  * @example
  * ```typescript
- * import { Stampdown } from 'stampdown';
- * import { dateHelpersPlugin } from 'stampdown/plugins/date-helpers';
+ * import { Stampdown } from '@stampdwn/core';
+ * import { dateHelpersPlugin } from '@stampdwn/core/plugins/date-helpers';
  *
  * const stampdown = new Stampdown({
  *   plugins: [dateHelpersPlugin]

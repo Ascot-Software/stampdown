@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions for Stampdown
 
-This document provides context and guidelines for AI assistants working on the Stampdown codebase.
+This document provides context and guidelines for AI assistants working on the Stampdown monorepo codebase.
 
 ## Project Purpose
 
@@ -16,52 +16,84 @@ Stampdown is a powerful Markdown templating language with Handlebars-like expres
 - Template precompilation for performance
 - CLI tool for build workflows
 - VS Code extension with syntax highlighting
+- LLM plugin for prompt templating with multi-provider support
 
-## Project Structure
+## Monorepo Structure
+
+This is an npm workspaces monorepo with 4 scoped packages:
 
 ```
 stampdown/
-├── src/                          # TypeScript source code
-│   ├── stampdown.ts              # Main Stampdown class (entry point)
-│   ├── parser.ts                 # Template parser (string → AST)
-│   ├── renderer.ts               # AST renderer (AST → output)
-│   ├── evaluator.ts              # Expression evaluator
-│   ├── loader.ts                 # Template file loader (.sdt files)
-│   ├── precompiler.ts            # Template precompiler (AST → JS)
-│   ├── cli.ts                    # Command-line interface
-│   ├── plugin.ts                 # Plugin system types and helpers
-│   ├── types.ts                  # TypeScript type definitions
-│   ├── index.ts                  # Public API exports
-│   ├── helpers/
-│   │   ├── registry.ts           # Helper function registry
-│   │   └── builtin.ts            # Built-in helpers (if, each, with, etc.)
-│   ├── plugins/                  # Plugin implementations
-│   │   ├── index.ts              # Plugin exports
-│   │   ├── string-helpers.ts     # String manipulation (uppercase, lowercase, etc.)
-│   │   ├── math-helpers.ts       # Math operations (add, multiply, etc.)
-│   │   ├── date-helpers.ts       # Date formatting
-│   │   ├── array-helpers.ts      # Array operations (join, reverse, etc.)
-│   │   └── debug.ts              # Debug utilities
-│   └── __tests__/                # Jest test suites
-│       ├── stampdown.test.ts     # Core functionality tests
-│       ├── advanced-expressions.test.ts  # Advanced expressions tests
-│       ├── variable-assignment.test.ts   # Variable assignment tests
-│       ├── parser.test.ts        # Parser tests
-│       ├── precompiler.test.ts   # Precompiler tests
-│       ├── loader.test.ts        # Template loader tests
-│       ├── partials.test.ts      # Advanced partials tests
-│       ├── llm-plugin.test.ts    # LLM plugin tests
-│       └── plugin.test.ts        # Plugin system tests
-├── docs/                         # Documentation (empty - docs consolidated into README)
-│   └── (no files - all documentation in README.md)
-├── vscode-extension/             # VS Code extension
-│   ├── README.md                 # Extension documentation (includes grammar dev notes)
-│   ├── package.json              # Extension manifest
+├── packages/
+│   ├── core/                     # @stampdwn/core - Core templating engine
+│   │   ├── src/
+│   │   │   ├── stampdown.ts      # Main Stampdown class (entry point)
+│   │   │   ├── parser.ts         # Template parser (string → AST)
+│   │   │   ├── renderer.ts       # AST renderer (AST → output)
+│   │   │   ├── evaluator.ts      # Expression evaluator
+│   │   │   ├── loader.ts         # Template file loader (.sdt files)
+│   │   │   ├── precompiler.ts    # Template precompiler (AST → JS)
+│   │   │   ├── plugin.ts         # Plugin system types and helpers
+│   │   │   ├── types.ts          # TypeScript type definitions
+│   │   │   ├── index.ts          # Public API exports
+│   │   │   ├── helpers/
+│   │   │   │   ├── registry.ts   # Helper function registry
+│   │   │   │   └── builtin.ts    # Built-in helpers (if, each, with, etc.)
+│   │   │   ├── plugins/          # Core plugin implementations
+│   │   │   │   ├── index.ts      # Plugin exports
+│   │   │   │   ├── string-helpers.ts  # String manipulation
+│   │   │   │   ├── math-helpers.ts    # Math operations
+│   │   │   │   ├── date-helpers.ts    # Date formatting
+│   │   │   │   ├── array-helpers.ts   # Array operations
+│   │   │   │   └── debug.ts           # Debug utilities
+│   │   │   └── __tests__/        # Jest test suites (133 tests)
+│   │   │       ├── stampdown.test.ts
+│   │   │       ├── advanced-expressions.test.ts
+│   │   │       ├── variable-assignment.test.ts
+│   │   │       ├── parser.test.ts
+│   │   │       ├── precompiler.test.ts
+│   │   │       ├── loader.test.ts
+│   │   │       ├── partials.test.ts
+│   │   │       └── plugin.test.ts
+│   │   └── package.json
+│   │
+│   ├── cli/                      # @stampdwn/cli - Command-line interface
+│   │   ├── src/
+│   │   │   ├── cli.ts            # CLI implementation
+│   │   │   └── __tests__/        # CLI tests (19 tests)
+│   │   │       └── cli.test.ts
+│   │   ├── bin/
+│   │   │   └── stampdown.js      # CLI executable
+│   │   └── package.json
+│   │
+│   ├── llm/                      # @stampdwn/llm - LLM plugin package
+│   │   ├── src/
+│   │   │   ├── index.ts          # Plugin exports
+│   │   │   ├── helpers.ts        # LLM-specific helpers
+│   │   │   ├── types.ts          # Type definitions
+│   │   │   ├── tokenizer.ts      # Token counting utilities
+│   │   │   ├── adapters/
+│   │   │   │   └── ai-sdk.ts     # @ai-sdk normalization
+│   │   │   └── __tests__/        # LLM tests (29 tests)
+│   │   │       └── llm-plugin.test.ts
+│   │   └── package.json
+│   │
+│   └── vscode/                   # @stampdwn/vscode - VS Code extension
+│       ├── syntaxes/
+│       │   └── stampdown.tmLanguage.json  # TextMate grammar (939 lines)
+│       ├── test-grammar.sdt      # Grammar test file
+│       └── package.json
+│
+├── package.json                  # Root workspace configuration
+├── tsconfig.json                 # Root TypeScript config
+├── jest.config.js                # Root Jest config
+├── eslint.config.mjs            # ESLint flat config (v9+)
+└── README.md                     # Main documentation
 │   ├── syntaxes/
 │   │   └── stampdown.tmLanguage.json  # TextMate grammar (939 lines)
 │   └── test-*.sdt                # Test template files
 ├── bin/
-│   └── stampdown-precompile.js   # CLI executable
+
 ├── package.json                  # NPM package configuration
 ├── tsconfig.json                 # TypeScript configuration
 ├── jest.config.js                # Jest test configuration
@@ -283,7 +315,7 @@ Partials enable template reuse with advanced Handlebars-compatible features:
 
 ## Built-in Helpers
 
-Located in `src/helpers/builtin.ts`:
+Located in `packages/core/src/helpers/builtin.ts`:
 
 - **if** - Conditional rendering (truthy check)
 - **unless** - Inverse conditional
@@ -333,10 +365,10 @@ export const myPlugin = createPlugin({
 
 **Built-in Plugins:**
 
-All plugins are located in `src/plugins/` and can be imported from `stampdown/plugins`.
+All plugins are located in `packages/core/src/plugins/` and can be imported from `@stampdwn/core/plugins`.
 
 #### String Helpers Plugin
-**Location:** `src/plugins/string-helpers.ts`
+**Location:** `packages/core/src/plugins/string-helpers.ts`
 
 Provides string manipulation helpers:
 - **uppercase** - Convert text to uppercase
@@ -348,7 +380,7 @@ Provides string manipulation helpers:
 
 **Usage:**
 ```typescript
-import { stringHelpersPlugin } from 'stampdown/plugins';
+import { stringHelpersPlugin } from '@stampdwn/core/plugins';
 
 const stampdown = new Stampdown({
   plugins: [stringHelpersPlugin]
@@ -360,7 +392,7 @@ const stampdown = new Stampdown({
 ```
 
 #### Math Helpers Plugin
-**Location:** `src/plugins/math-helpers.ts`
+**Location:** `packages/core/src/plugins/math-helpers.ts`
 
 Provides mathematical operation helpers:
 - **add** - Add numbers
@@ -374,7 +406,7 @@ Provides mathematical operation helpers:
 
 **Usage:**
 ```typescript
-import { mathHelpersPlugin } from 'stampdown/plugins';
+import { mathHelpersPlugin } from '@stampdwn/core/plugins';
 
 const stampdown = new Stampdown({
   plugins: [mathHelpersPlugin]
@@ -386,7 +418,7 @@ const stampdown = new Stampdown({
 ```
 
 #### Date Helpers Plugin
-**Location:** `src/plugins/date-helpers.ts`
+**Location:** `packages/core/src/plugins/date-helpers.ts`
 
 Provides date formatting and manipulation helpers:
 - **formatDate** - Format date with pattern (YYYY-MM-DD, etc.)
@@ -395,7 +427,7 @@ Provides date formatting and manipulation helpers:
 
 **Usage:**
 ```typescript
-import { dateHelpersPlugin } from 'stampdown/plugins';
+import { dateHelpersPlugin } from '@stampdwn/core/plugins';
 
 const stampdown = new Stampdown({
   plugins: [dateHelpersPlugin]
@@ -407,7 +439,7 @@ const stampdown = new Stampdown({
 ```
 
 #### Array Helpers Plugin
-**Location:** `src/plugins/array-helpers.ts`
+**Location:** `packages/core/src/plugins/array-helpers.ts`
 
 Provides array manipulation helpers:
 - **join** - Join array elements with separator
@@ -418,7 +450,7 @@ Provides array manipulation helpers:
 
 **Usage:**
 ```typescript
-import { arrayHelpersPlugin } from 'stampdown/plugins';
+import { arrayHelpersPlugin } from '@stampdwn/core/plugins';
 
 const stampdown = new Stampdown({
   plugins: [arrayHelpersPlugin]
@@ -430,7 +462,7 @@ const stampdown = new Stampdown({
 ```
 
 #### Debug Plugin
-**Location:** `src/plugins/debug.ts`
+**Location:** `packages/core/src/plugins/debug.ts`
 
 Provides debugging and introspection helpers:
 - **json** - Stringify value as JSON
@@ -440,7 +472,7 @@ Provides debugging and introspection helpers:
 
 **Usage:**
 ```typescript
-import { debugPlugin } from 'stampdown/plugins';
+import { debugPlugin } from '@stampdwn/core/plugins';
 
 const stampdown = new Stampdown({
   plugins: [debugPlugin]
@@ -452,7 +484,7 @@ const stampdown = new Stampdown({
 ```
 
 #### LLM Plugin
-**Location:** `src/plugins/llm/`
+**Location:** `packages/llm/src/`
 
 Provides specialized helpers for prompt engineering and LLM conversation templating with multi-provider support.
 
@@ -519,7 +551,7 @@ interface NormChat {
 - **truncateTokens** - Truncate by token limit (block/text/message modes)
 
 *Formatting:*
-- **mdSection** - Wrap content in markdown section with heading
+
 - **codeFence** - Wrap content in markdown code fence
 - **json** - Stringify value as JSON
 - **yaml** - Stringify value as YAML
@@ -527,8 +559,8 @@ interface NormChat {
 
 **Usage:**
 ```typescript
-import { Stampdown } from 'stampdown';
-import { llmPlugin } from 'stampdown/plugins/llm';
+import { Stampdown } from '@stampdwn/core';
+import { llmPlugin } from '@stampdwn/llm';
 
 const stampdown = new Stampdown({
   plugins: [llmPlugin]
@@ -560,17 +592,15 @@ const result = stampdown.render(template, {
 ```typescript
 const promptTemplate = `
 {{#withChat raw=chat}}
-{{#mdSection title="Context" level=2}}
+## Context
 {{#window size=5 from="end" role="user"}}
 {{#eachMessage}}
 User Query {{@index}}: {{#truncateTokens this max=100 on="message"/}}
 {{/eachMessage}}
 {{/window}}
-{{/mdSection}}
 
-{{#mdSection title="Full Conversation" level=2}}
+## Full Conversation
 Token count: {{#tokenCount (renderChat this format="json" shape="norm")/}}
-{{/mdSection}}
 {{/withChat}}
 `;
 ```
@@ -595,12 +625,12 @@ Block helpers (those with content blocks) use standard syntax:
 {{#eachMessage}}...{{/eachMessage}}              ✅ Block helper
 {{#ifUser}}...{{else}}...{{/ifUser}}             ✅ Block helper with inverse
 {{#window size=5}}...{{/window}}                 ✅ Block helper
-{{#mdSection title="Test"}}...{{/mdSection}}     ✅ Block helper
+{{#window size=5}}...{{/window}}               ✅ Block helper
 ```
 
 **Custom Tokenizer:**
 ```typescript
-import { llmPlugin, type Tokenizer } from 'stampdown/plugins/llm';
+import { llmPlugin, type Tokenizer } from '@stampdwn/llm';
 
 const customTokenizer: Tokenizer = {
   count: (text: string) => text.split(/\s+/).length,
@@ -634,14 +664,14 @@ Provider Messages → @ai-sdk → normalizeFromAiSdk() → NormChat → Helpers 
 ```
 
 **Testing LLM Helpers:**
-- Test file: `src/__tests__/llm-plugin.test.ts` (31 tests)
+- Test file: `packages/llm/src/__tests__/llm-plugin.test.ts` (29 tests)
 - Run: `npm test -- llm-plugin.test`
 - All helpers have comprehensive test coverage
 - Tests include normalization, role filtering, content extraction, windowing, tokens, and formatting
 
 **Documentation:**
-- Full README: `src/plugins/llm/README.md` (544 lines)
-- Main plugins README: `src/plugins/README.md` (includes LLM plugin section)
+- Full README: `packages/llm/README.md`
+- Main plugins README: `packages/core/src/plugins/README.md` (includes LLM plugin section)
 - All helpers have JSDoc with usage examples
 
 **Implementation Notes:**
@@ -662,15 +692,15 @@ Provider Messages → @ai-sdk → normalizeFromAiSdk() → NormChat → Helpers 
 
 **Loading Multiple Plugins:**
 ```typescript
+import { Stampdown } from '@stampdwn/core';
 import {
-  Stampdown,
   stringHelpersPlugin,
   mathHelpersPlugin,
   dateHelpersPlugin,
   arrayHelpersPlugin,
-  debugPlugin,
-  llmPlugin
-} from 'stampdown';
+  debugPlugin
+} from '@stampdwn/core/plugins';
+import { llmPlugin } from '@stampdwn/llm';
 
 const stampdown = new Stampdown({
   plugins: [
@@ -723,10 +753,10 @@ return output;
 
 ## CLI
 
-The CLI tool precompiles templates for build workflows:
+The CLI tool (`@stampdwn/cli`) precompiles templates for build workflows:
 
 ```bash
-stampdown-precompile -i "src/**/*.sdt" -o dist/templates -f esm
+stampdown compile "src/**/*.sdt" --output dist/templates --format esm
 ```
 
 **Options:**
@@ -738,17 +768,19 @@ stampdown-precompile -i "src/**/*.sdt" -o dist/templates -f esm
 - `-w, --watch` - Watch mode
 - `-m, --source-map` - Generate source maps
 
-**Implementation:** `src/cli.ts`
+**Implementation:** `packages/cli/src/cli.ts`
 - Glob pattern matching
 - Template compilation
 - Multiple output formats
 - Watch mode with file monitoring
+- Render mode for processing templates with data
+- Batch processing capabilities
 
 ## Syntax Highlighting
 
-The VS Code extension provides syntax highlighting via TextMate grammar.
+The VS Code extension (`@stampdwn/vscode`) provides syntax highlighting via TextMate grammar.
 
-**Grammar File:** `vscode-extension/syntaxes/stampdown.tmLanguage.json` (939 lines)
+**Grammar File:** `packages/vscode/syntaxes/stampdown.tmLanguage.json` (939 lines)
 
 **Supported Patterns:**
 - Expressions: `{{name}}`
@@ -804,7 +836,7 @@ parse(template: string): ASTNode {
 
 **REQUIRED:** Write tests for all new functionality.
 
-**Test Location:** `src/__tests__/`
+**Test Location:** `packages/*/src/__tests__/`
 
 **Running Tests:**
 ```bash
@@ -1033,14 +1065,20 @@ Order matters in TextMate grammars:
 
 ## Version
 
-This document reflects the codebase state as of October 4, 2025.
-All 164 tests passing (27 advanced expression tests, 34 variable assignment tests, 31 LLM plugin tests, 72 core tests). 100% JSDoc coverage. TypeScript strict mode enabled.
+This document reflects the codebase state as of October 6, 2025.
+All 181 tests passing across 4 packages:
+- @stampdwn/core: 133 tests (advanced expressions, variable assignment, partials, precompiler, etc.)
+- @stampdwn/cli: 19 tests (CLI functionality, precompilation, rendering)
+- @stampdwn/llm: 29 tests (LLM plugin helpers, normalization, token management)
+- @stampdwn/vscode: VS Code extension with comprehensive TextMate grammar
+
+100% JSDoc coverage. TypeScript strict mode enabled. ESLint flat config (v9+).
 
 **Recent Updates:**
-- Variable assignment: context mutation, template literals, arithmetic operations
-- Advanced expressions: comparison operators, else-if chains, subexpressions
-- Full precompiler support for assignments and advanced expressions
-- Documentation consolidated into README.md (docs/ folder empty)
-- Grammar development notes moved to vscode-extension/README.md
-- Removed examples/ folder (cleanup)
-- Enhanced `each` and `with` helpers to support context mutation
+- **Monorepo Migration**: Completed Phase 2 migration to npm workspaces with @stampdwn/* scoped packages
+- **Package Structure**: Split into core, CLI, LLM, and VS Code extension packages
+- **Documentation**: Comprehensive README files for each package with usage examples
+- **Import Paths**: Updated all imports to use @stampdwn/* package naming
+- **LLM Plugin**: Removed mdSection helper (simplified to direct markdown headings)
+- **ESLint**: Upgraded to flat config with proper TypeScript integration
+- **Test Coverage**: Maintained 100% test coverage across all packages during migration

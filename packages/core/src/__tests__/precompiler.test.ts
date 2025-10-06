@@ -105,7 +105,7 @@ describe('Precompiler', () => {
       });
 
       // Create the function from the generated code
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
+
       const templateFn = new Function('context', 'stampdown', compiled.code) as (
         context: unknown,
         stampdown: Stampdown
@@ -147,7 +147,6 @@ describe('Precompiler', () => {
       const template = '{{#if condition}}True{{else}}False{{/if}}';
       const compiled = precompiler.precompile(template);
 
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
       const templateFn = new Function('context', 'stampdown', compiled.code) as (
         context: unknown,
         stampdown: Stampdown
@@ -174,7 +173,6 @@ describe('Precompiler', () => {
       const template = '{{#uppercase name}}{{/uppercase}}';
       const compiled = precompiler.precompile(template);
 
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
       const templateFn = new Function('context', 'stampdown', compiled.code) as (
         context: unknown,
         stampdown: Stampdown

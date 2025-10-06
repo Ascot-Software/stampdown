@@ -39,7 +39,7 @@ export function registerBuiltInHelpers(registry: HelperRegistry): void {
   /**
    * 'each' helper - Array iteration
    * Iterates over an array and renders the block for each item
-   * Provides special variables: @index, @first, @last
+   * Provides special variables: `@index`, `@first`, `@last`
    */
   registry.register('each', (context: Context, options: HelperOptions, items: unknown) => {
     if (!Array.isArray(items)) {

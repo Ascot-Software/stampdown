@@ -17,9 +17,9 @@ Provides string manipulation helpers:
 
 **Import:**
 ```typescript
-import { stringHelpersPlugin } from 'stampdown/plugins/string-helpers';
+import { stringHelpersPlugin } from '@stampdwn/core/plugins/string-helpers';
 // or
-import { stringHelpersPlugin } from 'stampdown/plugins';
+import { stringHelpersPlugin } from '@stampdwn/core/plugins';
 ```
 
 ### Math Helpers Plugin
@@ -37,9 +37,9 @@ Provides mathematical operation helpers:
 
 **Import:**
 ```typescript
-import { mathHelpersPlugin } from 'stampdown/plugins/math-helpers';
+import { mathHelpersPlugin } from '@stampdwn/core/plugins/math-helpers';
 // or
-import { mathHelpersPlugin } from 'stampdown/plugins';
+import { mathHelpersPlugin } from '@stampdwn/core/plugins';
 ```
 
 ### Date Helpers Plugin
@@ -52,9 +52,9 @@ Provides date formatting and manipulation helpers:
 
 **Import:**
 ```typescript
-import { dateHelpersPlugin } from 'stampdown/plugins/date-helpers';
+import { dateHelpersPlugin } from '@stampdwn/core/plugins/date-helpers';
 // or
-import { dateHelpersPlugin } from 'stampdown/plugins';
+import { dateHelpersPlugin } from '@stampdwn/core/plugins';
 ```
 
 ### Array Helpers Plugin
@@ -69,9 +69,9 @@ Provides array manipulation helpers:
 
 **Import:**
 ```typescript
-import { arrayHelpersPlugin } from 'stampdown/plugins/array-helpers';
+import { arrayHelpersPlugin } from '@stampdwn/core/plugins/array-helpers';
 // or
-import { arrayHelpersPlugin } from 'stampdown/plugins';
+import { arrayHelpersPlugin } from '@stampdwn/core/plugins';
 ```
 
 ### Debug Plugin
@@ -85,9 +85,9 @@ Provides debugging and introspection helpers:
 
 **Import:**
 ```typescript
-import { debugPlugin } from 'stampdown/plugins/debug';
+import { debugPlugin } from '@stampdwn/core/plugins/debug';
 // or
-import { debugPlugin } from 'stampdown/plugins';
+import { debugPlugin } from '@stampdwn/core/plugins';
 ```
 
 ### LLM Plugin
@@ -100,15 +100,14 @@ Provides specialized helpers for prompt engineering and LLM conversation templat
 - **Content helpers**: `eachContent`, `eachText`, `joinText`, `firstText`, `lastText` - Extract and manipulate content
 - **Windowing**: `window` - Select message ranges for context management
 - **Token operations**: `tokenCount`, `truncateTokens` - Token counting and truncation
-- **Formatting**: `mdSection`, `codeFence`, `json`, `yaml`, `renderChat` - Output formatting
+- **Formatting**: `codeFence`, `json`, `yaml`, `renderChat` - Output formatting
 
 **Provider Support:** OpenAI, Anthropic, Azure OpenAI, Google Vertex AI, and custom providers
 
 **Import:**
 ```typescript
-import { llmPlugin } from 'stampdown/plugins/llm';
-// or
-import { llmPlugin } from 'stampdown/plugins';
+import { llmPlugin } from '@stampdwn/llm';
+// Note: LLM plugin is now a separate package
 ```
 
 **Full Documentation:** See [LLM Plugin README](./llm/README.md)
@@ -119,9 +118,9 @@ import { llmPlugin } from 'stampdown/plugins';
 
 ### Individual Plugin Import
 ```typescript
-import { Stampdown } from 'stampdown';
-import { stringHelpersPlugin } from 'stampdown/plugins/string-helpers';
-import { mathHelpersPlugin } from 'stampdown/plugins/math-helpers';
+import { Stampdown } from '@stampdwn/core';
+import { stringHelpersPlugin } from '@stampdwn/core/plugins/string-helpers';
+import { mathHelpersPlugin } from '@stampdwn/core/plugins/math-helpers';
 
 const stampdown = new Stampdown({
   plugins: [stringHelpersPlugin, mathHelpersPlugin]
@@ -130,12 +129,12 @@ const stampdown = new Stampdown({
 
 ### Multiple Plugins from Index
 ```typescript
-import { Stampdown } from 'stampdown';
+import { Stampdown } from '@stampdwn/core';
 import {
   stringHelpersPlugin,
   mathHelpersPlugin,
   debugPlugin
-} from 'stampdown/plugins';
+} from '@stampdwn/core/plugins';
 
 const stampdown = new Stampdown({
   plugins: [stringHelpersPlugin, mathHelpersPlugin, debugPlugin]
@@ -152,7 +151,7 @@ import {
   arrayHelpersPlugin,
   debugPlugin,
   llmPlugin
-} from 'stampdown';
+} from '@stampdwn/core';
 
 const stampdown = new Stampdown({
   plugins: [
@@ -168,8 +167,8 @@ const stampdown = new Stampdown({
 
 ### LLM Plugin Example
 ```typescript
-import { Stampdown } from 'stampdown';
-import { llmPlugin } from 'stampdown/plugins/llm';
+import { Stampdown } from '@stampdwn/core';
+import { llmPlugin } from '@stampdwn/llm';
 
 const stampdown = new Stampdown({
   plugins: [llmPlugin]

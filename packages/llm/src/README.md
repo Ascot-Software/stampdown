@@ -14,14 +14,14 @@ The LLM Plugin provides specialized helpers for prompt engineering and LLM conve
 ## Installation
 
 ```bash
-npm install stampdown @ai-sdk/provider yaml gpt-tokenizer zod
+npm install @stampdwn/core @stampdwn/llm @ai-sdk/provider yaml gpt-tokenizer zod
 ```
 
 ## Basic Usage
 
 ```typescript
-import { Stampdown } from 'stampdown';
-import { llmPlugin } from 'stampdown/plugins/llm';
+import { Stampdown } from '@stampdwn/core';
+import { llmPlugin } from '@stampdwn/llm';
 
 const stampdown = new Stampdown({
   plugins: [llmPlugin]
@@ -294,9 +294,7 @@ Creates a Markdown section with heading.
 
 **Usage:**
 ```handlebars
-{{#mdSection title="Conversation" level=2}}
-  Content here
-{{/mdSection}}
+
 ```
 
 **Output:**
@@ -380,8 +378,8 @@ Renders the normalized chat in various provider formats.
 You can provide a custom tokenizer for token counting:
 
 ```typescript
-import { Stampdown } from 'stampdown';
-import { llmPlugin, type Tokenizer } from 'stampdown/plugins/llm';
+import { Stampdown } from '@stampdwn/core';
+import { llmPlugin, type Tokenizer } from '@stampdwn/llm';
 
 const customTokenizer: Tokenizer = {
   count: (text: string) => {
@@ -408,8 +406,8 @@ const stampdown = new Stampdown({
 ## Complete Example
 
 ```typescript
-import { Stampdown } from 'stampdown';
-import { llmPlugin } from 'stampdown/plugins/llm';
+import { Stampdown } from '@stampdwn/core';
+import { llmPlugin } from '@stampdwn/llm';
 
 const stampdown = new Stampdown({
   plugins: [llmPlugin]
@@ -417,43 +415,40 @@ const stampdown = new Stampdown({
 
 const template = `
 {{#withChat raw=chat}}
-    {{#mdSection title="Conversation Summary" level=1}}
+# Conversation Summary
 
-        **Model**: {{model}} ({{provider}})
-        **Messages**: {{messages.length}}
+**Model**: {{model}} ({{provider}})
+**Messages**: {{messages.length}}
 
-        {{#mdSection title="Recent Messages" level=2}}
-            {{#window size=5 from="end"}}
-                {{#eachMessage}}
+## Recent Messages
+{{#window size=5 from="end"}}
+{{#eachMessage}}
 
-                    {{#ifSystem}}
-                        ### System Prompt
-                        {{#codeFence lang="text"}}
-                            {{#joinText this/}}
-                        {{/codeFence}}
-                    {{/ifSystem}}
+{{#ifSystem}}
+### System Prompt
+{{#codeFence lang="text"}}
+{{#joinText this/}}
+{{/codeFence}}
+{{/ifSystem}}
 
-                    {{#ifUser}}
-                        **User** ({{#tokenCount (firstText this)/}} tokens):
-                        {{#firstText this/}}
-                    {{/ifUser}}
+{{#ifUser}}
+**User** ({{#tokenCount (firstText this)/}} tokens):
+{{#firstText this/}}
+{{/ifUser}}
 
-                    {{#ifAssistant}}
-                        **Assistant** ({{#tokenCount (firstText this)/}} tokens):
-                        {{#truncateTokens this max=100 on="message"/}}
-                    {{/ifAssistant}}
+{{#ifAssistant}}
+**Assistant** ({{#tokenCount (firstText this)/}} tokens):
+{{#truncateTokens this max=100 on="message"/}}
+{{/ifAssistant}}
 
-                {{/eachMessage}}
-            {{/window}}
-        {{/mdSection}}
+{{/eachMessage}}
+{{/window}}
 
-        {{#mdSection title="All User Messages" level=2}}
-            {{#eachByRole role="user"}}
-                - {{#firstText this/}}
-            {{/eachByRole}}
-        {{/mdSection}}
+## All User Messages
+{{#eachByRole role="user"}}
+- {{#firstText this/}}
+{{/eachByRole}}
 
-    {{/mdSection}}
 {{/withChat}}
 `;
 
@@ -513,7 +508,7 @@ import type {
   NormChat,
   Tokenizer,
   LLMHelperOptions
-} from 'stampdown/plugins/llm';
+} from '@stampdwn/llm';
 ```
 
 ## Testing

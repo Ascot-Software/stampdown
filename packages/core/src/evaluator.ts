@@ -207,10 +207,8 @@ export class ExpressionEvaluator {
       case '!==':
         return left !== right;
       case '==':
-        // eslint-disable-next-line eqeqeq
         return left == right;
       case '!=':
-        // eslint-disable-next-line eqeqeq
         return left != right;
       case '>':
         return Number(left) > Number(right);

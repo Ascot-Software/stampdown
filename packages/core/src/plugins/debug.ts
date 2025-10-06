@@ -10,11 +10,10 @@ import type { HelperOptions } from '../helpers/registry';
 /**
  * Debug plugin
  * Adds helpers for json, typeof, keys, and values operations
- *
  * @example
  * ```typescript
- * import { Stampdown } from 'stampdown';
- * import { debugPlugin } from 'stampdown/plugins/debug';
+ * import { Stampdown } from '@stampdwn/core';
+ * import { debugPlugin } from '@stampdwn/core/plugins/debug';
  *
  * const stampdown = new Stampdown({
  *   plugins: [debugPlugin]

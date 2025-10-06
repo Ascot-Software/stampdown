@@ -10,11 +10,10 @@ import type { HelperOptions } from '../helpers/registry';
 /**
  * Array helpers plugin
  * Adds helpers for join, length, slice, reverse, and sort operations
- *
  * @example
  * ```typescript
- * import { Stampdown } from 'stampdown';
- * import { arrayHelpersPlugin } from 'stampdown/plugins/array-helpers';
+ * import { Stampdown } from '@stampdwn/core';
+ * import { arrayHelpersPlugin } from '@stampdwn/core/plugins/array-helpers';
  *
  * const stampdown = new Stampdown({
  *   plugins: [arrayHelpersPlugin]
@@ -70,7 +69,7 @@ export const arrayHelpersPlugin = createPlugin({
       'reverse',
       (_context: Context, _options: HelperOptions, array: unknown) => {
         if (!Array.isArray(array)) return '';
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         const reversed = [...array].reverse();
         return JSON.stringify(reversed);
       }
@@ -81,7 +80,7 @@ export const arrayHelpersPlugin = createPlugin({
       'sort',
       (_context: Context, _options: HelperOptions, array: unknown) => {
         if (!Array.isArray(array)) return '';
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         const sorted = [...array].sort();
         return JSON.stringify(sorted);
       }

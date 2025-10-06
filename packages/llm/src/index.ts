@@ -1,7 +1,6 @@
 /**
  * Stampdown LLM Plugin
  * Provides LLM-focused helpers for chat message templating
- *
  * @module plugins/llm
  */
 
@@ -10,12 +9,11 @@ import { registerLLMHelpers } from './helpers';
 
 /**
  * LLM Plugin for Stampdown
- * Normalizes provider payloads using @ai-sdk and provides role-aware helpers
- *
+ * Normalizes provider payloads using `@ai-sdk` and provides role-aware helpers
  * @example
  * ```typescript
- * import { Stampdown } from 'stampdown';
- * import { llmPlugin } from 'stampdown/plugins/llm';
+ * import { Stampdown } from '@stampdwn/core';
+ * import { llmPlugin } from '@stampdwn/llm';
  *
  * const stampdown = new Stampdown({
  *   plugins: [llmPlugin]

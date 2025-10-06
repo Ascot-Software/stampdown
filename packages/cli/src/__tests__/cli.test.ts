@@ -96,7 +96,7 @@ You have free access.
 
       try {
         await cli.run(['-D', dataPath, '-o', outputDir, templatePath]);
-      } catch (e) {
+      } catch {
         // Expected - process.exit(0) is called
       }
 
@@ -120,7 +120,7 @@ You have free access.
 
       try {
         await cli.run(['-D', dataPath, '-s', templatePath]);
-      } catch (e) {
+      } catch {
         // Expected - process.exit(0) is called
       }
 
@@ -138,7 +138,7 @@ You have free access.
 
       try {
         await cli.run(['-D', dataPath, '-o', outputDir, '-e', 'html', templatePath]);
-      } catch (e) {
+      } catch {
         // Expected - process.exit(0) is called
       }
 
@@ -159,7 +159,7 @@ You have free access.
 
       try {
         await cli.run(['-D', inlineData, '-s', templatePath]);
-      } catch (e) {
+      } catch {
         // Expected - process.exit(0) is called
       }
 
@@ -184,7 +184,7 @@ You have free access.
 
       try {
         await cli.run(['-D', dataPath, '-D', data2Path, '-s', templatePath]);
-      } catch (e) {
+      } catch {
         // Expected - process.exit(0) is called
       }
 
@@ -204,7 +204,7 @@ You have free access.
 
       try {
         await cli.run(['-D', path.join(testDir, 'data.json')]);
-      } catch (e) {
+      } catch {
         // Expected
       }
 
@@ -243,7 +243,7 @@ You have free access.
 
       try {
         await cli.run(['-P', partialsPattern, '-D', inlineData, '-s', templatePath]);
-      } catch (e) {
+      } catch {
         // Expected - process.exit(0) is called
       }
 
@@ -300,7 +300,7 @@ You have free access.
 
       try {
         await cli.run(['-H', helpersPattern, '-D', inlineData, '-s', templatePath]);
-      } catch (e) {
+      } catch {
         // Expected - process.exit(0) is called
       }
 
@@ -326,7 +326,7 @@ You have free access.
 
       try {
         await cli.run(['-H', helpersPattern, '-D', inlineData, '-s', templatePath]);
-      } catch (e) {
+      } catch {
         // Expected - process.exit(0) is called
       }
 
@@ -350,7 +350,7 @@ You have free access.
       expect(fs.existsSync(outputFile)).toBe(true);
 
       const content = fs.readFileSync(outputFile, 'utf8');
-      expect(content).toContain("import { Stampdown } from 'stampdown'");
+      expect(content).toContain("import { Stampdown } from '@stampdwn/core'");
       expect(content).toContain('const templates = {}');
       expect(content).toContain('export default templates');
 
@@ -387,12 +387,12 @@ You have free access.
       expect(fs.existsSync(outputFile)).toBe(true);
 
       const content = fs.readFileSync(outputFile, 'utf8');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       const json = JSON.parse(content);
       // The template ID depends on the path structure, so just check that we got templates
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
       expect(Object.keys(json).length).toBeGreaterThan(0);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
+
       const firstTemplate = Object.values(json)[0];
       expect(typeof firstTemplate).toBe('string');
 
@@ -408,7 +408,7 @@ You have free access.
 
       try {
         await cli.run(['--precompile']);
-      } catch (e) {
+      } catch {
         // Expected
       }
 
@@ -447,7 +447,7 @@ You have free access.
 
       try {
         await cli.run(['-D', inlineData, '-o', outputDir, templatesPattern]);
-      } catch (e) {
+      } catch {
         // Expected - process.exit(0) is called
       }
 
@@ -468,7 +468,7 @@ You have free access.
 
       try {
         await cli.run(['-D', inlineData, '-o', outputDir, templatesPattern]);
-      } catch (e) {
+      } catch {
         // Expected - process.exit(0) is called
       }
 
@@ -509,7 +509,7 @@ You have free access.
 
       try {
         await cli.run(['--unknown-option']);
-      } catch (e) {
+      } catch {
         // Expected
       }
 

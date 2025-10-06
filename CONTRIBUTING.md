@@ -1,6 +1,6 @@
 # Contributing to Stampdown
 
-Thank you for your interest in contributing to Stampdown! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to Stampdown! This document provides guidelines and instructions for contributing to this monorepo.
 
 ## Development Setup
 
@@ -10,39 +10,85 @@ Thank you for your interest in contributing to Stampdown! This document provides
    cd stampdown
    ```
 
-2. **Install dependencies**
+2. **Install dependencies** (installs all workspace dependencies)
    ```bash
    npm install
    ```
 
-3. **Build the project**
+3. **Build all packages**
    ```bash
    npm run build
    ```
 
-4. **Run tests**
+4. **Run all tests**
    ```bash
    npm test
    ```
 
+## Monorepo Structure
+
+This project uses npm workspaces with the following packages:
+
+- **[@stampdwn/core](packages/core/)** - Core templating engine
+- **[@stampdwn/cli](packages/cli/)** - Command-line interface
+- **[@stampdwn/llm](packages/llm/)** - LLM plugin for prompt templates
+- **[@stampdwn/vscode](packages/vscode/)** - VS Code extension
+
 ## Development Workflow
 
-### Running the Development Build
+### Working with Specific Packages
 
-The project uses TypeScript with watch mode for development:
+Each package has its own development workflow:
 
 ```bash
-npm run dev
+# Work on core package
+cd packages/core
+npm run dev        # Watch mode for development
+npm test           # Run core tests
+npm run lint       # Check linting
+
+# Work on CLI package
+cd packages/cli
+npm run dev        # Watch mode
+npm test           # Run CLI tests
+npm run build      # Build CLI
+
+# Work on LLM package
+cd packages/llm
+npm run dev        # Watch mode
+npm test           # Run LLM tests
+npm run build      # Build LLM package
+
+# Work on VS Code extension
+cd packages/vscode
+npm run build      # Build extension
+npm run package    # Create .vsix file
 ```
 
-This will watch for changes and automatically recompile.
+### Running All Package Commands
+
+From the root, you can run commands across all packages:
+
+```bash
+# Build all packages
+npm run build
+
+# Test all packages
+npm test
+
+# Lint all packages
+npm run lint
+
+# Clean all packages
+npm run clean
+```
 
 ### Code Quality
 
 We use ESLint and Prettier to maintain code quality:
 
 ```bash
-# Check linting issues
+# Check linting issues across all packages
 npm run lint
 
 # Fix linting issues automatically
@@ -176,10 +222,10 @@ describe('Feature Name', () => {
     it('should do something specific', () => {
       // Arrange
       const stampdown = new Stampdown();
-      
+
       // Act
       const result = stampdown.render(template, context);
-      
+
       // Assert
       expect(result).toBe(expected);
     });

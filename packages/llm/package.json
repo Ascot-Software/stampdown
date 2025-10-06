@@ -11,8 +11,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "jest",
@@ -36,10 +36,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@stampdwn/core": "^0.1.0",
     "@ai-sdk/provider": "^2.0.0",
+    "@stampdwn/core": "^0.1.0",
     "gpt-tokenizer": "^3.0.1",
     "yaml": "^2.8.1",
     "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.37.0"
   }
 }

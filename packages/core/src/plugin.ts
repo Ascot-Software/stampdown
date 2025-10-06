@@ -57,7 +57,7 @@ export interface PluginAPI {
 /**
  * Helper function to create a plugin
  * @param {string} name - Plugin name
- * @param {Function} plugin - Plugin function
+ * @param {(stampdown: Stampdown, options?: PluginOptions) => void | Promise<void>} plugin - Plugin function
  * @returns {StampdownPlugin} - The plugin object
  */
 export function definePlugin(
@@ -73,6 +73,10 @@ export function definePlugin(
 /**
  * Helper function to create a plugin with metadata
  * @param {object} config - Plugin configuration
+ * @param {string} config.name - Plugin name
+ * @param {string} [config.version] - Plugin version
+ * @param {string} [config.description] - Plugin description
+ * @param {(stampdown: Stampdown, options?: PluginOptions) => void | Promise<void>} config.plugin - Plugin function
  * @returns {StampdownPlugin} - The plugin object
  */
 export function createPlugin(config: {

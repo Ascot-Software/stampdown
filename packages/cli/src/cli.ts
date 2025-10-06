@@ -371,7 +371,7 @@ Examples:
     if (dataSource.trim().startsWith('{')) {
       try {
         return JSON.parse(dataSource) as Record<string, unknown>;
-      } catch (e) {
+      } catch {
         // Not valid JSON, treat as file path
       }
     }
@@ -401,8 +401,10 @@ Examples:
         // Try JSON parse anyway
         try {
           data = JSON.parse(content) as Record<string, unknown>;
-        } catch (e) {
-          throw new Error(`Unable to parse data file: ${file}`);
+        } catch (e: unknown) {
+          throw new Error(
+            `Unable to parse data file: ${file}: ${e instanceof Error ? e.message : String(e)}`
+          );
         }
       }
 
@@ -468,7 +470,7 @@ Examples:
   /**
    * Load helper functions from files
    * @param {string} pattern - Glob pattern for helper files
-   * @returns {Record<string, Function>} - Map of helper names to functions
+   * @returns {Record<string, (...args: unknown[]) => unknown>} - Map of helper names to functions
    * @private
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -481,25 +483,23 @@ Examples:
       const absolutePath = path.resolve(file);
 
       try {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
         const module = require(absolutePath);
 
         // Handle different export formats
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+
         if (typeof module === 'function') {
           // Single function export - use filename as helper name
           const basename = path.basename(file, path.extname(file));
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
           helpers[basename] = module;
 
           if (this.options.verbose) {
             console.log(`Registered helper: ${basename} from ${file}`);
           }
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         } else if (module.default && typeof module.default === 'function') {
           // Default export - use filename as helper name
           const basename = path.basename(file, path.extname(file));
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
           helpers[basename] = module.default;
 
           if (this.options.verbose) {
@@ -507,11 +507,9 @@ Examples:
           }
         } else {
           // Named exports - register all functions
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
           for (const key of Object.keys(module)) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (typeof module[key] === 'function' && key !== 'default') {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
               helpers[key] = module[key];
 
               if (this.options.verbose) {
@@ -547,13 +545,14 @@ Examples:
     if (this.options.stdin) {
       const stdinData = await this.readStdin();
       try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data = JSON.parse(stdinData);
         if (this.options.verbose) {
           console.log('Loaded data from stdin');
         }
-      } catch (e) {
-        throw new Error('Invalid JSON data from stdin');
+      } catch (e: unknown) {
+        throw new Error(
+          `Invalid JSON data from stdin: ${e instanceof Error ? e.message : String(e)}`
+        );
       }
     } else if (this.options.data && this.options.data.length > 0) {
       // Load and merge data from all sources
@@ -581,7 +580,6 @@ Examples:
       for (const helperPattern of this.options.helpers) {
         const helpers = this.loadHelpers(helperPattern);
         for (const [name, fn] of Object.entries(helpers)) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           stampdown.registerHelper(name, fn);
         }
       }
@@ -720,7 +718,7 @@ Examples:
     let output = '';
 
     if (format === 'esm') {
-      output += "import { Stampdown } from 'stampdown';\n\n";
+      output += "import { Stampdown } from '@stampdwn/core';\n\n";
     } else {
       output += "const { Stampdown } = require('stampdown');\n\n";
     }
