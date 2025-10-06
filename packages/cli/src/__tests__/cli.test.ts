@@ -118,7 +118,6 @@ You have free access.
         throw new Error('process.exit called');
       });
 
-
       try {
         await cli.run(['-D', dataPath, '-s', templatePath]);
       } catch (e) {
@@ -136,7 +135,6 @@ You have free access.
       const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
         throw new Error('process.exit called');
       });
-
 
       try {
         await cli.run(['-D', dataPath, '-o', outputDir, '-e', 'html', templatePath]);
@@ -183,7 +181,6 @@ You have free access.
       // Create second data file
       const data2Path = path.join(outputDir, 'data2.json');
       fs.writeFileSync(data2Path, JSON.stringify({ age: 35 }), 'utf8');
-
 
       try {
         await cli.run(['-D', dataPath, '-D', data2Path, '-s', templatePath]);
@@ -489,7 +486,6 @@ You have free access.
       const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
         throw new Error('process.exit called');
       });
-
 
       await expect(async () => {
         try {

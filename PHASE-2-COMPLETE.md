@@ -11,17 +11,17 @@ Phase 2 of the monorepo migration is complete! All files have been moved to thei
   - All core functionality: stampdown, parser, renderer, evaluator, loader, precompiler
   - Helper system and standard plugins (string, math, date, array, debug)
   - 133 tests passing
-  
+
 - **@stampdwn/cli** (packages/cli/): Command-line interface
   - CLI implementation with render and precompile modes
   - Renamed executable from `sdt-cli` to `stampdown`
   - 19 tests passing
-  
+
 - **@stampdwn/llm** (packages/llm/): LLM plugin as standalone package
   - All LLM-specific helpers and types
   - Dependencies isolated: @ai-sdk/provider, gpt-tokenizer, yaml, zod
   - 31 tests passing
-  
+
 - **@stampdwn/vscode** (packages/vscode/): VS Code extension
   - Moved from vscode-extension/ directory
   - Updated package.json with @stampdwn scope
