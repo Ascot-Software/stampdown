@@ -17,6 +17,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "author": "Devon Anderson",
   "license": "MIT",
   "engines": {
     "vscode": "^1.70.0"

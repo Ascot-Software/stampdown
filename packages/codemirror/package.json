@@ -1,0 +1,48 @@
+{
+  "name": "@stampdwn/codemirror",
+  "version": "0.1.0",
+  "description": "Stampdown language parser for CodeMirror 6",
+  "keywords": [
+    "markdown",
+    "template",
+    "templating",
+    "codemirror",
+    "codemirror6",
+    "handlebars",
+    "expressions",
+    "syntax-highlighting",
+    "language-support"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ascot-Software/stampdown.git",
+    "directory": "packages/codemirror"
+  },
+  "type": "module",
+  "license": "MIT",
+  "author": "Devon Anderson",
+  "main": "dist/index.cjs",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "prepare": "cm-buildhelper src/stampdown.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@codemirror/lang-markdown": "^6.4.0",
+    "@codemirror/language": "^6.11.3",
+    "@codemirror/view": "^6.38.6"
+  },
+  "devDependencies": {
+    "@codemirror/buildhelper": "^1.0.2"
+  }
+}
