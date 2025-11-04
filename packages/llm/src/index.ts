@@ -31,8 +31,8 @@ import { registerLLMHelpers } from './helpers';
  */
 export const llmPlugin = createPlugin({
   name: 'llm-plugin',
-  version: '1.0.0',
-  description: 'LLM chat normalization (via @ai-sdk) + role-aware helpers for prompt templating',
+  version: '0.1.1',
+  description: 'LLM-focused helpers for AI prompt templating',
   plugin: (stampdown, options) => {
     registerLLMHelpers(stampdown, options);
   },

@@ -1,7 +1,7 @@
 /**
  * Stampdown Language Support for CodeMirror
  *
- * Extends @codemirror/lang-markdown with custom syntax highlighting for Stampdown templates.
+ * Extends \@codemirror/lang-markdown with custom syntax highlighting for Stampdown templates.
  * Stampdown is a Markdown templating language with Handlebars-like syntax.
  *
  * Syntax Patterns:
@@ -12,9 +12,9 @@
  * - Comments: {{! comment }}
  */
 
-import { markdown } from '@codemirror/lang-markdown'
-import { ViewPlugin, Decoration, MatchDecorator } from '@codemirror/view'
-import { LanguageSupport } from '@codemirror/language'
+import { markdown } from '@codemirror/lang-markdown';
+import { ViewPlugin, Decoration, MatchDecorator } from '@codemirror/view';
+import { LanguageSupport } from '@codemirror/language';
 
 /**
  * Regex patterns for Stampdown syntax elements
@@ -37,7 +37,7 @@ const STAMPDOWN_PATTERNS = {
 
   // Variables: {{variable}}, {{object.property}}, but not block helpers, partials, or comments
   variable: /\{\{(?![#/>!])[^}]+\}\}/g,
-}
+};
 
 /**
  * Creates a MatchDecorator for highlighting Stampdown syntax
@@ -45,12 +45,12 @@ const STAMPDOWN_PATTERNS = {
 class StampdownMatcher {
   constructor() {
     // Create decorations for each syntax type
-    this.commentDeco = Decoration.mark({ class: 'stampdown-comment' })
-    this.blockOpenDeco = Decoration.mark({ class: 'stampdown-block-open' })
-    this.blockCloseDeco = Decoration.mark({ class: 'stampdown-block-close' })
-    this.selfClosingDeco = Decoration.mark({ class: 'stampdown-self-closing' })
-    this.partialDeco = Decoration.mark({ class: 'stampdown-partial' })
-    this.variableDeco = Decoration.mark({ class: 'stampdown-variable' })
+    this.commentDeco = Decoration.mark({ class: 'stampdown-comment' });
+    this.blockOpenDeco = Decoration.mark({ class: 'stampdown-block-open' });
+    this.blockCloseDeco = Decoration.mark({ class: 'stampdown-block-close' });
+    this.selfClosingDeco = Decoration.mark({ class: 'stampdown-self-closing' });
+    this.partialDeco = Decoration.mark({ class: 'stampdown-partial' });
+    this.variableDeco = Decoration.mark({ class: 'stampdown-variable' });
 
     // Create matchers for each pattern
     this.matchers = [
@@ -79,53 +79,60 @@ class StampdownMatcher {
         regexp: STAMPDOWN_PATTERNS.variable,
         decoration: this.variableDeco,
       }),
-    ]
+    ];
   }
 
   /**
    * Create decorations for the entire view
+   * @param {object} view - The editor view
+   * @returns {object} - The set of decorations
    */
   createDeco(view) {
-    let decorations = []
+    let decorations = [];
     for (const matcher of this.matchers) {
-      decorations.push(matcher.createDeco(view))
+      decorations.push(matcher.createDeco(view));
     }
-    return this.mergeDeco(decorations)
+    return this.mergeDeco(decorations);
   }
 
   /**
    * Update decorations when the document changes
+   * @param {object} update - The view update
+   * @param {object} decorations - The current decorations
+   * @returns {object} - The updated decorations
    */
   updateDeco(update, decorations) {
     if (update.docChanged || update.viewportChanged) {
-      return this.createDeco(update.view)
+      return this.createDeco(update.view);
     }
-    return decorations
+    return decorations;
   }
 
   /**
    * Merge multiple decoration sets into one
+   * @param {object[]} decos - Array of decoration sets
+   * @returns {object} - Merged decoration set
    */
   mergeDeco(decos) {
-    if (decos.length === 0) return Decoration.none
-    if (decos.length === 1) return decos[0]
+    if (decos.length === 0) return Decoration.none;
+    if (decos.length === 1) return decos[0];
 
     // Merge all decorations into a single set
-    let ranges = []
+    let ranges = [];
     for (const deco of decos) {
       deco.between(0, Number.MAX_SAFE_INTEGER, (from, to, value) => {
-        ranges.push({ from, to, value })
-      })
+        ranges.push({ from, to, value });
+      });
     }
 
     // Sort by position
-    ranges.sort((a, b) => a.from - b.from || a.to - b.to)
+    ranges.sort((a, b) => a.from - b.from || a.to - b.to);
 
     // Build final decoration set
     return Decoration.set(
       ranges.map((r) => r.value.range(r.from, r.to)),
       true
-    )
+    );
   }
 }
 
@@ -135,27 +142,25 @@ class StampdownMatcher {
 const stampdownHighlight = ViewPlugin.fromClass(
   class {
     constructor(view) {
-      this.matcher = new StampdownMatcher()
-      this.decorations = this.matcher.createDeco(view)
+      this.matcher = new StampdownMatcher();
+      this.decorations = this.matcher.createDeco(view);
     }
 
     update(update) {
-      this.decorations = this.matcher.updateDeco(update, this.decorations)
+      this.decorations = this.matcher.updateDeco(update, this.decorations);
     }
   },
   {
     decorations: (v) => v.decorations,
   }
-)
+);
 
 /**
  * Create a Stampdown language support extension
  *
  * This extends the markdown language with Stampdown-specific syntax highlighting.
- *
- * @param {Object} config - Configuration options (passed to markdown())
+ * @param {object} config - Configuration options (passed to markdown())
  * @returns {LanguageSupport} CodeMirror language support
- *
  * @example
  * import { stampdown } from './stampdownLanguage'
  * import { EditorState } from '@codemirror/state'
@@ -167,14 +172,14 @@ const stampdownHighlight = ViewPlugin.fromClass(
  */
 export function stampdown(config = {}) {
   // Ensure config is an object (handle null/undefined)
-  const safeConfig = config || {}
+  const safeConfig = config || {};
 
   // Get the base markdown language support
-  const markdownSupport = markdown(safeConfig)
+  const markdownSupport = markdown(safeConfig);
 
   // Return a new LanguageSupport that combines markdown with Stampdown highlighting
   return new LanguageSupport(markdownSupport.language, [
     ...markdownSupport.support,
     stampdownHighlight,
-  ])
+  ]);
 }

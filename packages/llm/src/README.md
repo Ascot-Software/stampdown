@@ -287,44 +287,6 @@ Truncates content by token limit.
 
 ---
 
-### Formatting Helpers
-
-#### `mdSection`
-Creates a Markdown section with heading.
-
-**Usage:**
-```handlebars
-
-```
-
-**Output:**
-```markdown
-## Conversation
-
-Content here
-```
-
-**Parameters:**
-- `title` (hash): Section title
-- `level` (hash): Heading level 1-6 (default: 2)
-
-#### `codeFence`
-Creates a Markdown code fence.
-
-**Usage:**
-```handlebars
-{{#codeFence lang="typescript"}}
-    const x = 42;
-{{/codeFence}}
-```
-
-**Output:**
-````markdown
-```typescript
-const x = 42;
-```
-````
-
 **Parameters:**
 - `lang` (hash): Language identifier
 
@@ -334,20 +296,37 @@ Stringifies a value as JSON.
 **Usage:**
 ```handlebars
 {{#json object/}}
-{{#json object indent=2/}}
+{{#json object indent=4/}}
 ```
 
 **Parameters:**
 - First arg: Value to stringify
-- `indent` (hash): Indentation level (default: 0)
+- `indent` (hash): Indentation level (default: 2)
+- `escape` (hash): Escape JSON for LangChain syntax `{{...}}`
 
 #### `yaml`
-Stringifies a value as YAML.
+Stringifies a value as YAML, using `yaml` package (https://www.npmjs.com/package/yaml).
 
 **Usage:**
 ```handlebars
 {{#yaml object/}}
 ```
+
+**Parameters:**
+- First arg: Value to format
+- `yamlOptions` (hash): Options to pass to the YAML parser ([documentation](https://eemeli.org/yaml/#options))
+
+#### `toon`
+Stringifies a value to token-efficient Token-Oriented Object Notation "TOON" format (https://github.com/toon-format/toon)
+
+**Usage:**
+```handlebars
+{{#toon object/}}
+```
+
+**Parameters:**
+- First arg: Value to format
+- `toonOptions` (hash): Options to pass to the TOON encoder ([documentation](https://github.com/toon-format/toon?tab=readme-ov-file#api))
 
 #### `renderChat`
 Renders the normalized chat in various provider formats.
@@ -368,8 +347,9 @@ Renders the normalized chat in various provider formats.
 ```
 
 **Parameters:**
-- `format` (hash): 'json', 'yaml', or 'custom'
+- `format` (hash): 'json', 'yaml', 'toon', 'custom' or 'raw'
 - `shape` (hash): 'norm', 'openai', or 'anthropic'
+- `formatter` (hash): the formatter function for custom formatting
 
 ---
 

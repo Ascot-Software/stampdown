@@ -11,7 +11,9 @@ export default [
     files: ['**/*.ts'],
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ['src/__tests__/*.test.ts'],
+        },
         tsconfigRootDir: __dirname,
       },
     },

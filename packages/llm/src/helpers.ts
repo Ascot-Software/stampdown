@@ -5,6 +5,7 @@
  */
 
 import YAML from 'yaml';
+import { encode as toonEncode } from '@toon-format/toon';
 import type { Stampdown } from '@stampdwn/core';
 import type { NormChat, NormMessage, NormContent } from './types';
 import { NormChatSchema } from './types';
@@ -360,17 +361,38 @@ export function registerLLMHelpers(stampdown: Stampdown, opts?: LLMHelperOptions
   );
 
   /**
+   * Format value as JSON with indentation and optional escaping
+   * @param {unknown} value - Value to format
+   * @param {number} indent - Number of spaces to use for indentation
+   * @param {boolean} escape - If true, wraps output in curly braces for LangChain-like usage
+   * @returns {string} - Formatted JSON string
+   */
+  const jsonFormatter = (value: unknown, indent: number, escape: boolean): string => {
+    let jsonString = JSON.stringify(value, null, indent);
+    // Escape for LangChain-like usage
+    if (escape) {
+      jsonString = `{${jsonString}}`;
+    }
+    return jsonString;
+  };
+
+  /**
    * 'json' helper - Stringify value as JSON
    * Pretty-prints the value with 2-space indentation
    * Usage: {{#json value/}}
    * @param {Context} context - Template context (used if no value provided)
-   * @param {HelperOptions} _options - Helper options (unused)
+   * @param {HelperOptions} options - Helper options (unused)
+   * @param {boolean} options.hash.escape - If true, wraps output in curly braces for LangChain-like usage
+   * @param {number} options.hash.indent - Number of spaces to use for indentation (defaults to 2)
    * @param {unknown} value - Optional value to stringify (defaults to context)
    * @returns {string} - JSON string representation
    */
-  stampdown.registerHelper('json', (context: Context, _options: HelperOptions, value?: unknown) => {
+  stampdown.registerHelper('json', (context: Context, options: HelperOptions, value?: unknown) => {
     const target = value ?? context;
-    return JSON.stringify(target, null, 2);
+    const indent = (options.hash?.indent as number) ?? 2;
+    const escape = (options.hash?.escape as boolean) ?? false;
+
+    return jsonFormatter(target, indent, escape);
   });
 
   /**
@@ -378,13 +400,31 @@ export function registerLLMHelpers(stampdown: Stampdown, opts?: LLMHelperOptions
    * Converts value to YAML format using YAML library
    * Usage: {{#yaml value/}}
    * @param {Context} context - Template context (used if no value provided)
-   * @param {HelperOptions} _options - Helper options (unused)
+   * @param {HelperOptions} options - Helper options
+   * @param {object} options.hash.yamlOptions - Optional YAML stringify options
    * @param {unknown} value - Optional value to stringify (defaults to context)
    * @returns {string} - YAML string representation
    */
-  stampdown.registerHelper('yaml', (context: Context, _options: HelperOptions, value?: unknown) => {
+  stampdown.registerHelper('yaml', (context: Context, options: HelperOptions, value?: unknown) => {
     const target = value ?? context;
-    return YAML.stringify(target);
+    const yamlOptions = options.hash?.yamlOptions ?? {};
+    return YAML.stringify(target, yamlOptions);
+  });
+
+  /**
+   * 'toon' helper - Encode value as Toon format
+   * Converts value to Toon format using Toon encoder
+   * Usage: {{#toon value/}}
+   * @param {Context} context - Template context (used if no value provided)
+   * @param {HelperOptions} options - Helper options
+   * @param {object} options.hash.toonOptions - Optional Toon encoding options
+   * @param {unknown} value - Optional value to encode (defaults to context)
+   * @returns {string} - Toon-encoded string representation
+   */
+  stampdown.registerHelper('toon', (context: Context, options: HelperOptions, value?: unknown) => {
+    const target = value ?? context;
+    const toonOptions = options.hash?.toonOptions ?? {};
+    return toonEncode(target, toonOptions);
   });
 
   // ### Provider shape emission
@@ -393,18 +433,49 @@ export function registerLLMHelpers(stampdown: Stampdown, opts?: LLMHelperOptions
    * Converts normalized chat to provider-specific shape (OpenAI, Anthropic, or normalized)
    * Usage: {{#renderChat chat format="json" shape="openai"/}}
    * @param {Context} context - Template context
-   * @param {HelperOptions} options - Helper options with hash.format ('json'|'yaml') and hash.shape ('norm'|'openai'|'anthropic')
+   * @param {HelperOptions} options - Helper options
+   * @param {'json' | 'yaml' | 'toon' | 'custom' | 'raw'} options.hash.format - Output format (default: 'json')
+   * @param {'norm' | 'openai' | 'anthropic'} options.hash.shape - Output shape (default: 'norm')
+   * @param {number} options.hash.indent - Indentation level for JSON (default: 2)
+   * @param {boolean} options.hash.escape - If true, escapes JSON output for LangChain-like usage (default: false)
+   * @param {object} options.hash.toonOptions - Optional Toon encoding options
+   * @param {object} options.hash.yamlOptions - Optional YAML stringify options
    * @param {unknown} chat - Optional chat object (defaults to context)
    * @returns {string} - Formatted chat in specified format and shape
    */
   stampdown.registerHelper(
     'renderChat',
     (context: Context, options: HelperOptions, chat?: unknown) => {
+      const noFormatter = (str: string): string => str;
       const target = (chat ?? context) as NormChat;
-      const format = (options.hash?.format ?? 'json') as 'json' | 'yaml';
+      const format = (options.hash?.format ?? 'json') as
+        | 'json'
+        | 'yaml'
+        | 'toon'
+        | 'custom'
+        | 'raw';
+      const indent = (options.hash?.indent as number) ?? 2;
+      const escape = (options.hash?.escape as boolean) ?? false;
+      const toonOptions = options.hash?.toonOptions ?? {};
+      const yamlOptions = options.hash?.yamlOptions ?? {};
+      const formatter = (options.hash?.formatter as Function) ?? noFormatter;
+
       const shape = (options.hash?.shape ?? 'norm') as 'norm' | 'openai' | 'anthropic';
       const obj = shape === 'norm' ? target : toShape(target, shape);
-      return format === 'yaml' ? YAML.stringify(obj) : JSON.stringify(obj, null, 2);
+      if (format === 'raw') {
+        return obj as unknown as string;
+      }
+      if (format === 'custom') {
+        return formatter(obj as unknown as string);
+      }
+      if (format === 'toon') {
+        return toonEncode(obj, toonOptions);
+      }
+      if (format === 'yaml') {
+        return YAML.stringify(obj, yamlOptions);
+      }
+      // json
+      return jsonFormatter(obj, indent, escape);
     }
   );
 

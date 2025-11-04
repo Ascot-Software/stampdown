@@ -5,6 +5,14 @@
 
 import { Stampdown } from '@stampdwn/core';
 import { llmPlugin } from '../index';
+import { encode } from '@toon-format/toon';
+
+jest.mock('@toon-format/toon', () => ({
+  encode: jest.fn((obj, options) => {
+    // Simple mock implementation for testing
+    return `toon_encoded(${JSON.stringify(obj)}) with_options(${JSON.stringify(options)})`;
+  }),
+}));
 
 describe('llm plugin', () => {
   let stampdown: Stampdown;
@@ -251,11 +259,54 @@ describe('llm plugin', () => {
       expect(parsed).toEqual({ name: 'test', value: 42 });
     });
 
+    it('pretty json stringifies object', () => {
+      const tpl = `{{#json obj indent=4/}}`;
+      const out = stampdown.render(tpl, { obj: { name: 'test', value: 42 } });
+      expect(out).toContain('    "name": "test"');
+      expect(out).toContain('    "value": 42');
+    });
+
+    it('escape json stringifies object with escaped characters', () => {
+      const tpl = `{{#json obj escape=true indent=0/}}`;
+      const out = stampdown.render(tpl, { obj: { text: 'hello' } });
+      expect(out).toBe('{{"text":"hello"}}');
+    });
+
     it('yaml stringifies object', () => {
       const tpl = `{{#yaml obj/}}`;
       const out = stampdown.render(tpl, { obj: { name: 'test', items: [1, 2, 3] } });
       expect(out).toContain('name: test');
       expect(out).toContain('items:');
+    });
+
+    it('accepts yaml options', () => {
+      const tpl = `{{#yaml obj yamlOptions=yamlOpts/}}`;
+      const out = stampdown.render(tpl, {
+        obj: { name: 'test', items: [1, 2, 3] },
+        yamlOpts: { indent: 4 },
+      });
+      expect(out).toContain('name: test');
+      expect(out).toContain('    - 1');
+    });
+
+    it('toon encodes object', () => {
+      const tpl = `{{#toon obj/}}`;
+      const obj = { user: { name: 'Alice', age: 30 } };
+      const out = stampdown.render(tpl, { obj });
+      expect(encode).toHaveBeenCalledWith(expect.any(Object), {});
+      expect(out).toMatch(`toon_encoded(${JSON.stringify(obj)}) with_options({})`);
+    });
+
+    it('accepts toon options', () => {
+      const tpl = `{{#toon obj toonOptions=toonOpts/}}`;
+      const out = stampdown.render(tpl, {
+        obj: { user: { name: 'Alice', age: 30 } },
+        toonOpts: { indent: 4 },
+      });
+      expect(encode).toHaveBeenCalledWith(expect.any(Object), { indent: 4 });
+      expect(out).toMatch(
+        `toon_encoded(${JSON.stringify({ user: { name: 'Alice', age: 30 } })}) with_options(${JSON.stringify({ indent: 4 })})`
+      );
     });
   });
 
