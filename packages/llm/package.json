@@ -17,7 +17,8 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "publish": "npm publish --access public"
   },
   "keywords": [
     "llm",
