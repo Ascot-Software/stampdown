@@ -1,6 +1,6 @@
 # Stampdown
 
-A powerful Markdown templating language with Handlebars-compatible expressions, advanced operators, partials, block helpers, and hooks.
+A Markdown templating language based on Handlebars with expressions, operators, partials, block helpers, and hooks.
 
 ## Installation
 
@@ -17,10 +17,6 @@ npm install @stampdwn/core
 - **CLI Tool**: `npm install @stampdwn/cli`
 - **LLM Plugin**: `npm install @stampdwn/llm`
 - **VS Code Extension**: Install from VS Code marketplace or `packages/vscode/`
-
-### Legacy Installation
-
-The original `stampdown` package is deprecated. Use `@stampdwn/core` instead.
 
 ## Quick Start
 
@@ -746,13 +742,7 @@ loader.clearCache(); // Clear all
 
 Install syntax highlighting for `.sdt` files:
 
-```bash
-# Run installer
-./install-extension.sh
-
-# Or manually copy
-cp -r vscode-extension ~/.vscode/extensions/stampdown-0.1.0/
-```
+https://marketplace.visualstudio.com/items?itemName=AscotSoftware.stampdown-language-support
 
 Features:
 - Syntax highlighting for expressions, helpers, partials, comments
@@ -826,14 +816,13 @@ new TemplateLoader(options?: StampdownOptions)
 - `render(context?: Context): string`
 - `source: string` - Original template source
 
-## Documentation
+## Packages
 
-- **[Advanced Partials Guide](docs/ADVANCED-PARTIALS.md)** - Complete guide to Handlebars-compatible partial features
-- **[CLI Reference](docs/CLI.md)** - Command-line tool for precompiling templates
-- **[Precompiler Guide](docs/PRECOMPILER.md)** - In-depth precompiler features and optimization
-- **[Self-Closing Blocks](docs/SELF-CLOSING.md)** - Concise syntax for simple helpers
-- **[Workflow Example](docs/WORKFLOW.md)** - Step-by-step integration guide
-- **[Plugin System](src/plugins/README.md)** - Built-in plugins and custom plugin development
+- **[@stampdwn/core](packages/core/README.md)** - Stampdown core library
+- **[@stampdwn/cli](packages/cli/README.md)** - CLI tool
+- **[@stampdwn/codemirror](packages/codemirror/README.md)** - Code Mirror language support plugin
+- **[@stampdwn/llm](packages/llm/README.md)** - Plugins designed for prompt-engineering
+- **[@stampdwn/vscode](packages/vscode/README.md)** - VSCode extension for Stampdown language support
 
 ## Development
 

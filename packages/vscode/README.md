@@ -6,9 +6,7 @@ Syntax highlighting and language features for Stampdown template files.
 
 ## ✨ Features
 
-### 🎨 Complete Syntax Highlighting
-
-Get beautiful, accurate syntax highlighting for all Stampdown features:
+### 🎨 Syntax Highlighting
 
 - ✅ **Expressions** - `{{name}}`, `{{user.email}}`
 - ✅ **Block Helpers** - `{{#if}}...{{else}}...{{/if}}`
@@ -19,9 +17,7 @@ Get beautiful, accurate syntax highlighting for all Stampdown features:
 - ✅ **Variable Assignment** - `{{ x = 5 }}`, `{{ name = \`Hello \${user}\` }}`
 - ✅ **Advanced Expressions** - `{{#if age > 18}}`, `{{#unless premium && verified}}`
 
-### ⚡ Smart Editor Features
-
-Work faster with intelligent editor support:
+### ⚡ Intellisense
 
 - 🔧 **Auto-detection** - `.sdt` files automatically use Stampdown syntax
 - 🎯 **Bracket Matching** - Smart matching for `{{...}}` delimiters
@@ -34,7 +30,7 @@ Work faster with intelligent editor support:
 
 ### Installation
 
-1. Install the extension from the VS Code Marketplace
+1. Install the extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=AscotSoftware.stampdown-language-support)
 2. Open or create a `.sdt` file
 3. Start writing Stampdown templates with full syntax highlighting!
 
