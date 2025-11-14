@@ -1,6 +1,7 @@
 /**
  * AST Renderer
  * Converts the AST back to a string with evaluated expressions
+ * @packageDocumentation
  */
 
 import type { ASTNode, Context } from './types';
@@ -10,6 +11,7 @@ import type { Stampdown } from './stampdown';
 
 /**
  * Renderer class for converting AST to rendered output
+ * @public
  */
 export class Renderer {
   private helperRegistry: HelperRegistry;
@@ -17,7 +19,7 @@ export class Renderer {
 
   /**
    * Creates a new Renderer instance
-   * @param {HelperRegistry} helperRegistry - The helper registry to use for helper resolution
+   * @param helperRegistry - The helper registry to use for helper resolution
    */
   constructor(helperRegistry: HelperRegistry) {
     this.helperRegistry = helperRegistry;
@@ -26,10 +28,10 @@ export class Renderer {
 
   /**
    * Render an AST to string output
-   * @param {ASTNode} ast - The root AST node to render
-   * @param {Context} context - The template context
-   * @param {Stampdown} stampdown - The Stampdown instance for partial resolution
-   * @returns {string} - The rendered output
+   * @param ast - The root AST node to render
+   * @param context - The template context
+   * @param stampdown - The Stampdown instance for partial resolution
+   * @returns The rendered output
    */
   render(ast: ASTNode, context: Context, stampdown: Stampdown): string {
     return this.renderNode(ast, context, stampdown);
@@ -37,10 +39,10 @@ export class Renderer {
 
   /**
    * Render a single AST node
-   * @param {ASTNode} node - The node to render
-   * @param {Context} context - The template context
-   * @param {Stampdown} stampdown - The Stampdown instance
-   * @returns {string} - The rendered node output
+   * @param node - The node to render
+   * @param context - The template context
+   * @param stampdown - The Stampdown instance
+   * @returns The rendered node output
    */
   private renderNode(node: ASTNode, context: Context, stampdown: Stampdown): string {
     switch (node.type) {
@@ -81,10 +83,10 @@ export class Renderer {
 
   /**
    * Render an array of child nodes
-   * @param {ASTNode[]} children - The child nodes to render
-   * @param {Context} context - The template context
-   * @param {Stampdown} stampdown - The Stampdown instance
-   * @returns {string} - The concatenated rendered output
+   * @param children - The child nodes to render
+   * @param context - The template context
+   * @param stampdown - The Stampdown instance
+   * @returns The concatenated rendered output
    */
   private renderChildren(children: ASTNode[], context: Context, stampdown: Stampdown): string {
     return children.map((child) => this.renderNode(child, context, stampdown)).join('');
@@ -92,9 +94,9 @@ export class Renderer {
 
   /**
    * Render an expression node
-   * @param {string} expression - The expression to evaluate
-   * @param {Context} context - The template context
-   * @returns {string} - The evaluated expression result as string
+   * @param expression - The expression to evaluate
+   * @param context - The template context
+   * @returns The evaluated expression result as string
    */
   private renderExpression(expression: string, context: Context): string {
     try {
@@ -109,11 +111,10 @@ export class Renderer {
   /**
    * Render an assignment node (mutates context, returns empty string)
    * Supports both simple variables and nested properties
-   * Example: {{ x = 5 }} or {{ this.fullName = `${firstName} ${lastName}` }}
-   * @param {ASTNode} node - The assignment node
-   * @param {Context} context - The template context (will be mutated)
-   * @returns {string} - Empty string (assignments don't render output)
-   * @private
+   * Example: \{\{ x = 5 \}\} or \{\{ this.fullName = `$\{firstName\} $\{lastName\}` \}\}
+   * @param node - The assignment node
+   * @param context - The template context (will be mutated)
+   * @returns Empty string (assignments don't render output)
    */
   private renderAssignment(node: ASTNode, context: Context): string {
     const target = node.assignmentTarget || '';
@@ -168,12 +169,11 @@ export class Renderer {
 
   /**
    * Render a helper expression (helper with arguments in expression context)
-   * Example: {{helper arg1 (subhelper arg2)}}
-   * @param {ASTNode} node - The helper expression node
-   * @param {Context} context - The template context
-   * @param {Stampdown} stampdown - The Stampdown instance
-   * @returns {string} - The rendered helper result
-   * @private
+   * Example: \{\{helper arg1 (subhelper arg2)\}\}
+   * @param node - The helper expression node
+   * @param context - The template context
+   * @param stampdown - The Stampdown instance
+   * @returns The rendered helper result
    */
   private renderHelperExpression(node: ASTNode, context: Context, stampdown: Stampdown): string {
     const helperName = node.helperName || '';
@@ -200,11 +200,10 @@ export class Renderer {
   /**
    * Render a subexpression (evaluate and return result as value, not string)
    * Subexpressions are used as arguments to other helpers
-   * @param {ASTNode} node - The subexpression node
-   * @param {Context} context - The template context
-   * @param {Stampdown} stampdown - The Stampdown instance
-   * @returns {string} - The evaluated subexpression result
-   * @private
+   * @param node - The subexpression node
+   * @param context - The template context
+   * @param stampdown - The Stampdown instance
+   * @returns The evaluated subexpression result
    */
   private renderSubexpression(node: ASTNode, context: Context, stampdown: Stampdown): string {
     const helperName = node.helperName || '';
@@ -230,11 +229,10 @@ export class Renderer {
 
   /**
    * Evaluate an argument (can be a string expression or a subexpression node)
-   * @param {unknown} arg - The argument to evaluate
-   * @param {Context} context - The template context
-   * @param {Stampdown} stampdown - The Stampdown instance
-   * @returns {unknown} - The evaluated argument value
-   * @private
+   * @param arg - The argument to evaluate
+   * @param context - The template context
+   * @param stampdown - The Stampdown instance
+   * @returns The evaluated argument value
    */
   private evaluateArgument(arg: unknown, context: Context, stampdown: Stampdown): unknown {
     // If it's a subexpression node, evaluate it
@@ -256,10 +254,10 @@ export class Renderer {
 
   /**
    * Render a partial node with support for dynamic partials, contexts, and hash parameters
-   * @param {ASTNode} node - The partial node
-   * @param {Context} context - The template context
-   * @param {Stampdown} stampdown - The Stampdown instance for partial lookup
-   * @returns {string} - The rendered partial output
+   * @param node - The partial node
+   * @param context - The template context
+   * @param stampdown - The Stampdown instance for partial lookup
+   * @returns The rendered partial output
    */
   private renderPartialNode(node: ASTNode, context: Context, stampdown: Stampdown): string {
     let partialName = node.partialName || '';
@@ -323,10 +321,10 @@ export class Renderer {
 
   /**
    * Render a partial block with failover content
-   * @param {ASTNode} node - The partial block node
-   * @param {Context} context - The template context
-   * @param {Stampdown} stampdown - The Stampdown instance
-   * @returns {string} - The rendered output
+   * @param node - The partial block node
+   * @param context - The template context
+   * @param stampdown - The Stampdown instance
+   * @returns The rendered output
    */
   private renderPartialBlock(node: ASTNode, context: Context, stampdown: Stampdown): string {
     const partialName = node.partialName || '';
@@ -383,10 +381,10 @@ export class Renderer {
 
   /**
    * Render an inline partial definition (no output, just registers the partial)
-   * @param {ASTNode} node - The inline partial node
-   * @param {Context} context - The template context
-   * @param {Stampdown} stampdown - The Stampdown instance
-   * @returns {string} - Empty string (inline partials produce no output)
+   * @param node - The inline partial node
+   * @param context - The template context
+   * @param stampdown - The Stampdown instance
+   * @returns Empty string (inline partials produce no output)
    */
   private renderInlinePartial(node: ASTNode, context: Context, stampdown: Stampdown): string {
     const inlineName = node.inlineName || '';
@@ -401,10 +399,10 @@ export class Renderer {
 
   /**
    * Render a block helper node
-   * @param {ASTNode} node - The block helper node
-   * @param {Context} context - The template context
-   * @param {Stampdown} stampdown - The Stampdown instance
-   * @returns {string} - The rendered helper output
+   * @param node - The block helper node
+   * @param context - The template context
+   * @param stampdown - The Stampdown instance
+   * @returns The rendered helper output
    */
   private renderBlockHelper(node: ASTNode, context: Context, stampdown: Stampdown): string {
     const helperName = node.helperName || '';

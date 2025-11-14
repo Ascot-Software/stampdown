@@ -1,5 +1,6 @@
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import prettier from 'eslint-plugin-prettier';
+import tsdoc from 'eslint-plugin-tsdoc';
 import jsdoc from 'eslint-plugin-jsdoc';
 import globals from 'globals';
 import tsParser from '@typescript-eslint/parser';
@@ -39,7 +40,7 @@ export default [
     plugins: {
       '@typescript-eslint': typescriptEslint,
       prettier,
-      jsdoc,
+      tsdoc,
     },
     rules: {
       // Disable standard rules that have TypeScript equivalents
@@ -58,8 +59,6 @@ export default [
           varsIgnorePattern: '^_',
         },
       ],
-      'jsdoc/require-description': 'error',
-      'jsdoc/check-values': 'error',
     },
   },
   // JavaScript files (like .mjs configs)

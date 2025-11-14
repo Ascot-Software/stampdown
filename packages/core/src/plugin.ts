@@ -1,6 +1,7 @@
 /**
  * Plugin system for Stampdown
  * Allows extending Stampdown with custom helpers, partials, hooks, and processing logic
+ * @packageDocumentation
  */
 
 import type { Stampdown } from './stampdown';
@@ -8,6 +9,7 @@ import type { Helper, Hook } from './types';
 
 /**
  * Plugin interface that all Stampdown plugins must implement
+ * @public
  */
 export interface StampdownPlugin {
   /** Unique name for the plugin */
@@ -22,12 +24,14 @@ export interface StampdownPlugin {
 
 /**
  * Options that can be passed to plugins
+ * @public
  */
 export type PluginOptions = Record<string, unknown>;
 
 /**
  * Plugin configuration when registering
  * Can be either a StampdownPlugin directly or an object with plugin and options
+ * @public
  */
 export type PluginConfig =
   | StampdownPlugin
@@ -40,6 +44,7 @@ export type PluginConfig =
 
 /**
  * Plugin API provided to plugins for extending Stampdown
+ * @public
  */
 export interface PluginAPI {
   /** Register a helper function */
@@ -56,9 +61,10 @@ export interface PluginAPI {
 
 /**
  * Helper function to create a plugin
- * @param {string} name - Plugin name
- * @param {(stampdown: Stampdown, options?: PluginOptions) => void | Promise<void>} plugin - Plugin function
- * @returns {StampdownPlugin} - The plugin object
+ * @param name - Plugin name
+ * @param plugin - Plugin function
+ * @returns The plugin object
+ * @public
  */
 export function definePlugin(
   name: string,
@@ -72,12 +78,13 @@ export function definePlugin(
 
 /**
  * Helper function to create a plugin with metadata
- * @param {object} config - Plugin configuration
- * @param {string} config.name - Plugin name
- * @param {string} [config.version] - Plugin version
- * @param {string} [config.description] - Plugin description
- * @param {(stampdown: Stampdown, options?: PluginOptions) => void | Promise<void>} config.plugin - Plugin function
- * @returns {StampdownPlugin} - The plugin object
+ * @param config - Plugin configuration
+ * @param name - Plugin name
+ * @param version - Plugin version
+ * @param description - Plugin description
+ * @param plugin - Plugin function
+ * @returns The plugin object
+ * @public
  */
 export function createPlugin(config: {
   name: string;

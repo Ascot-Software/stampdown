@@ -1,6 +1,7 @@
 /**
  * Stampdown Template File Loader
  * Loads and compiles .sdt template files
+ * @packageDocumentation
  */
 
 import { readFileSync } from 'fs';
@@ -10,12 +11,13 @@ import type { Context, StampdownOptions } from './types';
 
 /**
  * Compiled template that can be rendered multiple times
+ * @public
  */
 export interface CompiledTemplate {
   /**
    * Render the template with the given context
-   * @param {Context} context - Variables and data accessible in the template
-   * @returns {string} - The rendered output
+   * @param context - Variables and data accessible in the template
+   * @returns The rendered output
    */
   render(context?: Context): string;
 
@@ -27,6 +29,7 @@ export interface CompiledTemplate {
 
 /**
  * Template loader for .sdt files
+ * @public
  */
 export class TemplateLoader {
   private stampdown: Stampdown;
@@ -34,7 +37,7 @@ export class TemplateLoader {
 
   /**
    * Creates a new TemplateLoader instance
-   * @param {StampdownOptions} options - Configuration options for the Stampdown instance
+   * @param options - Configuration options for the Stampdown instance
    */
   constructor(options: StampdownOptions = {}) {
     this.stampdown = new Stampdown(options);
@@ -43,9 +46,9 @@ export class TemplateLoader {
 
   /**
    * Load and compile a template file
-   * @param {string} filePath - Path to the .sdt template file
-   * @param {boolean} useCache - Whether to use cached compiled template
-   * @returns {Promise<CompiledTemplate>} - The compiled template
+   * @param filePath - Path to the .sdt template file
+   * @param useCache - Whether to use cached compiled template
+   * @returns The compiled template
    */
   async load(filePath: string, useCache: boolean = true): Promise<CompiledTemplate> {
     // Check cache first
@@ -69,9 +72,9 @@ export class TemplateLoader {
 
   /**
    * Load a template file synchronously (Node.js only)
-   * @param {string} filePath - Path to the .sdt template file
-   * @param {boolean} useCache - Whether to use cached compiled template
-   * @returns {CompiledTemplate} - The compiled template
+   * @param filePath - Path to the .sdt template file
+   * @param useCache - Whether to use cached compiled template
+   * @returns The compiled template
    */
   loadSync(filePath: string, useCache: boolean = true): CompiledTemplate {
     // Check cache first
@@ -95,8 +98,8 @@ export class TemplateLoader {
 
   /**
    * Compile a template string
-   * @param {string} source - The template source code
-   * @returns {CompiledTemplate} - The compiled template
+   * @param source - The template source code
+   * @returns The compiled template
    */
   compile(source: string): CompiledTemplate {
     // Pre-parse to validate syntax
@@ -112,8 +115,7 @@ export class TemplateLoader {
 
   /**
    * Clear the template cache
-   * @param {string} filePath - Optional specific file to clear, or clear all if not provided
-   * @returns {void}
+   * @param filePath - Optional specific file to clear, or clear all if not provided
    */
   clearCache(filePath?: string): void {
     if (filePath) {
@@ -125,7 +127,7 @@ export class TemplateLoader {
 
   /**
    * Get the Stampdown instance
-   * @returns {Stampdown} - The Stampdown instance
+   * @returns The Stampdown instance
    */
   getStampdown(): Stampdown {
     return this.stampdown;

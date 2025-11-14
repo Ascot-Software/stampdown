@@ -1,6 +1,7 @@
 /**
  * Math helpers plugin for Stampdown
  * Provides helpers for mathematical operations
+ * @packageDocumentation
  */
 
 import { createPlugin } from '../plugin';
@@ -10,6 +11,8 @@ import type { HelperOptions } from '../helpers/registry';
 /**
  * Math helpers plugin
  * Adds helpers for add, subtract, multiply, divide, mod, round, min, and max operations
+ * @public
+ *
  * @example
  * ```typescript
  * import { Stampdown } from '@stampdwn/core';

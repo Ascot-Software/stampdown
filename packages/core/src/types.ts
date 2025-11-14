@@ -1,11 +1,13 @@
 /**
  * Core types for Stampdown
+ * @packageDocumentation
  */
 
 import type { PluginConfig } from './plugin';
 
 /**
  * Configuration options for Stampdown instance
+ * @public
  */
 export interface StampdownOptions {
   /** Custom helper functions to register */
@@ -25,25 +27,29 @@ export interface StampdownOptions {
 
 /**
  * Context object containing variables accessible in templates
+ * @public
  */
 export type Context = Record<string, unknown>;
 
 /**
  * Partial template string
+ * @public
  */
 export type Partial = string;
 
 /**
  * Helper function type
- * @param {Context} context - The current template context
- * @param {HelperOptions} options - Options including fn, inverse, and hash
- * @param {...unknown[]} args - Additional arguments passed to the helper
- * @returns {string} - The rendered output
+ * @param context - The current template context
+ * @param options - Options including fn, inverse, and hash
+ * @param args - Additional arguments passed to the helper
+ * @returns The rendered output
+ * @public
  */
 export type Helper = (context: Context, options: HelperOptions, ...args: unknown[]) => string;
 
 /**
  * Options passed to helper functions
+ * @public
  */
 export interface HelperOptions {
   /** Function to render the main block content */
@@ -56,14 +62,16 @@ export interface HelperOptions {
 
 /**
  * Hook function type for pre/post processing
- * @param {string} input - The input string to process
- * @param {Context} context - The current template context
- * @returns {string} - The processed output
+ * @param input - The input string to process
+ * @param context - The current template context
+ * @returns The processed output
+ * @public
  */
 export type Hook = (input: string, context: Context) => string;
 
 /**
  * Abstract Syntax Tree node representing parsed template elements
+ * @public
  */
 export interface ASTNode {
   /** Node type (e.g., 'root', 'text', 'expression', 'blockHelper', 'partial', 'partialBlock', 'inlinePartial', 'assignment') */
@@ -98,6 +106,7 @@ export interface ASTNode {
 
 /**
  * Token from lexical analysis
+ * @public
  */
 export interface Token {
   /** Type of token */
@@ -108,6 +117,10 @@ export interface Token {
   position: number;
 }
 
+/**
+ * Token types for lexical analysis
+ * @public
+ */
 export enum TokenType {
   TEXT = 'TEXT',
   EXPRESSION_START = 'EXPRESSION_START',

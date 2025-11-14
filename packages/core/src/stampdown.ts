@@ -2,6 +2,7 @@
  * Main Stampdown class
  * The primary interface for rendering Markdown templates with expressions,
  * partials, block helpers, and hooks.
+ * @packageDocumentation
  */
 
 import { Parser } from './parser';
@@ -14,12 +15,23 @@ import type { PluginConfig, StampdownPlugin, PluginOptions } from './plugin';
 
 /**
  * Stampdown templating engine
+ * @packageDocumentation
  */
+
 /**
  * Precompiled template function type
+ *
+ * @public
  */
 export type PrecompiledTemplateFn = (context: Context, stampdown: Stampdown) => string;
 
+/**
+ * Stampdown class
+ * Provides methods to render templates with context, register helpers and partials,
+ * and manage pre/post processing hooks.
+ *
+ * @public
+ */
 export class Stampdown {
   private parser: Parser;
   private renderer: Renderer;
@@ -32,7 +44,7 @@ export class Stampdown {
 
   /**
    * Creates a new Stampdown instance
-   * @param {StampdownOptions} options - Configuration options
+   * @param options - Configuration options
    */
   constructor(options: StampdownOptions = {}) {
     this.parser = new Parser();
@@ -77,9 +89,7 @@ export class Stampdown {
 
   /**
    * Load and initialize plugins
-   * @param {PluginConfig[]} plugins - Array of plugin configurations
-   * @returns {void}
-   * @private
+   * @param plugins - Array of plugin configurations
    */
   private loadPlugins(plugins: PluginConfig[]): void {
     for (const config of plugins) {
@@ -110,9 +120,8 @@ export class Stampdown {
 
   /**
    * Register a partial template
-   * @param {string} name - The name of the partial
-   * @param {string} content - The template content
-   * @returns {void}
+   * @param name - The name of the partial
+   * @param content - The template content
    */
   registerPartial(name: string, content: string): void {
     this.partials.set(name, content);
@@ -120,8 +129,8 @@ export class Stampdown {
 
   /**
    * Get a registered partial (checks inline partials first, then regular partials)
-   * @param {string} name - The name of the partial to retrieve
-   * @returns {string | undefined} - The partial content or undefined if not found
+   * @param name - The name of the partial to retrieve
+   * @returns The partial content or undefined if not found
    */
   getPartial(name: string): string | undefined {
     // Check inline partials first (they have precedence)
@@ -135,9 +144,8 @@ export class Stampdown {
 
   /**
    * Register an inline partial (block-scoped)
-   * @param {string} name - The name of the inline partial
-   * @param {string} content - The partial content (pre-rendered)
-   * @returns {void}
+   * @param name - The name of the inline partial
+   * @param content - The partial content (pre-rendered)
    */
   registerInlinePartial(name: string, content: string): void {
     this.inlinePartials.set(name, content);
@@ -145,8 +153,7 @@ export class Stampdown {
 
   /**
    * Unregister an inline partial
-   * @param {string} name - The name of the inline partial to remove
-   * @returns {void}
+   * @param name - The name of the inline partial to remove
    */
   unregisterInlinePartial(name: string): void {
     this.inlinePartials.delete(name);
@@ -154,7 +161,6 @@ export class Stampdown {
 
   /**
    * Clear all inline partials (typically called between renders)
-   * @returns {void}
    */
   clearInlinePartials(): void {
     this.inlinePartials.clear();
@@ -162,9 +168,8 @@ export class Stampdown {
 
   /**
    * Register a custom helper function
-   * @param {string} name - The name of the helper
-   * @param {(context: Context, options: HelperOptions, ...args: unknown[]) => string} helper - The helper function
-   * @returns {void}
+   * @param name - The name of the helper
+   * @param helper - The helper function
    */
   registerHelper(
     name: string,
@@ -175,8 +180,7 @@ export class Stampdown {
 
   /**
    * Add a preprocessing hook
-   * @param {Hook} hook - Hook function to transform template before parsing
-   * @returns {void}
+   * @param hook - Hook function to transform template before parsing
    */
   addPreProcessHook(hook: Hook): void {
     this.preProcessHooks.push(hook);
@@ -184,8 +188,7 @@ export class Stampdown {
 
   /**
    * Add a postprocessing hook
-   * @param {Hook} hook - Hook function to transform output after rendering
-   * @returns {void}
+   * @param hook - Hook function to transform output after rendering
    */
   addPostProcessHook(hook: Hook): void {
     this.postProcessHooks.push(hook);
@@ -193,9 +196,9 @@ export class Stampdown {
 
   /**
    * Render a template with the given context
-   * @param {string} template - The template string to render
-   * @param {Context} context - Variables and data accessible in the template
-   * @returns {string} - The rendered output
+   * @param template - The template string to render
+   * @param context - Variables and data accessible in the template
+   * @returns The rendered output
    */
   render(template: string, context: Context = {}): string {
     // Apply preprocessing hooks
@@ -220,10 +223,9 @@ export class Stampdown {
 
   /**
    * Render a precompiled template by its identifier
-   * @param {string} templateId - The identifier of the precompiled template
-   * @param {Context} context - Variables and data accessible in the template
-   * @returns {string} - The rendered output
-   * @throws {Error} - If the template is not found
+   * @param templateId - The identifier of the precompiled template
+   * @param context - Variables and data accessible in the template
+   * @returns The rendered output
    */
   renderPrecompiled(templateId: string, context: Context = {}): string {
     const templateFn = this.precompiledTemplates.get(templateId);
@@ -235,9 +237,8 @@ export class Stampdown {
 
   /**
    * Register a precompiled template
-   * @param {string} templateId - Identifier for the template
-   * @param {PrecompiledTemplateFn} templateFn - The compiled template function
-   * @returns {void}
+   * @param templateId - Identifier for the template
+   * @param templateFn - The compiled template function
    */
   registerPrecompiledTemplate(templateId: string, templateFn: PrecompiledTemplateFn): void {
     // Cast to mutable Map for registration
@@ -246,8 +247,8 @@ export class Stampdown {
 
   /**
    * Check if a precompiled template exists
-   * @param {string} templateId - The template identifier to check
-   * @returns {boolean} - True if the template exists
+   * @param templateId - The template identifier to check
+   * @returns True if the template exists
    */
   hasPrecompiledTemplate(templateId: string): boolean {
     return this.precompiledTemplates.has(templateId);
@@ -255,7 +256,7 @@ export class Stampdown {
 
   /**
    * Get all registered precompiled template IDs
-   * @returns {string[]} - Array of template identifiers
+   * @returns Array of template identifiers
    */
   getPrecompiledTemplateIds(): string[] {
     return Array.from(this.precompiledTemplates.keys());
@@ -263,7 +264,7 @@ export class Stampdown {
 
   /**
    * Get the renderer instance (for precompiled templates)
-   * @returns {Renderer} - The renderer instance
+   * @returns The renderer instance
    */
   getRenderer(): Renderer {
     return this.renderer;
@@ -271,7 +272,7 @@ export class Stampdown {
 
   /**
    * Get the helper registry (for precompiled templates)
-   * @returns {HelperRegistry} - The helper registry
+   * @returns The helper registry
    */
   getHelperRegistry(): HelperRegistry {
     return this.helperRegistry;
@@ -279,7 +280,7 @@ export class Stampdown {
 
   /**
    * Get the evaluator instance (for precompiled templates)
-   * @returns {ExpressionEvaluator} - The evaluator instance
+   * @returns The evaluator instance
    */
   getEvaluator(): ExpressionEvaluator {
     return this.renderer['evaluator'];

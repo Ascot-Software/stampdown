@@ -1,6 +1,7 @@
 /**
  * Debug helpers plugin for Stampdown
  * Provides helpers for debugging and introspection
+ * @packageDocumentation
  */
 
 import { createPlugin } from '../plugin';
@@ -10,6 +11,8 @@ import type { HelperOptions } from '../helpers/registry';
 /**
  * Debug plugin
  * Adds helpers for json, typeof, keys, and values operations
+ * @public
+ *
  * @example
  * ```typescript
  * import { Stampdown } from '@stampdwn/core';

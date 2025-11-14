@@ -32,7 +32,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "prepare": "cm-buildhelper src/stampdown.js"
+    "prepare": "cm-buildhelper src/stampdown.js",
+    "docs": "jsdoc2md src/stampdown.js > docs/api.md",
+    "ai-docs": "mkdir -p ../../.github/api/codemirror/ && cp ./docs/**.md ../../.github/api/codemirror/"
   },
   "publishConfig": {
     "access": "public"

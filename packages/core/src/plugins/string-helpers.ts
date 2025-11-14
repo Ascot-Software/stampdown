@@ -1,6 +1,7 @@
 /**
  * String manipulation plugin for Stampdown
  * Provides helpers for common string operations
+ * @packageDocumentation
  */
 
 import { createPlugin } from '../plugin';
@@ -10,6 +11,8 @@ import type { HelperOptions } from '../helpers/registry';
 /**
  * String manipulation plugin
  * Adds helpers for uppercase, lowercase, capitalize, trim, repeat, and truncate operations
+ * @public
+ *
  * @example
  * ```typescript
  * import { Stampdown } from '@stampdwn/core';

@@ -1,12 +1,14 @@
 /**
  * Template parser
  * Converts template strings into an Abstract Syntax Tree (AST)
+ * @packageDocumentation
  */
 
 import type { ASTNode } from './types';
 
 /**
  * Parser class for converting template strings to AST
+ * @public
  */
 export class Parser {
   private template: string = '';
@@ -14,8 +16,8 @@ export class Parser {
 
   /**
    * Parse a template string into an AST
-   * @param {string} template - The template string to parse
-   * @returns {ASTNode} - The root AST node
+   * @param template - The template string to parse
+   * @returns The root AST node
    */
   parse(template: string): ASTNode {
     this.template = template;
@@ -38,7 +40,7 @@ export class Parser {
 
   /**
    * Parse a single node from the current position
-   * @returns {ASTNode | null} - The parsed node or null if end of template
+   * @returns The parsed node or null if end of template
    */
   private parseNode(): ASTNode | null {
     // Try to parse partial block {{#> name}}...{{/name}}
@@ -72,7 +74,7 @@ export class Parser {
 
   /**
    * Parse plain text content
-   * @returns {ASTNode | null} - Text node or null if no text found
+   * @returns The text node or null if no text found
    */
   private parseText(): ASTNode | null {
     let text = '';
@@ -96,9 +98,9 @@ export class Parser {
   }
 
   /**
-   * Parse an expression node {{expression}}
+   * Parse an expression node \{\{expression\}\}
    * Can detect helper calls with subexpressions and variable assignments
-   * @returns {ASTNode} - Expression node, helperExpression node, or assignment node
+   * @returns The expression node, helperExpression node, or assignment node
    */
   private parseExpression(): ASTNode {
     this.consume('{{');
@@ -189,8 +191,7 @@ export class Parser {
    * Parse a subexpression (helper arg1 arg2...)
    * Subexpressions allow helpers to be called within other helpers
    * Example: (helper "arg1" arg2)
-   * @returns {ASTNode} - Subexpression node (a blockHelper node that will be evaluated)
-   * @private
+   * @returns The subexpression node (a blockHelper node that will be evaluated)
    */
   private parseSubexpression(): ASTNode {
     this.consume('(');
@@ -242,8 +243,8 @@ export class Parser {
   }
 
   /**
-   * Parse a partial node {{>partialName}}
-   * @returns {ASTNode} - Partial node
+   * Parse a partial node \{\{\>partialName\}\}
+   * @returns The partial node
    */
   private parsePartial(): ASTNode {
     this.consume('{{>');
@@ -313,8 +314,8 @@ export class Parser {
   }
 
   /**
-   * Parse a partial block node {{#> partialName}}...{{/partialName}}
-   * @returns {ASTNode} - Partial block node
+   * Parse a partial block node \{\{#\> partialName\}\}...\{\{/partialName\}\}
+   * @returns The partial block node
    */
   private parsePartialBlock(): ASTNode {
     this.consume('{{#>');
@@ -383,8 +384,8 @@ export class Parser {
   }
 
   /**
-   * Parse an inline partial definition {{#*inline "name"}}...{{/inline}}
-   * @returns {ASTNode} - Inline partial node
+   * Parse an inline partial definition \{\{#*inline "name"\}\}...\{\{/inline\}\}
+   * @returns The inline partial node
    */
   private parseInlinePartial(): ASTNode {
     this.consume('{{#*');
@@ -433,8 +434,8 @@ export class Parser {
   }
 
   /**
-   * Parse a block helper node {{#helperName}}...{{/helperName}} or {{#helperName arg/}}
-   * @returns {ASTNode} - Block helper node
+   * Parse a block helper node \{\{#helperName\}\}...\{\{/helperName\}\} or \{\{#helperName arg/\}\}
+   * @returns The block helper node
    */
   private parseBlockHelper(): ASTNode {
     this.consume('{{#');
@@ -662,9 +663,8 @@ export class Parser {
 
   /**
    * Parse an else-if chain into nested if blocks
-   * Handles: {{else if cond1}}...{{else if cond2}}...{{else}}...
-   * @returns {ASTNode[]} - Array containing the first else-if block (with nested inverse)
-   * @private
+   * Handles: \{\{else if cond1\}\}...\{\{else if cond2\}\}...\{\{else\}\}...
+   * @returns The array containing the first else-if block (with nested inverse)
    */
   private parseElseIfChain(): ASTNode[] {
     this.consume('{{else');
@@ -727,8 +727,8 @@ export class Parser {
 
   /**
    * Check if the current position matches a string without consuming it
-   * @param {string} str - The string to check for
-   * @returns {boolean} - True if the string matches at current position
+   * @param str - The string to check for
+   * @returns True if the string matches at current position
    */
   private peek(str: string): boolean {
     return this.template.substr(this.position, str.length) === str;
@@ -736,9 +736,9 @@ export class Parser {
 
   /**
    * Check if a string matches ahead at the current position (with length check)
-   * @param {string} str - The string to check for
-   * @param {number} length - The length to check
-   * @returns {boolean} - True if the string matches at current position
+   * @param str - The string to check for
+   * @param length - The length to check
+   * @returns True if the string matches at current position
    */
   private peekAhead(str: string, length: number): boolean {
     return this.template.substr(this.position, length).startsWith(str);
@@ -746,9 +746,8 @@ export class Parser {
 
   /**
    * Consume a string at the current position or throw error if not found
-   * @param {string} str - The expected string to consume
-   * @returns {void}
-   * @throws {Error} - If the expected string is not found
+   * @param str - The expected string to consume
+   * @returns void
    */
   private consume(str: string): void {
     if (!this.peek(str)) {
@@ -759,7 +758,6 @@ export class Parser {
 
   /**
    * Skip whitespace characters at the current position
-   * @returns {void}
    */
   private skipWhitespace(): void {
     while (this.position < this.template.length && /\s/.test(this.template[this.position])) {
@@ -769,7 +767,7 @@ export class Parser {
 
   /**
    * Read an identifier (alphanumeric and underscore)
-   * @returns {string} - The identifier string
+   * @returns The identifier string
    */
   private readIdentifier(): string {
     const start = this.position;
@@ -783,8 +781,8 @@ export class Parser {
   }
 
   /**
-   * Read an extended identifier (can include dots, dashes, @ for partial names)
-   * @returns {string} - The extended identifier string
+   * Read an extended identifier (can include dots, dashes, \@ for partial names)
+   * @returns The extended identifier string
    */
   private readExtendedIdentifier(): string {
     const start = this.position;
@@ -798,10 +796,9 @@ export class Parser {
   }
 
   /**
-   * Detect if a string contains an assignment (= but not ==, ===, !=, !==, <=, >=)
-   * @param {string} content - The content to check
-   * @returns {{ target: string; value: string } | null} - Assignment parts or null
-   * @private
+   * Detect if a string contains an assignment (= but not ==, ===, !=, !==, \<=, \>=)
+   * @param content - The content to check
+   * @returns Assignment parts or null
    */
   private detectAssignment(content: string): { target: string; value: string } | null {
     let inQuotes = false;
@@ -867,8 +864,8 @@ export class Parser {
 
   /**
    * Read characters until a delimiter is encountered
-   * @param {string | RegExp} delimiter - The delimiter to stop at
-   * @returns {string} - The characters read
+   * @param delimiter - The delimiter to stop at
+   * @returns The characters read
    */
   private readUntil(delimiter: string | RegExp): string {
     const start = this.position;

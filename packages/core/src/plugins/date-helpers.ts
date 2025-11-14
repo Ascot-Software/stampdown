@@ -1,6 +1,7 @@
 /**
  * Date helpers plugin for Stampdown
  * Provides helpers for date formatting and manipulation
+ * @packageDocumentation
  */
 
 import { createPlugin } from '../plugin';
@@ -10,6 +11,8 @@ import type { HelperOptions } from '../helpers/registry';
 /**
  * Date formatting plugin
  * Adds helpers for formatDate, now, and timeAgo operations
+ * @public
+ *
  * @example
  * ```typescript
  * import { Stampdown } from '@stampdwn/core';

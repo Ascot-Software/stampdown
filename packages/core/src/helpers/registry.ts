@@ -1,12 +1,14 @@
 /**
  * Helper Registry
  * Manages custom and built-in helpers
+ * @packageDocumentation
  */
 
 import type { Context } from '../types';
 
 /**
  * Options passed to helper functions
+ * @public
  */
 export interface HelperOptions {
   /** Function to render the main block content */
@@ -19,15 +21,17 @@ export interface HelperOptions {
 
 /**
  * Helper function type
- * @param {Context} context - The current template context
- * @param {HelperOptions} options - Options including fn, inverse, and hash
- * @param {...unknown[]} args - Additional arguments passed to the helper
- * @returns {string} - The rendered output
+ * @param context - The current template context
+ * @param options - Options including fn, inverse, and hash
+ * @param args - Additional arguments passed to the helper
+ * @returns The rendered output
+ * @public
  */
 export type Helper = (context: Context, options: HelperOptions, ...args: unknown[]) => string;
 
 /**
  * Registry for managing template helpers
+ * @public
  */
 export class HelperRegistry {
   private helpers: Map<string, Helper>;
@@ -41,9 +45,8 @@ export class HelperRegistry {
 
   /**
    * Register a helper function
-   * @param {string} name - The name of the helper
-   * @param {Helper} helper - The helper function
-   * @returns {void}
+   * @param name - The name of the helper
+   * @param helper - The helper function
    */
   register(name: string, helper: Helper): void {
     this.helpers.set(name, helper);
@@ -51,8 +54,8 @@ export class HelperRegistry {
 
   /**
    * Get a helper by name
-   * @param {string} name - The name of the helper to retrieve
-   * @returns {Helper | undefined} - The helper function or undefined if not found
+   * @param name - The name of the helper to retrieve
+   * @returns The helper function or undefined if not found
    */
   get(name: string): Helper | undefined {
     return this.helpers.get(name);
@@ -60,8 +63,8 @@ export class HelperRegistry {
 
   /**
    * Check if a helper exists
-   * @param {string} name - The name of the helper to check
-   * @returns {boolean} - True if the helper exists
+   * @param name - The name of the helper to check
+   * @returns True if the helper exists
    */
   has(name: string): boolean {
     return this.helpers.has(name);
@@ -69,8 +72,8 @@ export class HelperRegistry {
 
   /**
    * Unregister a helper
-   * @param {string} name - The name of the helper to remove
-   * @returns {boolean} - True if the helper was removed, false if it didn't exist
+   * @param name - The name of the helper to remove
+   * @returns True if the helper was removed, false if it didn't exist
    */
   unregister(name: string): boolean {
     return this.helpers.delete(name);

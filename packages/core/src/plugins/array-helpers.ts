@@ -1,6 +1,7 @@
 /**
  * Array helpers plugin for Stampdown
  * Provides helpers for array operations and manipulation
+ * @packageDocumentation
  */
 
 import { createPlugin } from '../plugin';
@@ -10,6 +11,8 @@ import type { HelperOptions } from '../helpers/registry';
 /**
  * Array helpers plugin
  * Adds helpers for join, length, slice, reverse, and sort operations
+ * @public
+ *
  * @example
  * ```typescript
  * import { Stampdown } from '@stampdwn/core';

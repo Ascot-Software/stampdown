@@ -1,12 +1,14 @@
 /**
  * Expression Evaluator
  * Safely evaluates expressions within templates
+ * @packageDocumentation
  */
 
 import type { Context } from './types';
 
 /**
  * ExpressionEvaluator class for safely evaluating template expressions
+ * @public
  */
 export class ExpressionEvaluator {
   /**
@@ -14,16 +16,16 @@ export class ExpressionEvaluator {
    * Supports:
    * - Dot notation for nested property access (e.g., "user.name")
    * - Literal values: numbers, strings (quoted), booleans, null, undefined
-   * - Comparison operators: ===, !==, ==, !=, >, <, >=, <=
+   * - Comparison operators: ===, !==, ==, !=, \>, \<, \>=, \<=
    * - Logical operators: &&, ||, !
-   * @param {string} expression - The expression to evaluate
-   * @param {Context} context - The context containing variables
-   * @returns {unknown} - The evaluated result or undefined if not found
+   * @param expression - The expression to evaluate
+   * @param context - The context containing variables
+   * @returns The evaluated result or undefined if not found
    */
   evaluate(expression: string, context: Context): unknown {
     const trimmed = expression.trim();
 
-    // Check for template literals (backticks with ${...} interpolation)
+    // Check for template literals (backticks with $\{...\} interpolation)
     if (trimmed.startsWith('`') && trimmed.endsWith('`')) {
       return this.evaluateTemplateLiteral(trimmed, context);
     }
@@ -144,10 +146,9 @@ export class ExpressionEvaluator {
 
   /**
    * Split expression by operator, respecting quoted strings
-   * @param {string} expression - The expression to split
-   * @param {string} operator - The operator to split by
-   * @returns {string[]} - Array of parts
-   * @private
+   * @param expression - The expression to split
+   * @param operator - The operator to split by
+   * @returns Array of parts
    */
   private splitByOperator(expression: string, operator: string): string[] {
     const parts: string[] = [];
@@ -194,11 +195,10 @@ export class ExpressionEvaluator {
 
   /**
    * Compare two values using the given operator
-   * @param {unknown} left - Left operand
-   * @param {unknown} right - Right operand
-   * @param {string} operator - Comparison operator
-   * @returns {boolean} - Comparison result
-   * @private
+   * @param left - Left operand
+   * @param right - Right operand
+   * @param operator - Comparison operator
+   * @returns Comparison result
    */
   private compareValues(left: unknown, right: unknown, operator: string): boolean {
     switch (operator) {
@@ -225,11 +225,10 @@ export class ExpressionEvaluator {
 
   /**
    * Apply an arithmetic operation to two values
-   * @param {unknown} left - Left operand
-   * @param {unknown} right - Right operand
-   * @param {string} operator - Arithmetic operator (+, -, *, /, %)
-   * @returns {number} - Arithmetic result
-   * @private
+   * @param left - Left operand
+   * @param right - Right operand
+   * @param operator - Arithmetic operator (+, -, *, /, %)
+   * @returns Arithmetic result
    */
   private applyArithmetic(left: unknown, right: unknown, operator: string): number {
     const leftNum = Number(left);
@@ -253,21 +252,19 @@ export class ExpressionEvaluator {
 
   /**
    * Check if a value is truthy
-   * @param {unknown} value - Value to check
-   * @returns {boolean} - True if value is truthy
-   * @private
+   * @param value - Value to check
+   * @returns True if value is truthy
    */
   private isTruthy(value: unknown): boolean {
     return !!value;
   }
 
   /**
-   * Evaluate a template literal (backtick string with ${...} interpolation)
-   * Example: `Hello ${name}` or `${firstName} ${lastName}`
-   * @param {string} literal - The template literal string (including backticks)
-   * @param {Context} context - The context containing variables
-   * @returns {string} - The interpolated string result
-   * @private
+   * Evaluate a template literal (backtick string with $\{...\} interpolation)
+   * Example: `Hello $\{name\}` or `$\{firstName} $\{lastName\}`
+   * @param literal - The template literal string (including backticks)
+   * @param context - The context containing variables
+   * @returns The interpolated string result
    */
   private evaluateTemplateLiteral(literal: string, context: Context): string {
     // Remove the backticks
@@ -277,7 +274,7 @@ export class ExpressionEvaluator {
     let i = 0;
 
     while (i < content.length) {
-      // Look for ${...} interpolation
+      // Look for $\{...\} interpolation
       if (content[i] === '$' && content[i + 1] === '{') {
         // Find the closing }
         let depth = 1;

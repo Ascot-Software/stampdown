@@ -1,18 +1,20 @@
 /**
  * Stampdown LLM Plugin Types
  * Normalized chat message types for multi-provider LLM interactions
- * @module plugins/llm/types
+ * @packageDocumentation
  */
 
 import { z } from 'zod';
 
 /**
  * Normalized message role types across LLM providers
+ * @public
  */
 export type NormRole = 'system' | 'user' | 'assistant' | 'tool' | 'function';
 
 /**
  * Normalized content types for message content
+ * @public
  */
 export type NormContent =
   | { type: 'text'; text: string }
@@ -21,6 +23,7 @@ export type NormContent =
 
 /**
  * Normalized message structure
+ * @public
  */
 export interface NormMessage {
   role: NormRole;
@@ -31,6 +34,7 @@ export interface NormMessage {
 
 /**
  * Normalized chat structure with provider metadata
+ * @public
  */
 export interface NormChat {
   provider: 'openai' | 'anthropic' | 'azure' | 'vertex' | 'other';
@@ -41,6 +45,7 @@ export interface NormChat {
 
 /**
  * Zod schema for validating normalized messages
+ * @public
  */
 export const NormMessageSchema = z.object({
   role: z.enum(['system', 'user', 'assistant', 'tool', 'function']),
@@ -68,6 +73,7 @@ export const NormMessageSchema = z.object({
 
 /**
  * Zod schema for validating normalized chat objects
+ * @public
  */
 export const NormChatSchema = z.object({
   provider: z.enum(['openai', 'anthropic', 'azure', 'vertex', 'other']),

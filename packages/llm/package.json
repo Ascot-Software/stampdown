@@ -18,7 +18,10 @@
     "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "jest",
     "test:watch": "jest --watch",
-    "publish": "npm publish --access public"
+    "publish": "npm publish --access public",
+    "api": "api-extractor run",
+    "docs": "api-documenter markdown --input-folder ./temp --output-folder ./docs",
+    "ai-docs": "mkdir -p ../../.github/api/llm/ && cp ./docs/**.md ../../.github/api/llm/"
   },
   "keywords": [
     "llm",

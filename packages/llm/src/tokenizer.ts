@@ -1,27 +1,28 @@
 /**
  * Tokenizer
  * Token counting and truncation abstraction for LLM text processing
- * @module plugins/llm/tokenizer
+ * @packageDocumentation
  */
 
 import { encode, decode } from 'gpt-tokenizer';
 
 /**
  * Tokenizer interface for counting and truncating text by tokens
+ * @public
  */
 export interface Tokenizer {
   /**
    * Count tokens in text
-   * @param {string} text - Text to count tokens for
-   * @returns {number} - Token count
+   * @param text - Text to count tokens for
+   * @returns - Token count
    */
   count(text: string): number;
 
   /**
    * Truncate text to maximum token count
-   * @param {string} text - Text to truncate
-   * @param {number} _maxTokens - Maximum number of tokens
-   * @returns {string} - Truncated text
+   * @param text - Text to truncate
+   * @param _maxTokens - Maximum number of tokens
+   * @returns Truncated text
    */
   truncateByTokens(text: string, _maxTokens: number): string;
 }
@@ -29,8 +30,14 @@ export interface Tokenizer {
 /**
  * Default tokenizer using gpt-tokenizer
  * Falls back to character-based estimation if tokenization fails
+ * @public
  */
 export const defaultTokenizer: Tokenizer = {
+  /**
+   * Count tokens in text
+   * @param text - Text to count tokens for
+   * @returns Token count
+   */
   count(text) {
     try {
       return encode(text).length;
@@ -40,6 +47,12 @@ export const defaultTokenizer: Tokenizer = {
     }
   },
 
+  /**
+   * Truncate text by tokens
+   * @param text - Text to truncate
+   * @param maxTokens - Maximum number of tokens
+   * @returns Truncated text
+   */
   truncateByTokens(text, maxTokens) {
     try {
       const ids = encode(text).slice(0, Math.max(0, maxTokens));

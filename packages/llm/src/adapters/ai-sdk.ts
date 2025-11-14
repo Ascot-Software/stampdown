@@ -2,15 +2,14 @@
  * AI SDK Adapter
  * Normalizes `@ai-sdk` message shapes to our internal NormChat format.
  * This is the ONLY file that imports `@ai-sdk` types - they never leak beyond this boundary.
- * @module plugins/llm/adapters/ai-sdk
- * @private
+ * @packageDocumentation
  */
 
 import type { NormChat, NormMessage, NormContent } from '../types';
 
 /**
  * Minimal shape we expect from `@ai-sdk` (kept local; don't re-export)
- * @private
+ * @public
  */
 export type AiSdkMessage = {
   role: 'system' | 'user' | 'assistant' | 'tool' | 'function';
@@ -25,7 +24,7 @@ export type AiSdkMessage = {
 
 /**
  * Payload shape from `@ai-sdk` providers
- * @private
+ * @public
  */
 export type AiSdkPayload = {
   provider?: string;
@@ -36,8 +35,8 @@ export type AiSdkPayload = {
 
 /**
  * Normalize an `@ai-sdk` payload to our internal NormChat format
- * @param {AiSdkPayload} raw - Raw payload from `@ai-sdk` provider
- * @returns {NormChat} - Normalized chat object
+ * @param raw - Raw payload from `@ai-sdk` provider
+ * @returns Normalized chat object
  */
 export function normalizeFromAiSdk(raw: AiSdkPayload): NormChat {
   const messages: NormMessage[] = (raw.messages ?? []).map((m) => ({
@@ -56,9 +55,9 @@ export function normalizeFromAiSdk(raw: AiSdkPayload): NormChat {
 
 /**
  * Map `@ai-sdk` role to normalized role
- * @param {string} r - Role from `@ai-sdk`
- * @returns {NormMessage['role']} - Normalized role
- * @private
+ * @param r - Role from `@ai-sdk`
+ * @returns Normalized role
+ * @public
  */
 function mapRole(r: AiSdkMessage['role']): NormMessage['role'] {
   if (r === 'function') return 'function';
@@ -70,9 +69,9 @@ function mapRole(r: AiSdkMessage['role']): NormMessage['role'] {
 
 /**
  * Map `@ai-sdk` content to normalized content array
- * @param {object} c - Content item from `@ai-sdk`
- * @returns {NormContent[]} - Array of normalized content items
- * @private
+ * @param c - Content item from `@ai-sdk`
+ * @returns Array of normalized content items
+ * @public
  */
 function mapContent(c: AiSdkMessage['content'][number]): NormContent[] {
   switch (c.type) {
@@ -114,9 +113,9 @@ function mapContent(c: AiSdkMessage['content'][number]): NormContent[] {
 
 /**
  * Map provider string to normalized provider type
- * @param {string | undefined} p - Provider string from `@ai-sdk`
- * @returns {NormChat['provider']} - Normalized provider
- * @private
+ * @param p - Provider string from `@ai-sdk`
+ * @returns Normalized provider
+ * @public
  */
 function mapProvider(p?: string): NormChat['provider'] {
   if (!p) return 'other';

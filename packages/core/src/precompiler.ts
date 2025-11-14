@@ -2,6 +2,7 @@
  * Template Precompiler
  * Converts Stampdown templates into optimized JavaScript functions
  * for faster rendering and smaller bundle sizes
+ * @packageDocumentation
  */
 
 import { Parser } from './parser';
@@ -9,6 +10,7 @@ import type { ASTNode } from './types';
 
 /**
  * Options for precompiling templates
+ * @public
  */
 export interface PrecompileOptions {
   /**
@@ -20,13 +22,11 @@ export interface PrecompileOptions {
 
   /**
    * Include source map information in the precompiled output
-   * @default false
    */
   sourceMap?: boolean;
 
   /**
    * Strict mode - throw errors for unknown helpers instead of warnings
-   * @default false
    */
   strict?: boolean;
 
@@ -39,6 +39,7 @@ export interface PrecompileOptions {
 
 /**
  * Precompiled template result
+ * @public
  */
 export interface PrecompiledTemplate {
   /**
@@ -69,6 +70,7 @@ export interface PrecompiledTemplate {
 
 /**
  * Precompiler class for converting templates to optimized functions
+ * @public
  */
 export class Precompiler {
   private parser: Parser;
@@ -79,9 +81,9 @@ export class Precompiler {
 
   /**
    * Precompile a template string into an optimized function
-   * @param {string} template - The template string to precompile
-   * @param {PrecompileOptions} options - Precompilation options
-   * @returns {PrecompiledTemplate} - The precompiled template result
+   * @param template - The template string to precompile
+   * @param options - Precompilation options
+   * @returns The precompiled template result
    */
   precompile(template: string, options: PrecompileOptions = {}): PrecompiledTemplate {
     const ast = this.parser.parse(template);
@@ -115,9 +117,8 @@ export class Precompiler {
 
   /**
    * Extract all helper names used in the AST
-   * @param {ASTNode} node - The AST node to analyze
-   * @returns {string[]} - Array of unique helper names
-   * @private
+   * @param node - The AST node to analyze
+   * @returns Array of unique helper names
    */
   private extractHelpers(node: ASTNode): string[] {
     const helpers = new Set<string>();
@@ -159,10 +160,9 @@ export class Precompiler {
 
   /**
    * Generate optimized JavaScript code from AST
-   * @param {ASTNode} ast - The parsed template AST
-   * @param {PrecompileOptions} options - Precompilation options
-   * @returns {string} - Generated JavaScript code
-   * @private
+   * @param ast - The parsed template AST
+   * @param options - Precompilation options
+   * @returns Generated JavaScript code
    */
   private generateCode(ast: ASTNode, options: PrecompileOptions): string {
     const templateId = options.templateId || 'anonymous';
@@ -188,11 +188,10 @@ export class Precompiler {
 
   /**
    * Generate code for a single AST node
-   * @param {ASTNode} node - The AST node
-   * @param {string} contextVar - Variable name for context
-   * @param {number} indent - Indentation level
-   * @returns {string} - Generated code
-   * @private
+   * @param node - The AST node
+   * @param contextVar - Variable name for context
+   * @param indent - Indentation level
+   * @returns Generated code
    */
   private generateNodeCode(node: ASTNode, contextVar: string, indent: number): string {
     const spaces = '  '.repeat(indent);
@@ -622,10 +621,9 @@ export class Precompiler {
 
   /**
    * Generate a basic source map for debugging
-   * @param {string} source - Original template source
-   * @param {string} _code - Generated code
-   * @returns {string} - Source map as JSON string
-   * @private
+   * @param source - Original template source
+   * @param _code - Generated code
+   * @returns Source map as JSON string
    */
   private generateSourceMap(source: string, _code: string): string {
     // Simplified source map - in production would use proper source-map library

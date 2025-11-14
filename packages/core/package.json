@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "description": "Stampdown is a Markdown templating language, that is simple and extensible.",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/core.d.ts",
   "files": [
     "dist",
     "README.md",
@@ -19,7 +19,10 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "publish": "npm publish --access public"
+    "publish": "npm publish --access public",
+    "api": "api-extractor run",
+    "docs": "api-documenter markdown --input-folder ./temp --output-folder ./docs",
+    "ai-docs": "mkdir -p ../../.github/api/core/ && cp ./docs/**.md ../../.github/api/core/"
   },
   "keywords": [
     "markdown",

@@ -1,7 +1,7 @@
 /**
  * Stampdown LLM Plugin
  * Provides LLM-focused helpers for chat message templating
- * @module plugins/llm
+ * @packageDocumentation
  */
 
 import { createPlugin } from '@stampdwn/core';
@@ -28,6 +28,7 @@ import { registerLLMHelpers } from './helpers';
  * {{/withChat}}
  * `;
  * ```
+ * @public
  */
 export const llmPlugin = createPlugin({
   name: 'llm-plugin',

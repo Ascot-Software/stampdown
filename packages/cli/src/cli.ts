@@ -4,6 +4,7 @@
  * Stampdown CLI (sdt-cli)
  *
  * Command-line interface for rendering and precompiling Stampdown templates
+ * @packageDocumentation
  */
 
 import * as fs from 'fs';
@@ -13,35 +14,91 @@ import { Precompiler } from '@stampdwn/core';
 
 /**
  * CLI options interface
+ * @public
  */
-interface CliOptions {
+export interface CliOptions {
   // Common options
+  /**
+   * Show help information
+   */
   help?: boolean;
+  /**
+   * Show version information
+   */
   version?: boolean;
+  /**
+   * Enable verbose output
+   */
   verbose?: boolean;
 
   // Render mode options
+  /**
+   * Output directory for rendered templates
+   */
   output?: string;
+  /**
+   * Output file extension for rendered templates
+   */
   extension?: string;
+  /**
+   * Output rendered templates to stdout
+   */
   stdout?: boolean;
+  /**
+   * Read data from stdin
+   */
   stdin?: boolean;
+  /**
+   * Register partial templates
+   */
   partials?: string[];
+  /**
+   * Register helper templates
+   */
   helpers?: string[];
+  /**
+   * Data sources for templates
+   */
   data?: string[];
+  /**
+   * Template files to process
+   */
   templates?: string[];
 
   // Precompile mode options
+  /**
+   * Enable precompile mode
+   */
   precompile?: boolean;
+  /**
+   * Comma-separated list of known helpers (or "all")
+   */
   knownHelpers?: string;
+  /**
+   * Strict mode - error on unknown helpers
+   */
   strict?: boolean;
+  /**
+   * Output format: esm, cjs, or json
+   */
   format?: 'esm' | 'cjs' | 'json';
+  /**
+   * Watch mode - recompile on file changes
+   */
   watch?: boolean;
+  /**
+   * Generate source maps
+   */
   sourceMap?: boolean;
+  /**
+   * Input file or glob pattern (required in precompile mode)
+   */
   input?: string;
 }
 
 /**
  * Stampdown CLI class
+ * @public
  */
 class StampdownCLI {
   private options: CliOptions;
@@ -49,7 +106,7 @@ class StampdownCLI {
 
   /**
    * Creates a new StampdownCLI instance
-   * @param {CliOptions} options - CLI options
+   * @param options - CLI options
    */
   constructor(options: CliOptions = {}) {
     this.options = options;
@@ -57,7 +114,6 @@ class StampdownCLI {
 
   /**
    * Show help message
-   * @returns {void}
    */
   private showHelp(): void {
     console.log(`
@@ -123,7 +179,6 @@ Examples:
 
   /**
    * Show version
-   * @returns {void}
    */
   private showVersion(): void {
     console.log(`sdt-cli v${this.version}`);
@@ -131,8 +186,8 @@ Examples:
 
   /**
    * Parse command-line arguments
-   * @param {string[]} args - Command-line arguments to parse
-   * @returns {CliOptions} - Parsed options object
+   * @param args - Command-line arguments to parse
+   * @returns Parsed options object
    */
   private parseArgs(args: string[]): CliOptions {
     const options: CliOptions = {
@@ -263,9 +318,8 @@ Examples:
 
   /**
    * Find files matching a glob pattern
-   * @param {string} pattern - Glob pattern to match
-   * @returns {string[]} - Array of matching file paths
-   * @private
+   * @param pattern - Glob pattern to match
+   * @returns Array of matching file paths
    */
   private findFiles(pattern: string): string[] {
     const results: string[] = [];
@@ -347,10 +401,9 @@ Examples:
 
   /**
    * Check if a filename matches a glob pattern
-   * @param {string} name - Filename to check
-   * @param {string} pattern - Glob pattern
-   * @returns {boolean} - True if name matches pattern
-   * @private
+   * @param name - Filename to check
+   * @param pattern - Glob pattern
+   * @returns True if name matches pattern
    */
   private matchPattern(name: string, pattern: string): boolean {
     // Convert glob pattern to regex
@@ -362,9 +415,8 @@ Examples:
 
   /**
    * Load data from file or inline JSON
-   * @param {string} dataSource - Path to data file or inline JSON string
-   * @returns {Record<string, unknown>} - Parsed data object
-   * @private
+   * @param dataSource - Path to data file or inline JSON string
+   * @returns Parsed data object
    */
   private loadData(dataSource: string): Record<string, unknown> {
     // Try to parse as inline JSON first
@@ -420,8 +472,7 @@ Examples:
 
   /**
    * Read data from stdin
-   * @returns {Promise<string>} - Data from stdin
-   * @private
+   * @returns Data from stdin
    */
   private readStdin(): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -446,9 +497,8 @@ Examples:
 
   /**
    * Load partials from files
-   * @param {string} pattern - Glob pattern for partial files
-   * @returns {Record<string, string>} - Map of partial names to content
-   * @private
+   * @param pattern - Glob pattern for partial files
+   * @returns - Map of partial names to content
    */
   private loadPartials(pattern: string): Record<string, string> {
     const files = this.findFiles(pattern);
@@ -469,9 +519,8 @@ Examples:
 
   /**
    * Load helper functions from files
-   * @param {string} pattern - Glob pattern for helper files
-   * @returns {Record<string, (...args: unknown[]) => unknown>} - Map of helper names to functions
-   * @private
+   * @param pattern - Glob pattern for helper files
+   * @returns - Map of helper names to functions
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private loadHelpers(pattern: string): Record<string, any> {
@@ -528,8 +577,6 @@ Examples:
 
   /**
    * Run render mode
-   * @returns {Promise<void>}
-   * @private
    */
   private async runRenderMode(): Promise<void> {
     // Validate options
@@ -635,10 +682,9 @@ Examples:
 
   /**
    * Generate a template ID from file path
-   * @param {string} filePath - Path to template file
-   * @param {string} inputPattern - Original input pattern
-   * @returns {string} - Generated template ID
-   * @private
+   * @param filePath - Path to template file
+   * @param inputPattern - Original input pattern
+   * @returns Generated template ID
    */
   private generateTemplateId(filePath: string, inputPattern: string): string {
     // Remove base directory from input pattern
@@ -659,11 +705,10 @@ Examples:
 
   /**
    * Precompile a single file
-   * @param {Precompiler} precompiler - Precompiler instance
-   * @param {string} filePath - Path to template file
-   * @param {string} templateId - Template ID
-   * @returns {{ id: string; code: string; sourceMap?: string } | null} - Precompiled template or null on error
-   * @private
+   * @param precompiler - Precompiler instance
+   * @param filePath - Path to template file
+   * @param templateId - Template ID
+   * @returns Precompiled template or null on error
    */
   private precompileFile(
     precompiler: Precompiler,
@@ -697,10 +742,9 @@ Examples:
 
   /**
    * Generate output code for precompiled templates
-   * @param {Array<{ id: string; code: string; sourceMap?: string }>} templates - Array of precompiled templates
-   * @param {string} format - Output format (esm, cjs, or json)
-   * @returns {string} - Generated output code
-   * @private
+   * @param templates - Array of precompiled templates
+   * @param format - Output format (esm, cjs, or json)
+   * @returns Generated output code
    */
   private generatePrecompileOutput(
     templates: Array<{ id: string; code: string; sourceMap?: string }>,
@@ -744,8 +788,6 @@ Examples:
 
   /**
    * Run precompile mode
-   * @returns {void}
-   * @private
    */
   private runPrecompileMode(): void {
     // Validate options
@@ -818,8 +860,7 @@ Examples:
 
   /**
    * Run the CLI
-   * @param {string[]} args - Command-line arguments
-   * @returns {Promise<void>}
+   * @param args - Command-line arguments
    */
   async run(args: string[]): Promise<void> {
     this.options = { ...this.options, ...this.parseArgs(args) };

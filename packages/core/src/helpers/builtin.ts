@@ -1,6 +1,7 @@
 /**
  * Built-in Helpers
  * Provides common templating helpers similar to Handlebars
+ * @packageDocumentation
  */
 
 import type { HelperRegistry, HelperOptions } from './registry';
@@ -8,8 +9,9 @@ import type { Context } from '../types';
 
 /**
  * Register all built-in helpers to the given registry
- * @param {HelperRegistry} registry - The helper registry to register helpers to
- * @returns {void}
+ * @public
+ *
+ * @param registry - The helper registry to register helpers to
  */
 export function registerBuiltInHelpers(registry: HelperRegistry): void {
   /**
@@ -156,8 +158,10 @@ export function registerBuiltInHelpers(registry: HelperRegistry): void {
 
 /**
  * Check if a value is truthy according to Handlebars semantics
- * @param {unknown} value - The value to check
- * @returns {boolean} - True if the value is truthy
+ * @public
+ *
+ * @param value - The value to check
+ * @returns True if the value is truthy
  */
 function isTruthy(value: unknown): boolean {
   if (value === null || value === undefined || value === false) {
