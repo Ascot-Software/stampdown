@@ -5,15 +5,7 @@ Specialized Stampdown plugin for LLM prompt templating with multi-provider suppo
 ## Installation
 
 ```bash
-npm install @# Markdown sections can be added directly
-## Conversation
-{{#eachMessage}}...{{/eachMessage}}pdwn/llm
-```
-
-The LLM plugin requires peer dependencies:
-
-```bash
-npm install @ai-sdk/provider gpt-tokenizer yaml zod
+npm install @stampdwn/llm
 ```
 
 ## Quick Start
@@ -28,10 +20,10 @@ const stampdown = new Stampdown({
 
 const template = `
 {{#withChat raw=chat}}
-{{#eachMessage}}
-{{#ifUser}}👤 User: {{#firstText this/}}{{/ifUser}}
-{{#ifAssistant}}🤖 Assistant: {{#firstText this/}}{{/ifAssistant}}
-{{/eachMessage}}
+  {{#eachMessage}}
+    {{#ifUser}}👤 User: {{#firstText this/}}{{/ifUser}}
+    {{#ifAssistant}}🤖 Assistant: {{#firstText this/}}{{/ifAssistant}}
+  {{/eachMessage}}
 {{/withChat}}
 `;
 
@@ -47,9 +39,7 @@ const result = stampdown.render(template, {
 });
 ```
 
-## Features
-
-### Multi-Provider Normalization
+## Multi-Provider Normalization
 
 The plugin normalizes messages from different LLM providers via `@ai-sdk`:
 
@@ -60,96 +50,6 @@ The plugin normalizes messages from different LLM providers via `@ai-sdk`:
 - **Custom providers** via `@ai-sdk`
 
 All providers are normalized to a consistent internal format, so your templates work across any provider.
-
-### Role-Aware Helpers
-
-Filter and render content based on message roles:
-
-```typescript
-// Render only user messages
-{{#eachByRole role="user"}}
-  User said: {{#firstText this/}}
-{{/eachByRole}}
-
-// Conditional rendering by role
-{{#ifUser}}This is a user message{{/ifUser}}
-{{#ifAssistant}}This is an assistant message{{/ifAssistant}}
-{{#ifSystem}}This is a system message{{/ifSystem}}
-{{#ifTool}}This is a tool message{{/ifTool}}
-```
-
-### Content Handling
-
-Extract and manipulate different content types:
-
-```typescript
-// Get all text content
-{{#joinText messages sep=" | "/}}
-
-// Iterate over content items
-{{#eachContent}}
-  {{#if type === "text"}}Text: {{text}}{{/if}}
-  {{#if type === "image"}}Image: {{url}}{{/if}}
-{{/eachContent}}
-
-// Filter to text content only
-{{#eachText}}
-  {{this}} <!-- 'this' is the text value -->
-{{/eachText}}
-```
-
-### Token Management
-
-Count and truncate content by token limits:
-
-```typescript
-// Count tokens in text
-Token count: {{#tokenCount text/}}
-
-// Truncate by token limit
-{{#truncateTokens content max=100 on="text"/}}
-
-// Truncate entire messages
-{{#truncateTokens conversation max=2000 on="message"/}}
-```
-
-### Message Windowing
-
-Select message ranges for context management:
-
-```typescript
-// Last 5 messages
-{{#window size=5 from="end"}}
-{{#eachMessage}}...{{/eachMessage}}
-{{/window}}
-
-// First 3 user messages only
-{{#window size=3 from="start" role="user"}}
-{{#eachMessage}}...{{/eachMessage}}
-{{/window}}
-```
-
-### Output Formatting
-
-Format chat data for debugging or API calls:
-
-```typescript
-// JSON format
-{{#json chat/}}
-
-// YAML format
-{{#yaml chat/}}
-
-// Markdown sections
-{{#mdSection title="Conversation" level=2}}
-{{#eachMessage}}...{{/eachMessage}}
-{{/mdSection}}
-
-// Code fences
-{{#codeFence lang="json"}}
-{{#json messages/}}
-{{/codeFence}}
-```
 
 ## Helper Reference
 
@@ -191,8 +91,8 @@ Conditional rendering based on message role.
 
 ```handlebars
 {{#eachMessage}}
-{{#ifUser}}👤 {{#firstText this/}}{{/ifUser}}
-{{#ifAssistant}}🤖 {{#firstText this/}}{{/ifAssistant}}
+  {{#ifUser}}👤 {{#firstText this/}}{{/ifUser}}
+  {{#ifAssistant}}🤖 {{#firstText this/}}{{/ifAssistant}}
 {{/eachMessage}}
 ```
 
@@ -267,23 +167,13 @@ Truncates by token limit with different modes.
 
 ### Formatting Helpers
 
-
-
-#### `codeFence`
-Wraps content in markdown code fence.
-
-```handlebars
-{{#codeFence lang="json"}}
-{{#json data/}}
-{{/codeFence}}
-```
-
-#### `json`, `yaml`
-Stringifies value as JSON or YAML.
+#### `json`, `yaml`, `toon`
+Stringifies value as JSON, YAML or TOON
 
 ```handlebars
 {{#json chat/}}
 {{#yaml config/}}
+{{#toon chat/}}
 ```
 
 #### `renderChat`
@@ -399,26 +289,6 @@ interface Tokenizer {
   truncateByTokens(text: string, maxTokens: number): string;
 }
 ```
-
-## Use Cases
-
-### Prompt Engineering
-- Build reusable prompt templates
-- Context windowing for token limits
-- Multi-turn conversation management
-- Provider-agnostic prompt design
-
-### LLM Application Development
-- Request/response formatting
-- Conversation history templating
-- Dynamic prompt generation
-- Debug output formatting
-
-### Multi-Provider Systems
-- Normalize different provider formats
-- Template once, deploy everywhere
-- Provider switching without code changes
-- Consistent conversation handling
 
 ## Related Packages
 
