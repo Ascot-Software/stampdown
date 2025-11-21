@@ -1,6 +1,6 @@
 {
   "name": "@stampdwn/codemirror",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Stampdown language parser for CodeMirror 6",
   "keywords": [
     "markdown",
