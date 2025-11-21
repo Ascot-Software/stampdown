@@ -20,6 +20,7 @@ To learn more about each package refer to the `README.md` files located in each 
 - [`@stampdwn/core/README.md`](../packages/core/README.md)
 - [`@stampdwn/cli/README.md`](../packages/cli/README.md)
 - [`@stampdwn/llm/README.md`](../packages/llm/README.md)
+- [`@stampdwn/codemirror/README.md`](../packages/codemirror/README.md)
 - [`@stampdwn/vscode/README.md`](../packages/vscode/README.md)
 
 ### API Documentation

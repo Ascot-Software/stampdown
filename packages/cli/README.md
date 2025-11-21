@@ -4,16 +4,8 @@ Command-line interface for Stampdown template compilation and processing.
 
 ## Installation
 
-### Global Installation
-
 ```bash
 npm install -g @stampdwn/cli
-```
-
-### Local Installation
-
-```bash
-npm install @stampdwn/cli
 ```
 
 ## Usage
@@ -175,20 +167,6 @@ stampdown batch <templates-dir> [options]
 - `-h, --helpers <file>` - Custom helpers module
 - `-p, --partials <dir>` - Partials directory
 - `--ext <ext>` - Template file extension (default: `.sdt`)
-
-### `init`
-
-Initialize a new Stampdown project.
-
-```bash
-stampdown init [project-name]
-```
-
-Creates a new project with:
-- Sample templates
-- Configuration file (`stampdown.config.js`)
-- Package.json with scripts
-- Basic folder structure
 
 ## Configuration File
 

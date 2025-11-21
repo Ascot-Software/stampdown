@@ -5,10 +5,6 @@
   "version": "0.1.2",
   "publisher": "AscotSoftware",
   "icon": "./ext-icon.png",
-  "scripts": {
-    "package": "vsce package",
-    "publish": "vsce publish"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Ascot-Software/stampdown.git",

@@ -19,7 +19,6 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "publish": "npm publish --access public",
     "api": "api-extractor run",
     "docs": "api-documenter markdown --input-folder ./temp --output-folder ./docs",
     "ai-docs": "mkdir -p ../../.github/api/core/ && cp ./docs/**.md ../../.github/api/core/ && python -m ../../scripts/flatten_api_docs.py ../../.github/api/core > ../../.github/api/core.md && rm -rf ../../.github/api/core/"
