@@ -11,14 +11,6 @@ This package provides syntax highlighting for Stampdown templates in CodeMirror 
 - Lightweight implementation with minimal overhead
 - Drop-in language support for CodeMirror 6
 
-### Supported Syntax
-
-- **Variables**: `{{variable}}`, `{{object.property}}`
-- **Block Helpers**: `{{#if}}...{{/if}}`, `{{#each}}...{{/each}}`
-- **Self-Closing Helpers**: `{{#helper arg/}}`
-- **Partials**: `{{> partialName}}`
-- **Comments**: `{{! comment }}`
-
 ## Installation
 
 ```bash
@@ -81,32 +73,32 @@ const editor = new EditorView({
 The language parser adds CSS classes to Stampdown syntax elements. Style them in your CSS:
 
 ```css
-/* Variables: {{name}} */
+/* Variables: */
 .stampdown-variable {
   color: #9cdcfe;
   font-weight: 500;
 }
 
-/* Block helpers: {{#if}}, {{/if}} */
+/* Block helpers: */
 .stampdown-block-open,
 .stampdown-block-close {
   color: #c586c0;
   font-weight: bold;
 }
 
-/* Self-closing helpers: {{#helper arg/}} */
+/* Self-closing helpers: */
 .stampdown-self-closing {
   color: #4ec9b0;
   font-weight: 600;
 }
 
-/* Partials: {{> partial}} */
+/* Partials: */
 .stampdown-partial {
   color: #dcdcaa;
   font-style: italic;
 }
 
-/* Comments: {{! comment }} */
+/* Comments: */
 .stampdown-comment {
   color: #6a9955;
   font-style: italic;
@@ -258,64 +250,6 @@ onUnmounted(() => {
 </script>
 ```
 
-## Advanced Usage
-
-### Custom Themes
-
-```javascript
-import { EditorView } from '@codemirror/view'
-import { stampdown } from '@stampdwn/codemirror'
-
-const customTheme = EditorView.theme({
-  '.stampdown-variable': {
-    color: '#ff6b6b',
-    fontWeight: '600'
-  },
-  '.stampdown-block-open, .stampdown-block-close': {
-    color: '#4ecdc4',
-    fontWeight: 'bold',
-    backgroundColor: 'rgba(78, 205, 196, 0.1)',
-    padding: '2px 4px',
-    borderRadius: '3px'
-  },
-  '.stampdown-comment': {
-    color: '#95a5a6',
-    fontStyle: 'italic',
-    opacity: 0.7
-  }
-}, { dark: false })
-
-const editor = new EditorView({
-  extensions: [
-    basicSetup,
-    stampdown(),
-    customTheme
-  ],
-  parent: document.querySelector('#editor')
-})
-```
-
-### Read-Only Template Viewer
-
-```javascript
-import { EditorView, basicSetup } from 'codemirror'
-import { EditorState } from '@codemirror/state'
-import { stampdown } from '@stampdwn/codemirror'
-
-const viewer = new EditorView({
-  state: EditorState.create({
-    doc: templateContent,
-    extensions: [
-      basicSetup,
-      stampdown(),
-      EditorState.readOnly.of(true),
-      EditorView.editable.of(false)
-    ]
-  }),
-  parent: document.querySelector('#template-viewer')
-})
-```
-
 ## Related Packages
 
 This package is part of the Stampdown ecosystem:
@@ -323,7 +257,7 @@ This package is part of the Stampdown ecosystem:
 - [@stampdwn/core](https://www.npmjs.com/package/@stampdwn/core) - Core templating engine
 - [@stampdwn/cli](https://www.npmjs.com/package/@stampdwn/cli) - Command-line interface
 - [@stampdwn/llm](https://www.npmjs.com/package/@stampdwn/llm) - LLM plugin for prompt templating
-- [stampdown-language-support](https://marketplace.visualstudio.com/items?itemName=AscotSoftware.stampdown-language-support) - VS Code extension
+- [@stampdwn/vscode](https://marketplace.visualstudio.com/items?itemName=AscotSoftware.stampdown-language-support) - VS Code extension
 
 ## Resources
 

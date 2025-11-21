@@ -1,837 +1,157 @@
 # Stampdown
 
-A Markdown templating language based on Handlebars with expressions, operators, partials, block helpers, and hooks.
+Stampdown is a simple Markdown templating language with a minimal, Handlebars‑style syntax. It uses a template and an input object to generate a Markdown document.
 
-## Installation
+## Why Stampdown?
 
-### Core Package
+- **Dynamic Markdown**: Author content as Markdown; make it dynamic with templating features.
+- **Expressive**: Conditionals, loops, inline math/string/date helpers, subexpressions, and assignment.
+- **Composable**: Partials, partial blocks, inline partials, and plugins keep large templates maintainable.
+- **Performant**: Precompile to tiny JS functions (tree‑shake helpers) for 10× faster render throughput.
+- **Tooling**: CLI for build pipelines, VS Code & CodeMirror syntax highlighting.
 
-For the main templating engine with built-in helpers and standard plugins:
+## Example
 
-```bash
-npm install @stampdwn/core
-```
+Template file (`welcome.sdt`):
+```markdown
+# Welcome, {{user.name}}!
 
-### Specialized Packages
-
-- **CLI Tool**: `npm install @stampdwn/cli`
-- **LLM Plugin**: `npm install @stampdwn/llm`
-- **VS Code Extension**: Install from VS Code marketplace or `packages/vscode/`
-
-## Quick Start
-
-```typescript
-import { Stampdown } from '@stampdwn/core';
-
-const stampdown = new Stampdown();
-const result = stampdown.render('Hello {{name}}!', { name: 'World' });
-console.log(result); // "Hello World!"
-```
-
-## Packages
-
-This repository is organized as a monorepo with the following packages:
-
-| Package | Description | Version |
-|---------|-------------|---------|
-| [`@stampdwn/core`](packages/core/) | Core templating engine with built-in helpers and standard plugins | ![npm](https://img.shields.io/npm/v/@stampdwn/core) |
-| [`@stampdwn/cli`](packages/cli/) | Command-line interface for template compilation and processing | ![npm](https://img.shields.io/npm/v/@stampdwn/cli) |
-| [`@stampdwn/llm`](packages/llm/) | Specialized plugin for LLM prompt templating with multi-provider support | ![npm](https://img.shields.io/npm/v/@stampdwn/llm) |
-| [`@stampdwn/vscode`](packages/vscode/) | VS Code extension with syntax highlighting for `.sdt` files | - |
-
-## Features
-
-### Expressions
-
-Interpolate variables with dot notation for nested properties:
-
-```typescript
-stampdown.render('{{user.name}} ({{user.email}})', {
-  user: { name: 'Alice', email: 'alice@example.com' }
-});
-```
-
-### Block Helpers
-
-**if/else**
-```typescript
-const template = '{{#if premium}}Premium{{else}}Free{{/if}}';
-stampdown.render(template, { premium: true }); // "Premium"
-```
-
-**each**
-```typescript
-const template = '{{#each items}}- {{this}}\n{{/each}}';
-stampdown.render(template, { items: ['A', 'B', 'C'] });
-// Output:
-// - A
-// - B
-// - C
-```
-
-Special variables in `each`: `{{this}}`, `{{@index}}`, `{{@first}}`, `{{@last}}`
-
-**unless** - Inverse of `if`
-
-**with** - Change context scope
-
-**lookup** - Dynamic property access
-
-### Advanced Expressions
-
-Stampdown now supports Handlebars-compatible advanced expression features for more powerful templates.
-
-#### Comparison Operators
-
-Use comparison operators directly in `if` conditions:
-
-```typescript
-// Equality (strict and loose)
-{{#if tier === "gold"}}Premium{{/if}}
-{{#if status !== "inactive"}}Active{{/if}}
-{{#if count == 0}}Empty{{/if}}
-
-// Numeric comparisons
-{{#if age > 18}}Adult{{else}}Minor{{/if}}
-{{#if score >= 90}}A Grade{{/if}}
-{{#if price < 100}}Affordable{{/if}}
-{{#if stock <= 5}}Low Stock{{/if}}
-
-// Logical operators
-{{#if premium && verified}}Elite{{/if}}
-{{#if trial || demo}}Trial User{{/if}}
-{{#if !disabled}}Enabled{{/if}}
-
-// Complex expressions
-{{#if (age > 18) && (verified === true)}}Access Granted{{/if}}
-```
-
-**Supported Operators:**
-- **Equality**: `===`, `!==`, `==`, `!=`
-- **Comparison**: `>`, `<`, `>=`, `<=`
-- **Logical**: `&&`, `||`, `!`
-
-#### Else-If Chaining
-
-Chain multiple conditions with `else if`:
-
-```typescript
-const template = `
-{{#if score >= 90}}
-  Grade: A
-{{else if score >= 80}}
-  Grade: B
-{{else if score >= 70}}
-  Grade: C
-{{else if score >= 60}}
-  Grade: D
+{{#if user.premium}}
+**Premium Member**
 {{else}}
-  Grade: F
-{{/if}}
-`;
-
-stampdown.render(template, { score: 85 }); // "Grade: B"
-```
-
-Works with comparison operators and complex expressions:
-
-```typescript
-{{#if tier === "platinum"}}
-  Platinum Benefits
-{{else if tier === "gold" && points > 1000}}
-  Gold+ Benefits
-{{else if tier === "gold"}}
-  Gold Benefits
-{{else}}
-  Standard Benefits
-{{/if}}
-```
-
-#### Subexpressions
-
-Call helpers within helper arguments for composable logic:
-
-```typescript
-// Nested helper calls
-{{#if (gt (length items) 10)}}
-  Many items ({{length items}})
-{{else}}
-  Few items
-{{/if}}
-
-// Multiple levels of nesting
-{{#uppercase (concat firstName " " lastName)/}}
-
-// In conditions with comparisons
-{{#if (gt age 18) && verified}}
-  Verified adult
-{{/if}}
-
-// With custom helpers
-stampdown.registerHelper('double', (_ctx, _opts, n) => String(Number(n) * 2));
-stampdown.registerHelper('add', (_ctx, _opts, a, b) => String(Number(a) + Number(b)));
-
-{{#if (gt (double value) 100)}}Large{{/if}}
-{{#uppercase (add prefix suffix)/}}
-```
-
-**Subexpression syntax:** `(helperName arg1 arg2 ...)`
-
-Subexpressions work in:
-- Block helper conditions: `{{#if (helper arg)}}`
-- Regular expressions: `{{uppercase (helper arg)}}`
-- Self-closing helpers: `{{#uppercase (concat a b)/}}`
-- Nested within other subexpressions: `{{#if (gt (length arr) (add 5 3))}}`
-
-### Variable Assignment
-
-Dynamically set and modify context variables within templates:
-
-```typescript
-// Basic assignments
-{{ count = 0 }}
-{{ name = "Alice" }}
-{{ enabled = true }}
-
-// Template literals with interpolation
-{{ fullName = `${firstName} ${lastName}` }}
-{{ greeting = `Hello, ${user.name}!` }}
-
-// Arithmetic operations
-{{ total = price + tax }}
-{{ discountPrice = price * 0.8 }}
-{{ remaining = stock - sold }}
-
-// Nested property assignment
-{{ this.computed = value }}
-{{ user.displayName = `${user.first} ${user.last}` }}
-
-// Complex expressions
-{{ isEligible = age >= 18 && verified === true }}
-{{ finalPrice = basePrice + (basePrice * taxRate) }}
-```
-
-**Key Features:**
-- **No output**: Assignments modify context silently (return empty string)
-- **Context persistence**: Variables set in one place are available throughout the template
-- **Mutable context**: Works across block helpers (`#each`, `#with`, `#if`)
-- **Template literals**: JavaScript-style backtick strings with `${...}` interpolation
-- **Arithmetic support**: `+`, `-`, `*`, `/`, `%` operators
-
-**Accumulator Pattern:**
-
-```typescript
-const template = `
-{{ total = 0 }}
-{{#each items}}
-  {{ total = total + this.price }}
-{{/each}}
-Total: ${{total}}
-`;
-
-stampdown.render(template, {
-  items: [{ price: 10 }, { price: 20 }, { price: 30 }]
-});
-// Output: Total: $60
-```
-
-**Loop Enhancement:**
-
-```typescript
-{{#each users}}
-  {{ this.fullName = `${this.firstName} ${this.lastName}` }}
-  - {{this.fullName}}
-{{/each}}
-```
-
-### Partials
-
-Reuse template snippets with powerful Handlebars-compatible features:
-
-**Basic Partials**
-```typescript
-const stampdown = new Stampdown({
-  partials: {
-    header: '# {{title}}\n*By {{author}}*'
-  }
-});
-
-stampdown.render('{{> header}}\n\nContent...', {
-  title: 'My Post',
-  author: 'Jane'
-});
-```
-
-**Advanced Partial Features**
-
-Stampdown supports all Handlebars partial features:
-
-- **Dynamic Partials**: `{{> (expression) }}` - Select partial at runtime
-- **Partial Contexts**: `{{> myPartial customContext}}` - Pass specific context
-- **Hash Parameters**: `{{> button text="Save" variant=primary}}` - Pass parameters
-- **Partial Blocks**: `{{#> layout}}content{{/layout}}` - Layouts with `@partial-block`
-- **Inline Partials**: `{{#*inline "name"}}...{{/inline}}` - Define partials inline
-
-```typescript
-// Dynamic partial selection
-stampdown.render('{{> (cardType) }}', { cardType: 'userCard' });
-
-// Partial with context
-stampdown.render('{{> userCard person}}', {
-  person: { name: 'Alice' }
-});
-
-// Partial with parameters
-stampdown.render('{{> button text="Click me" size=large}}', {});
-
-// Layout with @partial-block
-const stampdown = new Stampdown({
-  partials: { layout: '<div>{{> @partial-block}}</div>' }
-});
-stampdown.render('{{#> layout}}Content{{/layout}}', {});
-// Output: <div>Content</div>
-```
-
-See [Advanced Partials Guide](docs/ADVANCED-PARTIALS.md) for complete documentation.
-
-Or register dynamically:
-```typescript
-stampdown.registerPartial('footer', '© {{year}} {{company}}');
-```
-
-### Custom Helpers
-
-```typescript
-const stampdown = new Stampdown({
-  helpers: {
-    uppercase: (_ctx, _opts, text) => String(text).toUpperCase()
-  }
-});
-
-stampdown.render('{{#uppercase name}}{{/uppercase}}', { name: 'hello' }); // "HELLO"
-
-// Or use self-closing syntax (shorter!)
-stampdown.render('{{#uppercase name/}}', { name: 'hello' }); // "HELLO"
-```
-
-### Self-Closing Blocks
-
-For simple helpers, use self-closing block syntax to reduce verbosity:
-
-```typescript
-// Regular syntax (with closing tag)
-{{#uppercase name}}{{/uppercase}}
-
-// Self-closing block syntax (30-40% fewer characters!)
-{{#uppercase name/}}
-
-// Works with any helper that returns a value
-{{#capitalize title/}}
-{{#add x y/}}
-{{#multiply price quantity/}}
-```
-
-**The `{{#.../}}` syntax:**
-- Uses `#` to indicate a helper call (like block helpers)
-- Ends with `/}}` instead of a closing tag (self-closing)
-- Perfect for helpers that transform values without needing content blocks
-
-**Benefits:**
-- **Concise**: 30-40% fewer characters than regular block syntax
-- **Readable**: Cleaner, more intuitive templates
-- **Flexible**: Works with built-in and custom helpers
-
-**When to use:**
-- ✓ String transformations: `{{#uppercase text/}}`
-- ✓ Math operations: `{{#add a b/}}`
-- ✓ Single-argument helpers: `{{#double value/}}`
-- ✓ Helpers that return values directly
-- ✗ Loops and conditionals: Use regular syntax for `if`, `each`, etc. (they need content blocks)
-
-### Hooks
-
-Transform templates before or after rendering:
-
-```typescript
-const stampdown = new Stampdown({
-  hooks: {
-    preProcess: [(input) => input.replace(/\[VERSION\]/g, '1.0.0')],
-    postProcess: [(output) => output.trim()]
-  }
-});
-```
-
-### Plugin System
-
-Extend Stampdown with reusable plugin packages:
-
-```typescript
-import { Stampdown, createPlugin } from '@stampdwn/core';
-
-// Create a plugin
-const mathPlugin = createPlugin({
-  name: 'math-helpers',
-  version: '1.0.0',
-  description: 'Mathematical helper functions',
-  plugin: (stampdown) => {
-    stampdown.registerHelper('add', (_ctx, _opts, a, b) => Number(a) + Number(b));
-    stampdown.registerHelper('multiply', (_ctx, _opts, a, b) => Number(a) * Number(b));
-  }
-});
-
-// Use the plugin
-const stampdown = new Stampdown({
-  plugins: [mathPlugin]
-});
-
-stampdown.render('{{#add 5 3}}{{/add}}', {}); // "8"
-```
-
-**Plugins with Options:**
-
-```typescript
-const configPlugin = createPlugin({
-  name: 'config-plugin',
-  plugin: (stampdown, options) => {
-    const prefix = options?.prefix || 'Default';
-    stampdown.registerHelper('prefixed', (_ctx, _opts, text) => {
-      return `${prefix}: ${String(text)}`;
-    });
-  }
-});
-
-const stampdown = new Stampdown({
-  plugins: [
-    { plugin: configPlugin, options: { prefix: 'Custom' } }
-  ]
-});
-```
-
-**Built-in Plugin Packs:**
-
-Stampdown provides ready-to-use plugin packs for common operations:
-- **stringHelpersPlugin** - uppercase, lowercase, capitalize, trim, repeat, truncate
-- **mathHelpersPlugin** - add, subtract, multiply, divide, mod, round, min, max
-- **dateHelpersPlugin** - formatDate, now, timeAgo
-- **arrayHelpersPlugin** - join, length, slice, reverse, sort
-- **debugPlugin** - json, typeof, keys, values
-
-Import plugins individually:
-
-```typescript
-import { Stampdown } from '@stampdwn/core';
-import { stringHelpersPlugin } from '@stampdwn/core/plugins';
-import { mathHelpersPlugin } from '@stampdwn/core/plugins';
-
-const stampdown = new Stampdown({
-  plugins: [stringHelpersPlugin, mathHelpersPlugin]
-});
-
-stampdown.render('{{#uppercase name}}{{/uppercase}}', { name: 'hello' }); // "HELLO"
-stampdown.render('{{#multiply 6 7}}{{/multiply}}', {}); // "42"
-```
-
-Or import all at once:
-
-```typescript
-import { Stampdown } from '@stampdwn/core';
-import { stringHelpersPlugin, mathHelpersPlugin } from '@stampdwn/core/plugins';
-
-// ... use as above
-```
-
-## Precompiler
-
-For production applications, precompile your templates to optimized JavaScript functions for faster rendering and reduced bundle sizes.
-
-### Basic Precompilation
-
-```typescript
-import { Stampdown, Precompiler } from '@stampdwn/core';
-
-const precompiler = new Precompiler();
-const stampdown = new Stampdown();
-
-// Precompile a template
-const template = 'Hello {{name}}!';
-const compiled = precompiler.precompile(template, {
-  templateId: 'greeting'
-});
-
-// Create executable function from generated code
-const templateFn = new Function('context', 'stampdown', compiled.code);
-
-// Register the precompiled template
-stampdown.registerPrecompiledTemplate('greeting', templateFn);
-
-// Render using the precompiled template
-const result = stampdown.renderPrecompiled('greeting', { name: 'World' });
-console.log(result); // "Hello World!"
-```
-
-### Known Helpers (Tree-Shaking)
-
-Reduce bundle size by specifying which helpers your templates use:
-
-```typescript
-const compiled = precompiler.precompile(template, {
-  templateId: 'user-profile',
-  knownHelpers: ['uppercase', 'formatDate'], // Only include these helpers
-  strict: true // Throw error if unknown helpers are used
-});
-
-// Or include all helpers
-const compiled2 = precompiler.precompile(template, {
-  knownHelpers: 'all' // Include all registered helpers
-});
-```
-
-**Strict vs Non-Strict Mode:**
-
-- **Strict mode** (`strict: true`): Throws error if template uses helpers not in `knownHelpers`
-- **Non-strict mode** (default): Logs warning but continues compilation
-
-### Template Registry
-
-Precompiled templates are stored in a readonly registry:
-
-```typescript
-// Check if template exists
-if (stampdown.hasPrecompiledTemplate('greeting')) {
-  const result = stampdown.renderPrecompiled('greeting', context);
-}
-
-// Get all registered template IDs
-const templateIds = stampdown.getPrecompiledTemplateIds();
-console.log(templateIds); // ['greeting', 'user-profile', ...]
-```
-
-### Build-Time Precompilation
-
-For optimal performance, precompile templates during your build process:
-
-**precompile-templates.js**
-```typescript
-import { Precompiler } from '@stampdwn/core';
-import { readFileSync, writeFileSync } from 'fs';
-import { glob } from 'glob';
-
-const precompiler = new Precompiler();
-
-// Find all template files
-const templates = glob.sync('src/templates/**/*.sdt');
-
-const output = ['// Auto-generated precompiled templates'];
-output.push('export const precompiledTemplates = {');
-
-templates.forEach(file => {
-  const source = readFileSync(file, 'utf-8');
-  const templateId = file.replace(/^src\/templates\//, '').replace(/\.sdt$/, '');
-
-  const compiled = precompiler.precompile(source, {
-    templateId,
-    knownHelpers: ['uppercase', 'lowercase', 'formatDate', 'if', 'each']
-  });
-
-  output.push(`  '${templateId}': function(context, stampdown) {`);
-  output.push(compiled.code.split('\n').map(line => '    ' + line).join('\n'));
-  output.push('  },');
-});
-
-output.push('};');
-
-writeFileSync('src/templates.generated.js', output.join('\n'));
-```
-
-**Usage in your app:**
-```typescript
-import { Stampdown } from '@stampdwn/core';
-import { precompiledTemplates } from './templates.generated';
-
-const stampdown = new Stampdown();
-
-// Register all precompiled templates
-Object.entries(precompiledTemplates).forEach(([id, fn]) => {
-  stampdown.registerPrecompiledTemplate(id, fn);
-});
-
-// Render instantly without parsing
-const html = stampdown.renderPrecompiled('user/profile', userData);
-```
-
-### Performance Benefits
-
-Precompiled templates provide significant performance improvements:
-
-- **Faster rendering**: No parsing or AST traversal at runtime
-- **Smaller bundles**: Tree-shake unused helpers with `knownHelpers`
-- **Type safety**: Generated code is plain JavaScript
-- **Caching**: Templates are compiled once, rendered many times
-
-**Benchmark example:**
-```typescript
-// Regular rendering: ~1000 renders/sec
-stampdown.render(template, context);
-
-// Precompiled rendering: ~10,000 renders/sec
-stampdown.renderPrecompiled('templateId', context);
-```
-
-### CLI Tool
-
-Stampdown includes a command-line tool for precompiling templates in build scripts:
-
-```bash
-# Install globally
-npm install -g stampdown
-
-# Or use npx
-npx stampdown-precompile [options]
-```
-
-**Basic Usage:**
-
-```bash
-# Precompile all .sdt files in a directory
-stampdown-precompile -i "templates/**/*.sdt" -o dist/templates
-
-# Specify known helpers for tree-shaking
-stampdown-precompile -i "src/**/*.sdt" -k "uppercase,lowercase,if,each"
-
-# Generate CommonJS modules
-stampdown-precompile -i "templates/*.sdt" -f cjs -o build
-
-# Strict mode with verbose output
-stampdown-precompile -i "src/**/*.sdt" -s -v
-
-# Watch mode for development
-stampdown-precompile -i "templates/**/*.sdt" -w
-```
-
-**CLI Options:**
-
-| Option | Description |
-|--------|-------------|
-| `-i, --input <glob>` | Input file or glob pattern (e.g., "src/**/*.sdt") |
-| `-o, --output <dir>` | Output directory (default: "./precompiled") |
-| `-k, --known-helpers <list>` | Comma-separated list of known helpers (or "all") |
-| `-s, --strict` | Strict mode - error on unknown helpers |
-| `-f, --format <format>` | Output format: esm, cjs, or json (default: esm) |
-| `-w, --watch` | Watch mode - recompile on file changes |
-| `-m, --source-map` | Generate source maps |
-| `-v, --verbose` | Verbose output |
-| `-h, --help` | Show help message |
-
-**Integration with Build Tools:**
-
-Add to your `package.json`:
-
-```json
-{
-  "scripts": {
-    "precompile": "stampdown-precompile -i 'src/templates/**/*.sdt' -o dist/templates -k 'all'",
-    "build": "npm run precompile && your-build-command",
-    "dev": "stampdown-precompile -i 'src/templates/**/*.sdt' -w & your-dev-server"
-  }
-}
-```
-
-**Using Precompiled Templates:**
-
-```typescript
-// ESM format (default)
-import { Stampdown } from '@stampdwn/core';
-import { templates } from './dist/templates.mjs';
-
-const stampdown = new Stampdown();
-
-// Register all templates
-Object.entries(templates).forEach(([id, fn]) => {
-  stampdown.registerPrecompiledTemplate(id, fn);
-});
-
-// Render
-const output = stampdown.renderPrecompiled('welcome', { name: 'Alice' });
-```
-
-```typescript
-// CJS format
-const { Stampdown } = require('stampdown');
-const { templates } = require('./dist/templates.cjs');
-
-const stampdown = new Stampdown();
-
-Object.entries(templates).forEach(([id, fn]) => {
-  stampdown.registerPrecompiledTemplate(id, fn);
-});
-
-const output = stampdown.renderPrecompiled('welcome', { name: 'Bob' });
-```
-
-**See [CLI Reference](docs/CLI.md) for complete CLI documentation.**
-
-### Source Maps
-
-Enable source map generation for debugging:
-
-```typescript
-const compiled = precompiler.precompile(template, {
-  templateId: 'debug-template',
-  sourceMap: true // Generate source map
-});
-
-console.log(compiled.sourceMap); // Basic source map for debugging
-```
-
-### Precompiled Template Structure
-
-The `precompile()` method returns:
-
-```typescript
-interface PrecompiledTemplate {
-  code: string;           // Generated JavaScript code
-  usedHelpers: string[];  // List of helpers used in template
-  source: string;         // Original template source
-  templateId?: string;    // Template identifier
-  sourceMap?: string;     // Source map if enabled
-}
-```
-
-## Template Files (.sdt)
-
-Use dedicated template files with syntax highlighting:
-
-**template.sdt**
-```stampdown
-# {{title}}
-
-{{#if description}}
-{{description}}
+Free Tier
 {{/if}}
 
 {{#each items}}
 - {{this}}
 {{/each}}
+
+{{#*inline "footer"}}
+---
+Generated on {{#formatDate now "YYYY-MM-DD"/}}
+{{/inline}}
+
+{{> footer}}
 ```
 
-**Load and render:**
+Render code:
 ```typescript
-import { TemplateLoader } from '@stampdwn/core';
+import { Stampdown } from '@stampdwn/core';
+import { dateHelpersPlugin, stringHelpersPlugin } from '@stampdwn/core/plugins';
+import { readFileSync } from 'fs';
 
-const loader = new TemplateLoader();
+const stampdown = new Stampdown({ plugins: [dateHelpersPlugin, stringHelpersPlugin] });
 
-// Async
-const template = await loader.load('./template.sdt');
-const output = template.render({ title: 'Hello', items: ['A', 'B'] });
+const templateSource = readFileSync('welcome.sdt', 'utf-8');
+const data = {
+  user: { name: 'Alice', premium: true },
+  items: ['Getting Started Guide', 'FAQ', 'Release Notes'],
+  now: new Date()
+};
 
-// Sync (Node.js)
-const template2 = loader.loadSync('./template.sdt');
-
-// Compile from string
-const template3 = loader.compile('Hello {{name}}!');
+const output = stampdown.render(templateSource, data);
+console.log(output);
 ```
 
-**Caching:**
-```typescript
-// Templates are cached by default
-loader.clearCache('./template.sdt'); // Clear specific
-loader.clearCache(); // Clear all
+Resulting Markdown (rendered output):
+```markdown
+# Welcome, Alice!
+
+**Premium Member**
+
+- Getting Started Guide
+- FAQ
+- Release Notes
+
+---
+Generated on 2025-11-21
 ```
-
-### VS Code Extension
-
-Install syntax highlighting for `.sdt` files:
-
-https://marketplace.visualstudio.com/items?itemName=AscotSoftware.stampdown-language-support
-
-Features:
-- Syntax highlighting for expressions, helpers, partials, comments
-- Auto-closing pairs
-- Code folding for block helpers
-- Markdown support within templates
-
-## API Reference
-
-### Stampdown
-
-```typescript
-new Stampdown(options?: StampdownOptions)
-```
-
-**Methods:**
-- `render(template: string, context?: Context): string`
-- `registerPartial(name: string, content: string): void`
-- `registerHelper(name: string, helper: Helper): void`
-- `addPreProcessHook(hook: Hook): void`
-- `addPostProcessHook(hook: Hook): void`
-- `renderPrecompiled(templateId: string, context?: Context): string`
-- `registerPrecompiledTemplate(templateId: string, templateFn: PrecompiledTemplateFn): void`
-- `hasPrecompiledTemplate(templateId: string): boolean`
-- `getPrecompiledTemplateIds(): string[]`
-
-### Precompiler
-
-```typescript
-new Precompiler()
-```
-
-**Methods:**
-- `precompile(template: string, options?: PrecompileOptions): PrecompiledTemplate`
-
-**Options:**
-```typescript
-interface PrecompileOptions {
-  templateId?: string;           // Identifier for the template
-  knownHelpers?: string[] | 'all'; // Helpers to include (for tree-shaking)
-  strict?: boolean;              // Throw error on unknown helpers
-  sourceMap?: boolean;           // Generate source map
-}
-```
-
-**Returns:**
-```typescript
-interface PrecompiledTemplate {
-  code: string;           // Generated JavaScript function body
-  usedHelpers: string[];  // Helpers referenced in template
-  source: string;         // Original template source
-  templateId?: string;    // Template identifier if provided
-  sourceMap?: string;     // Source map if enabled
-}
-```
-
-### TemplateLoader
-
-```typescript
-new TemplateLoader(options?: StampdownOptions)
-```
-
-**Methods:**
-- `async load(filePath: string, useCache?: boolean): Promise<CompiledTemplate>`
-- `loadSync(filePath: string, useCache?: boolean): CompiledTemplate`
-- `compile(source: string): CompiledTemplate`
-- `clearCache(filePath?: string): void`
-
-### CompiledTemplate
-
-- `render(context?: Context): string`
-- `source: string` - Original template source
 
 ## Packages
 
-- **[@stampdwn/core](packages/core/README.md)** - Stampdown core library
-- **[@stampdwn/cli](packages/cli/README.md)** - CLI tool
-- **[@stampdwn/codemirror](packages/codemirror/README.md)** - Code Mirror language support plugin
-- **[@stampdwn/llm](packages/llm/README.md)** - Plugins designed for prompt-engineering
-- **[@stampdwn/vscode](packages/vscode/README.md)** - VSCode extension for Stampdown language support
+| Package | Description | Version |
+|---------|-------------|---------|
+| [`@stampdwn/core`](packages/core/) | Core templating engine with built‑in helpers and plugin system | ![npm](https://img.shields.io/npm/v/@stampdwn/core) |
+| [`@stampdwn/cli`](packages/cli/) | CLI for compiling, rendering, batching, project scaffolding | ![npm](https://img.shields.io/npm/v/@stampdwn/cli) |
+| [`@stampdwn/llm`](packages/llm/) | LLM prompt engineering helpers (chat normalization, tokens) | ![npm](https://img.shields.io/npm/v/@stampdwn/llm) |
+| [`@stampdwn/codemirror`](packages/codemirror/) | CodeMirror language support (inline highlighting) | ![npm](https://img.shields.io/npm/v/@stampdwn/codemirror) |
+| [`@stampdwn/vscode`](packages/vscode/) | VS Code extension for `.sdt` templates | - |
+
+## API Docs
+
+| Package | API Reference |
+|---------|---------------|
+| Core | [`packages/core/docs/index.md`](packages/core/docs/index.md) |
+| CLI | [`packages/cli/docs/index.md`](packages/cli/docs/index.md) |
+| LLM | [`packages/llm/docs/index.md`](packages/llm/docs/index.md) |
+| CodeMirror | [`packages/codemirror/docs/index.md`](packages/codemirror/docs/index.md) |
+| VS Code | (Extension commands & grammar – no generated API) |
+
+## Feature Overview (High Level)
+
+- **Expressions & Operators**: Dot access, literals, comparison & logical operators, subexpressions.
+- **Loops & Context**: `#each`, `#with`, iteration metadata (`@index`, `@first`, `@last`).
+- **Built‑in Helpers**: Strings, math, dates, arrays, debug (opt‑in via plugins).
+- **Partials**: Static, dynamic, context passing, hash params, inline partials, partial blocks (`#>` / `@partial-block`).
+- **Custom Helpers**: Register synchronous helpers (`(context, options, ...args) => string`).
+- **Variable Assignment**: Mutate context inline: `{{ total = total + item.price }}`.
+- **Hooks**: Pre/post process transforms for template or output.
+- **Plugins**: Load helper bundles or author your own via `createPlugin/definePlugin`.
+- **Precompiling**: Convert templates to lean JS functions; specify `knownHelpers` for tree‑shaking.
+- **CLI**: Compile, render, batch, watch, strict helper validation, source maps.
+- **Editor Tooling**: VS Code & CodeMirror highlighting for `.sdt`, including helpers & partial syntax.
+
+## Getting Started
+
+```bash
+npm install @stampdwn/core
+```
+
+```typescript
+import { Stampdown } from '@stampdwn/core';
+const engine = new Stampdown();
+engine.render('Hello {{name}}', { name: 'World' });
+```
+
+Add helper plugins:
+```typescript
+import { stringHelpersPlugin, mathHelpersPlugin } from '@stampdwn/core/plugins';
+const engine = new Stampdown({ plugins: [stringHelpersPlugin, mathHelpersPlugin] });
+```
+
+## Precompile
+
+```typescript
+import { Precompiler, Stampdown } from '@stampdwn/core';
+const pre = new Precompiler();
+const compiled = pre.precompile('Hi {{name}}', { templateId: 'greet', knownHelpers: ['if'] });
+const fn = new Function('context', 'stampdown', compiled.code);
+const sd = new Stampdown();
+sd.registerPrecompiledTemplate('greet', fn);
+sd.renderPrecompiled('greet', { name: 'Ada' });
+```
+
+## CLI
+
+```bash
+stampdown compile "templates/**/*.sdt" --output dist/ --format esm
+stampdown render template.sdt --data data.json --partials partials/
+stampdown batch templates/ --data-dir data/ --output dist/
+```
+
+## Editor Extensions
+
+- **VS Code**: Install "Stampdown Language Support" for `.sdt` syntax, folding & comments.
+- **CodeMirror**: Use `@stampdwn/codemirror` to extend Markdown highlighting with Stampdown tokens.
 
 ## Development
 
 ```bash
-npm install        # Install dependencies
-npm run build      # Build TypeScript
-npm test           # Run tests
-npm run lint       # Lint code
-npm run format     # Format code
+npm install
+npm run build
+npm test
+npm run lint
+npm run format
 ```
 
 ## License

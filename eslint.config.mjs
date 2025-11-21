@@ -1,7 +1,6 @@
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import prettier from 'eslint-plugin-prettier';
 import tsdoc from 'eslint-plugin-tsdoc';
-import jsdoc from 'eslint-plugin-jsdoc';
 import globals from 'globals';
 import tsParser from '@typescript-eslint/parser';
 import js from '@eslint/js';
@@ -18,7 +17,6 @@ export default [
   },
   // ESLint recommended for all files
   js.configs.recommended,
-  jsdoc.configs['flat/recommended'],
   // TypeScript ESLint configs only for TypeScript files
   {
     files: ['**/*.ts'],

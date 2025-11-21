@@ -21,7 +21,7 @@
     "publish": "npm publish --access public",
     "api": "api-extractor run",
     "docs": "api-documenter markdown --input-folder ./temp --output-folder ./docs",
-    "ai-docs": "mkdir -p ../../.github/api/llm/ && cp ./docs/**.md ../../.github/api/llm/"
+    "ai-docs": "mkdir -p ../../.github/api/llm/ && cp ./docs/**.md ../../.github/api/llm/ && python -m ../../scripts/flatten_api_docs.py ../../.github/api/llm > ../../.github/api/llm.md && rm -rf ../../.github/api/llm/"
   },
   "keywords": [
     "llm",

@@ -26,10 +26,10 @@ To learn more about each package refer to the `README.md` files located in each 
 API documentation is generated using API Extractor and API Documenter.
 You can find the generated API docs in the `api/` directory:
 
-- [`@stampdwn/core API Docs`](../.github/api/core/index.md)
-- [`@stampdwn/cli API Docs`](../.github/api/cli/index.md)
-- [`@stampdwn/llm API Docs`](../.github/api/llm/index.md)
-- [`@stampdwn/codemirror API Docs`](../.github/api/codemirror/api.md)
+- [`@stampdwn/core API Docs`](../.github/api/core.md)
+- [`@stampdwn/cli API Docs`](../.github/api/cli.md)
+- [`@stampdwn/llm API Docs`](../.github/api/llm.md)
+- [`@stampdwn/codemirror API Docs`](../.github/api/codemirror.md)
 
 ## Development Guidelines
 

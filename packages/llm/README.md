@@ -58,7 +58,7 @@ All providers are normalized to a consistent internal format, so your templates 
 #### `withChat`
 Normalizes raw chat payload and sets as block context.
 
-```handlebars
+```markdown
 {{#withChat raw=chat}}
   <!-- chat is now normalized and available as context -->
 {{/withChat}}
@@ -69,18 +69,18 @@ Normalizes raw chat payload and sets as block context.
 #### `eachMessage`
 Iterates over all messages with special variables.
 
-```handlebars
+```markdown
 {{#eachMessage}}
-  Message {{@index}}: {{#firstText this/}}
+  **Message** {{@index}}: {{#firstText this/}}
 {{/eachMessage}}
 ```
 
 #### `eachByRole`
 Iterates over messages filtered by role.
 
-```handlebars
+```markdown
 {{#eachByRole role="user"}}
-  User {{@index}}: {{#firstText this/}}
+  **User** {{@index}}: {{#firstText this/}}
 {{/eachByRole}}
 ```
 
@@ -89,7 +89,7 @@ Iterates over messages filtered by role.
 #### `ifUser`, `ifAssistant`, `ifSystem`, `ifTool`
 Conditional rendering based on message role.
 
-```handlebars
+```markdown
 {{#eachMessage}}
   {{#ifUser}}👤 {{#firstText this/}}{{/ifUser}}
   {{#ifAssistant}}🤖 {{#firstText this/}}{{/ifAssistant}}
@@ -101,16 +101,16 @@ Conditional rendering based on message role.
 #### `eachContent`
 Iterates over all content items in a message.
 
-```handlebars
+```markdown
 {{#eachContent}}
-  Type: {{type}}, Content: {{#if type === "text"}}{{text}}{{/if}}
+  **Type**: {{type}}, **Content**: {{#if type === "text"}}{{text}}{{/if}}
 {{/eachContent}}
 ```
 
 #### `eachText`
 Iterates over text content only.
 
-```handlebars
+```markdown
 {{#eachText}}
   {{this}} <!-- text value -->
 {{/eachText}}
@@ -119,16 +119,16 @@ Iterates over text content only.
 #### `joinText`
 Joins all text content with separator.
 
-```handlebars
+```markdown
 {{#joinText messages sep=" | "/}}
 ```
 
 #### `firstText`, `lastText`
 Gets first or last text content from message.
 
-```handlebars
-First: {{#firstText message/}}
-Last: {{#lastText message/}}
+```markdown
+**First**: {{#firstText message/}}
+**Last**: {{#lastText message/}}
 ```
 
 ### Windowing & Tokens
@@ -136,7 +136,7 @@ Last: {{#lastText message/}}
 #### `window`
 Selects message range with optional role filter.
 
-```handlebars
+```markdown
 {{#window size=5 from="end" role="user"}}
   {{#eachMessage}}...{{/eachMessage}}
 {{/window}}
@@ -145,14 +145,14 @@ Selects message range with optional role filter.
 #### `tokenCount`
 Counts tokens in text using gpt-tokenizer.
 
-```handlebars
+```markdown
 Tokens: {{#tokenCount text/}}
 ```
 
 #### `truncateTokens`
 Truncates by token limit with different modes.
 
-```handlebars
+```markdown
 <!-- Truncate text -->
 {{#truncateTokens text max=100 on="text"/}}
 
@@ -170,7 +170,7 @@ Truncates by token limit with different modes.
 #### `json`, `yaml`, `toon`
 Stringifies value as JSON, YAML or TOON
 
-```handlebars
+```markdown
 {{#json chat/}}
 {{#yaml config/}}
 {{#toon chat/}}
@@ -179,12 +179,10 @@ Stringifies value as JSON, YAML or TOON
 #### `renderChat`
 Converts chat to provider-specific format.
 
-```handlebars
+```markdown
 {{#renderChat chat format="json" shape="openai"/}}
 {{#renderChat chat format="yaml" shape="anthropic"/}}
 ```
-
-## Advanced Usage
 
 ### Custom Tokenizer
 
@@ -211,89 +209,18 @@ const stampdown = new Stampdown({
 });
 ```
 
-### Complex Prompt Templates
+## API Docs
 
-Build sophisticated prompts with context windowing:
-
-```typescript
-const promptTemplate = `
-{{#withChat raw=conversation}}
-
-## System Context
-You are a helpful AI assistant.
-
-## Recent Context
-{{#window size=10 from="end"}}
-{{#eachMessage}}
-{{#ifUser}}**User**: {{#joinText this sep=" "/}}{{/ifUser}}
-{{#ifAssistant}}**Assistant**: {{#joinText this sep=" "/}}{{/ifAssistant}}
-
-{{/eachMessage}}
-{{/window}}
-
-## Current Query
-{{query}}
-
-Current token count: {{#tokenCount (renderChat this format="json" shape="openai")/}}
-
-{{/withChat}}
-`;
-
-const prompt = stampdown.render(promptTemplate, {
-  conversation: aiSdkPayload,
-  query: "What did we discuss about pricing?"
-});
-```
-
-### Multi-Provider Support Example
-
-```typescript
-// Works with any @ai-sdk compatible provider
-const templates = {
-  openai: stampdown.render(template, { chat: openaiPayload }),
-  anthropic: stampdown.render(template, { chat: anthropicPayload }),
-  vertex: stampdown.render(template, { chat: vertexPayload })
-};
-
-// All produce consistent output regardless of provider
-```
-
-## Type Definitions
-
-```typescript
-// Normalized types (provider-agnostic)
-type NormRole = 'system' | 'user' | 'assistant' | 'tool' | 'function';
-
-type NormContent =
-  | { type: 'text'; text: string }
-  | { type: 'image'; url?: string; data?: string; mime?: string }
-  | { type: 'tool_result'; toolName?: string; callId?: string; result: unknown };
-
-interface NormMessage {
-  role: NormRole;
-  name?: string;
-  content: NormContent[];
-  meta?: Record<string, unknown>;
-}
-
-interface NormChat {
-  provider: 'openai' | 'anthropic' | 'azure' | 'vertex' | 'other';
-  model?: string;
-  messages: NormMessage[];
-  meta?: Record<string, unknown>;
-}
-
-// Tokenizer interface
-interface Tokenizer {
-  count(text: string): number;
-  truncateByTokens(text: string, maxTokens: number): string;
-}
-```
+Full API reference: [`packages/llm/docs/index.md`](docs/index.md)
 
 ## Related Packages
 
-- [`@stampdwn/core`](https://www.npmjs.com/package/@stampdwn/core) - Core templating engine
-- [`@stampdwn/cli`](https://www.npmjs.com/package/@stampdwn/cli) - Command-line interface
+This package is part of the Stampdown ecosystem:
+
+- [@stampdwn/core](https://www.npmjs.com/package/@stampdwn/core) - Core templating engine
+- [@stampdwn/cli](https://www.npmjs.com/package/@stampdwn/cli) - Command-line interface
+- [@stampdwn/codemirror](https://www.npmjs.com/package/@stampdwn/codemirror) - Code mirror language support
+- [@stampdwn/vscode](https://marketplace.visualstudio.com/items?itemName=AscotSoftware.stampdown-language-support) - VS Code extension
 
 ## License
 
