@@ -10,4 +10,3 @@ export { mathHelpersPlugin } from './math-helpers';
 export { dateHelpersPlugin } from './date-helpers';
 export { arrayHelpersPlugin } from './array-helpers';
 export { debugPlugin } from './debug';
-// Note: llmPlugin is now in @stampdwn/llm package

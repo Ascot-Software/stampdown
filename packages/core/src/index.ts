@@ -1,27 +1,18 @@
 /**
- * Stampdown - A Markdown templating language
- * Main entry point
+ * Stampdown compatibility entry point
+ * @deprecated Import from '@stampdwn/core', '@stampdwn/core/server', or '@stampdwn/core/client' instead.
  */
 
-export { Stampdown, type PrecompiledTemplateFn } from './stampdown';
-export { Parser } from './parser';
-export { Renderer } from './renderer';
-export { HelperRegistry } from './helpers/registry';
-export type { Helper, HelperOptions } from './helpers/registry';
-export { ExpressionEvaluator } from './evaluator';
-export { TemplateLoader, type CompiledTemplate } from './loader';
-export { Precompiler, type PrecompileOptions, type PrecompiledTemplate } from './precompiler';
-export type { StampdownOptions, Context, Partial, Hook } from './types';
-export { definePlugin, createPlugin } from './plugin';
-export type { StampdownPlugin, PluginOptions, PluginConfig, PluginAPI } from './plugin';
+const deprecatedIndexImportWarningFlag = '__stampdwnCoreDeprecatedIndexImportWarning__';
+const deprecatedIndexImportWarningState = globalThis as typeof globalThis & {
+  __stampdwnCoreDeprecatedIndexImportWarning__?: boolean;
+};
 
-// Re-export plugins for convenience (can also import from '@stampdwn/core/plugins')
-export {
-  stringHelpersPlugin,
-  mathHelpersPlugin,
-  dateHelpersPlugin,
-  arrayHelpersPlugin,
-  debugPlugin,
-} from './plugins';
+if (!deprecatedIndexImportWarningState[deprecatedIndexImportWarningFlag]) {
+  deprecatedIndexImportWarningState[deprecatedIndexImportWarningFlag] = true;
+  console.warn(
+    "[stampdown] Importing from '@stampdwn/core/index' is deprecated. Use '@stampdwn/core', '@stampdwn/core/server', or '@stampdwn/core/client' instead."
+  );
+}
 
-// Note: llmPlugin is now in @stampdwn/llm package
+export * from './server';

@@ -74,6 +74,22 @@ Generated on 2025-11-21
 npm install @stampdwn/core
 ```
 
+## Runtime Entry Points
+
+`@stampdwn/core` now resolves to the right runtime entry automatically:
+
+- In Node.js, `@stampdwn/core` resolves to the server entry and includes `TemplateLoader`.
+- In browser bundlers that honor the `browser` export condition, `@stampdwn/core` resolves to the client entry and does not include `TemplateLoader`.
+
+If you need an explicit import path, use:
+
+```typescript
+import { Stampdown } from '@stampdwn/core/client';
+import { TemplateLoader } from '@stampdwn/core/server';
+```
+
+The legacy `@stampdwn/core/index` subpath remains available for compatibility, but it is deprecated and emits a runtime warning when imported directly.
+
 ## Features
 
 ### Variables

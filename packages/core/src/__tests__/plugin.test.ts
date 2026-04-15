@@ -2,7 +2,7 @@
  * Tests for the plugin system
  */
 
-import { Stampdown, createPlugin } from '../index';
+import { Stampdown, createPlugin } from '../server';
 
 describe('Plugin System', () => {
   it('should load and apply a simple plugin', () => {

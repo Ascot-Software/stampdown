@@ -22,6 +22,8 @@ Stampdown targets Node.js 24 or newer for local development and package runtime 
    npm install
    ```
 
+   `npm install` also enables the repository Git hooks through Husky.
+
 4. **Build all packages**
    ```bash
    npm run build
@@ -94,6 +96,9 @@ npm run lint
 
 # Format all packages
 npm run format
+
+# Run the automated validation suite used by the pre-commit hook
+npm run validate
 ```
 
 ### Code Quality
@@ -113,6 +118,8 @@ npm run format
 # Check formatting without making changes
 npm run format:check
 ```
+
+The pre-commit hook runs `npm run validate`, which executes linting, tests, and workspace builds before a commit is created.
 
 ### Testing
 
