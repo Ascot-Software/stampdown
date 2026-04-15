@@ -2,7 +2,7 @@
   "name": "stampdown-language-support",
   "displayName": "Stampdown",
   "description": "Language Support for Stampdown template files (.sdt)",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "AscotSoftware",
   "icon": "./ext-icon.png",
   "repository": {
