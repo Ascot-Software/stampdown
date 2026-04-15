@@ -3,7 +3,7 @@
  * Tests for LLM-focused helpers and message templating
  */
 
-import { Stampdown } from '@stampdwn/core';
+import { Stampdown } from '@stampdwn/core/client';
 import { llmPlugin } from '../index';
 import { encode } from '@toon-format/toon';
 

@@ -11,8 +11,8 @@ import type { NormChat, NormMessage, NormContent } from './types';
 import { NormChatSchema } from './types';
 import { AiSdkPayload, normalizeFromAiSdk } from './adapters/ai-sdk';
 import { defaultTokenizer, type Tokenizer } from './tokenizer';
-import type { Context } from '@stampdwn/core';
-import type { HelperOptions } from '@stampdwn/core';
+import type { Context } from '@stampdwn/core/client';
+import type { HelperOptions } from '@stampdwn/core/client';
 
 /**
  * Options for LLM helper registration

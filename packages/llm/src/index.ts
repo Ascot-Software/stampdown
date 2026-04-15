@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import { createPlugin } from '@stampdwn/core';
+import { createPlugin } from '@stampdwn/core/client';
 import { registerLLMHelpers } from './helpers';
 
 /**
@@ -12,7 +12,7 @@ import { registerLLMHelpers } from './helpers';
  * Normalizes provider payloads using `@ai-sdk` and provides role-aware helpers
  * @example
  * ```typescript
- * import { Stampdown } from '@stampdwn/core';
+ * import { Stampdown } from '@stampdwn/core/client';
  * import { llmPlugin } from '@stampdwn/llm';
  *
  * const stampdown = new Stampdown({

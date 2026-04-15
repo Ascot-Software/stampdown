@@ -11,9 +11,8 @@ export default [
     files: ['**/*.ts'],
     languageOptions: {
       parserOptions: {
-        projectService: {
-          allowDefaultProject: ['src/__tests__/*.test.ts'],
-        },
+        project: './tsconfig.eslint.json',
+        projectService: false,
         tsconfigRootDir: __dirname,
       },
     },
