@@ -1,6 +1,8 @@
 # Stampdown CLI
 
-Command-line interface for Stampdown template compilation and processing.
+Command-line interface for rendering and precompiling Stampdown templates.
+
+The package installs the `stampdown` binary.
 
 ## Installation
 
@@ -8,274 +10,112 @@ Command-line interface for Stampdown template compilation and processing.
 npm install -g @stampdwn/cli
 ```
 
-## Usage
+## Overview
 
-### Basic Commands
+The CLI has two modes:
 
-```bash
-# Compile templates to precompiled JavaScript
-stampdown compile templates/*.sdt --output dist/
+- Render mode is the default and processes one or more templates into Markdown output.
+- Precompile mode is enabled with `--precompile` and turns templates into optimized JavaScript bundles.
 
-# Process templates with data
-stampdown render template.sdt --data data.json
-
-# Watch for changes and recompile
-stampdown compile templates/*.sdt --output dist/ --watch
-```
-
-### Template Compilation
-
-Compile `.sdt` (Stampdown Template) files to optimized JavaScript:
+## Render Mode
 
 ```bash
-# Compile all .sdt files in src/ to dist/
-stampdown compile "src/**/*.sdt" --output dist/
+# Render a template with a JSON data file
+stampdown -D data.json template.sdt
 
-# Specify output format
-stampdown compile templates/ --output dist/ --format esm
-stampdown compile templates/ --output dist/ --format cjs
-stampdown compile templates/ --output dist/ --format json
+# Render with inline JSON data
+stampdown -D '{"name":"World"}' template.sdt
 
-# Enable source maps
-stampdown compile templates/ --output dist/ --source-map
+# Register partials and helpers from globs
+stampdown -P "partials/*.sdt" -H "helpers/*.js" -D data.json template.sdt
 
-# Tree-shake unused helpers
-stampdown compile templates/ --output dist/ --known-helpers if,each,with
+# Write rendered output into a directory with a custom extension
+stampdown -D data.json -o dist -e html template.sdt
+
+# Write rendered output to stdout
+stampdown -D data.json -s template.sdt
+
+# Read data from stdin
+echo '{"name":"Alice"}' | stampdown -i template.sdt
 ```
 
-### Template Rendering
+### Render Options
 
-Render templates directly from the command line:
+- `-D, --data <glob|json>...` Parse data from a file or inline JSON
+- `-P, --partial <glob>...` Register partial templates from one or more globs
+- `-H, --helper <glob>...` Register helper modules from one or more globs
+- `-o, --output <directory>` Output directory for rendered files
+- `-e, --extension <ext>` Output extension for generated files (default: `md`)
+- `-s, --stdout` Output rendered content to stdout
+- `-i, --stdin` Read JSON data from stdin
+- `--verbose` Enable verbose logging
+
+## Precompile Mode
 
 ```bash
-# Render with JSON data file
-stampdown render template.sdt --data data.json
+# Precompile all templates matched by a glob
+stampdown --precompile --input "templates/**/*.sdt" -o dist
 
-# Render with inline JSON
-stampdown render template.sdt --data '{"name": "World"}'
+# Change output format
+stampdown --precompile --input "templates/**/*.sdt" -o dist -f cjs
+stampdown --precompile --input "templates/**/*.sdt" -o dist -f json
 
-# Output to file
-stampdown render template.sdt --data data.json --output result.html
+# Generate source maps
+stampdown --precompile --input "templates/**/*.sdt" -o dist --source-map
 
-# Use custom helpers
-stampdown render template.sdt --data data.json --helpers ./helpers.js
+# Restrict known helpers for tree-shaking
+stampdown --precompile --input "templates/**/*.sdt" -k "if,each,with"
+
+# Enable strict helper validation
+stampdown --precompile --input "templates/**/*.sdt" --strict
 ```
 
-### Batch Processing
+### Precompile Options
 
-Process multiple templates with different data:
+- `--precompile` Enable precompile mode
+- `--input <glob>` Input file or glob pattern
+- `-o, --output <dir>` Output directory (default: `./precompiled`)
+- `-f, --format <format>` Output format: `esm`, `cjs`, or `json` (default: `esm`)
+- `-k, --known-helpers <list>` Comma-separated list of known helpers or `all`
+- `--strict` Error on unknown helpers
+- `-w, --watch` Watch matched files and rebuild on changes
+- `-m, --source-map` Generate source maps
+- `--verbose` Enable verbose logging
 
-```bash
-# Process all .sdt files with corresponding .json data files
-stampdown batch templates/ --data-dir data/ --output dist/
+## Helper Modules
 
-# Example file structure:
-# templates/
-#   ├── page.sdt
-#   ├── email.sdt
-# data/
-#   ├── page.json
-#   ├── email.json
-```
-
-## Command Reference
-
-### `compile`
-
-Compile Stampdown templates to JavaScript.
-
-```bash
-stampdown compile [input] [options]
-```
-
-**Arguments:**
-- `input` - Input file pattern (glob supported)
-
-**Options:**
-- `-o, --output <dir>` - Output directory
-- `-f, --format <format>` - Output format: `esm`, `cjs`, `json` (default: `esm`)
-- `-k, --known-helpers <list>` - Comma-separated list of known helpers for tree-shaking
-- `-s, --strict` - Error on unknown helpers
-- `-m, --source-map` - Generate source maps
-- `-w, --watch` - Watch for changes and recompile
-- `--template-id <id>` - Template identifier for generated code
-
-**Examples:**
-
-```bash
-# Basic compilation
-stampdown compile "templates/*.sdt" --output dist/
-
-# ESM format with source maps
-stampdown compile templates/ -o dist/ -f esm --source-map
-
-# Optimize for known helpers
-stampdown compile templates/ -o dist/ -k "if,each,with,uppercase"
-
-# Strict mode (fails on unknown helpers)
-stampdown compile templates/ -o dist/ --strict
-```
-
-### `render`
-
-Render templates with data.
-
-```bash
-stampdown render <template> [options]
-```
-
-**Arguments:**
-- `template` - Path to template file
-
-**Options:**
-- `-d, --data <data>` - JSON data (file path or inline JSON)
-- `-o, --output <file>` - Output file (default: stdout)
-- `-h, --helpers <file>` - Custom helpers module
-- `-p, --partials <dir>` - Partials directory
-- `--plugins <list>` - Comma-separated list of plugin names
-
-**Examples:**
-
-```bash
-# Render with data file
-stampdown render template.sdt --data data.json
-
-# Render with inline data
-stampdown render template.sdt -d '{"title": "My Page", "items": [1,2,3]}'
-
-# Use custom helpers
-stampdown render template.sdt --data data.json --helpers ./my-helpers.js
-
-# Include partials
-stampdown render template.sdt --data data.json --partials ./partials/
-```
-
-### `batch`
-
-Batch process multiple templates.
-
-```bash
-stampdown batch <templates-dir> [options]
-```
-
-**Arguments:**
-- `templates-dir` - Directory containing template files
-
-**Options:**
-- `-d, --data-dir <dir>` - Directory containing JSON data files
-- `-o, --output <dir>` - Output directory
-- `-h, --helpers <file>` - Custom helpers module
-- `-p, --partials <dir>` - Partials directory
-- `--ext <ext>` - Template file extension (default: `.sdt`)
-
-## Configuration File
-
-Create `stampdown.config.js` for project configuration:
-
-```javascript
-module.exports = {
-  input: 'templates/**/*.sdt',
-  output: 'dist/',
-  format: 'esm',
-  knownHelpers: ['if', 'each', 'with', 'unless'],
-  strict: false,
-  sourceMap: true,
-  plugins: ['@stampdwn/llm'],
-  helpers: './helpers.js',
-  partials: './partials/',
-  watch: process.env.NODE_ENV === 'development'
-};
-```
-
-Then run:
-
-```bash
-stampdown compile  # Uses config file automatically
-```
-
-## Custom Helpers Module
-
-Create reusable helpers in a separate file:
+Helper files can export a single function or named helper functions. Pass them with `-H` or `--helper`.
 
 ```javascript
 // helpers.js
 module.exports = {
-  formatDate: (context, options, date, format = 'YYYY-MM-DD') => {
-    // Custom date formatting logic
-    return new Date(date).toLocaleDateString();
-  },
-
-  calculateTax: (context, options, amount, rate = 0.1) => {
-    return (Number(amount) * Number(rate)).toFixed(2);
-  }
+  formatDate: (_context, _options, value) => new Date(value).toISOString().slice(0, 10),
+  repeat: (_context, _options, text, count = 2) => String(text).repeat(Number(count)),
 };
 ```
-
-Use with:
 
 ```bash
-stampdown render template.sdt --data data.json --helpers ./helpers.js
+stampdown -H ./helpers.js -D data.json template.sdt
 ```
 
-## Integration Examples
+## Output Files
 
-### Build Scripts
+- Render mode writes one output file per input template unless `--stdout` is used.
+- Precompile mode writes a single bundle file into the output directory:
+  - `templates.mjs` for `esm`
+  - `templates.cjs` for `cjs`
+  - `templates.json` for `json`
 
-Add to `package.json`:
+## API Docs
 
-```json
-{
-  "scripts": {
-    "build:templates": "stampdown compile templates/ --output dist/",
-    "dev:templates": "stampdown compile templates/ --output dist/ --watch",
-    "render:email": "stampdown render email.sdt --data user.json --output email.html"
-  }
-}
-```
-
-### GitHub Actions
-
-```yaml
-name: Build Templates
-on: [push]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-      - run: npm install -g @stampdwn/cli
-      - run: stampdown compile templates/ --output dist/
-      - uses: actions/upload-artifact@v3
-        with:
-          name: compiled-templates
-          path: dist/
-```
-
-### Webpack Integration
-
-```javascript
-// webpack.config.js
-const { exec } = require('child_process');
-
-module.exports = {
-  // ... other config
-  plugins: [
-    {
-      apply: (compiler) => {
-        compiler.hooks.beforeCompile.tap('StampdownPlugin', () => {
-          exec('stampdown compile templates/ --output src/generated/');
-        });
-      }
-    }
-  ]
-};
-```
+Full API reference: [`docs/index.md`](docs/index.md)
 
 ## Related Packages
 
 - [`@stampdwn/core`](https://www.npmjs.com/package/@stampdwn/core) - Core templating engine
 - [`@stampdwn/llm`](https://www.npmjs.com/package/@stampdwn/llm) - LLM prompt templating plugin
+- [`@stampdwn/codemirror`](https://www.npmjs.com/package/@stampdwn/codemirror) - CodeMirror language support
+- [`stampdown-language-support`](https://marketplace.visualstudio.com/items?itemName=AscotSoftware.stampdown-language-support) - VS Code extension
 
 ## License
 

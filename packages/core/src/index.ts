@@ -6,7 +6,8 @@
 export { Stampdown, type PrecompiledTemplateFn } from './stampdown';
 export { Parser } from './parser';
 export { Renderer } from './renderer';
-export { Helper, HelperOptions, HelperRegistry } from './helpers/registry';
+export { HelperRegistry } from './helpers/registry';
+export type { Helper, HelperOptions } from './helpers/registry';
 export { ExpressionEvaluator } from './evaluator';
 export { TemplateLoader, type CompiledTemplate } from './loader';
 export { Precompiler, type PrecompileOptions, type PrecompiledTemplate } from './precompiler';

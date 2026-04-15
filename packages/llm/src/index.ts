@@ -32,7 +32,7 @@ import { registerLLMHelpers } from './helpers';
  */
 export const llmPlugin = createPlugin({
   name: 'llm-plugin',
-  version: '0.1.1',
+  version: '0.1.3',
   description: 'LLM-focused helpers for AI prompt templating',
   plugin: (stampdown, options) => {
     registerLLMHelpers(stampdown, options);

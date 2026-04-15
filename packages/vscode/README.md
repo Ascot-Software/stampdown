@@ -17,12 +17,14 @@ Syntax highlighting and language features for Stampdown template files.
 - **Variable Assignment** - `{{ x = 5 }}`, `{{ name = \`Hello \${user}\` }}`
 - **Advanced Expressions** - `{{#if age > 18}}`, `{{#unless premium && verified}}`
 
-### Intellisense
+### Editor Language Features
 
 - **Auto-detection** - `.sdt` files automatically use Stampdown syntax
 - **Bracket Matching** - Smart matching for `{{...}}` delimiters
 - **Quick Comments** - Toggle comments with `Ctrl+/` (Cmd+/)
 - **Auto-Indentation** - Indentation within block helpers
+
+This extension currently provides grammar-based language support. It does not ship a language server or semantic autocomplete.
 
 ## Installation
 
@@ -97,4 +99,4 @@ Found a bug or have a feature request? Please open an issue on [GitHub](https://
 
 ## License
 
-MIT © 2025 Ascot Software
+MIT

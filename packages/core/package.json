@@ -21,7 +21,7 @@
     "test:coverage": "jest --coverage",
     "api": "api-extractor run",
     "docs": "api-documenter markdown --input-folder ./temp --output-folder ./docs",
-    "ai-docs": "mkdir -p ../../.github/api/core/ && cp ./docs/**.md ../../.github/api/core/ && python -m ../../scripts/flatten_api_docs.py ../../.github/api/core > ../../.github/api/core.md && rm -rf ../../.github/api/core/"
+    "ai-docs": "mkdir -p ../../.github/api/core/ && cp ./docs/**.md ../../.github/api/core/ && python ../../scripts/flatten_docs.py ../../.github/api/core > ../../.github/api/core.md && rm -rf ../../.github/api/core/"
   },
   "keywords": [
     "markdown",
@@ -37,11 +37,14 @@
     "url": "https://github.com/Ascot-Software/stampdown.git",
     "directory": "packages/core"
   },
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.37.0"
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^9.39.4"
   }
 }

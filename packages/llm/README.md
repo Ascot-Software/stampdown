@@ -211,7 +211,7 @@ const stampdown = new Stampdown({
 
 ## API Docs
 
-Full API reference: [`packages/llm/docs/index.md`](docs/index.md)
+Full API reference: [`docs/index.md`](docs/index.md)
 
 ## Related Packages
 
@@ -219,7 +219,7 @@ This package is part of the Stampdown ecosystem:
 
 - [@stampdwn/core](https://www.npmjs.com/package/@stampdwn/core) - Core templating engine
 - [@stampdwn/cli](https://www.npmjs.com/package/@stampdwn/cli) - Command-line interface
-- [@stampdwn/codemirror](https://www.npmjs.com/package/@stampdwn/codemirror) - Code mirror language support
+- [@stampdwn/codemirror](https://www.npmjs.com/package/@stampdwn/codemirror) - CodeMirror language support
 - [@stampdwn/vscode](https://marketplace.visualstudio.com/items?itemName=AscotSoftware.stampdown-language-support) - VS Code extension
 
 ## License

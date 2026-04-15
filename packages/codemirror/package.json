@@ -18,6 +18,9 @@
     "url": "https://github.com/Ascot-Software/stampdown.git",
     "directory": "packages/codemirror"
   },
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "type": "module",
   "license": "MIT",
   "author": "Devon Anderson",
@@ -40,9 +43,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@codemirror/lang-markdown": "^6.4.0",
-    "@codemirror/language": "^6.11.3",
-    "@codemirror/view": "^6.38.6"
+    "@codemirror/lang-markdown": "^6.5.0",
+    "@codemirror/language": "^6.12.3",
+    "@codemirror/view": "^6.41.0"
   },
   "devDependencies": {
     "@codemirror/buildhelper": "^1.0.2"

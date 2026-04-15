@@ -70,7 +70,7 @@ You have free access.
       await cli.run(['--version']);
 
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('sdt-cli'));
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('0.1.0'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('0.1.1'));
       consoleSpy.mockRestore();
     });
 

@@ -200,7 +200,7 @@ console.log(result); // => Avg: 5.00
 
 ## API Docs
 
-Full API reference: [`packages/core/docs/index.md`](../core/docs/index.md)
+Full API reference: [`docs/index.md`](docs/index.md)
 
 ## Related Packages
 
@@ -208,7 +208,7 @@ This package is part of the Stampdown ecosystem:
 
 - [@stampdwn/llm](https://www.npmjs.com/package/@stampdwn/llm) - LLM plugin for prompt templating
 - [@stampdwn/cli](https://www.npmjs.com/package/@stampdwn/cli) - Command-line interface
-- [@stampdwn/codemirror](https://www.npmjs.com/package/@stampdwn/codemirror) - Code mirror language support
+- [@stampdwn/codemirror](https://www.npmjs.com/package/@stampdwn/codemirror) - CodeMirror language support
 - [@stampdwn/vscode](https://marketplace.visualstudio.com/items?itemName=AscotSoftware.stampdown-language-support) - VS Code extension
 
 ## License

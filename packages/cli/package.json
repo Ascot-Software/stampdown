@@ -22,10 +22,9 @@
     "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "jest",
     "test:watch": "jest --watch",
-    "publish": "npm publish --access public",
     "api": "api-extractor run",
     "docs": "api-documenter markdown --input-folder ./temp --output-folder ./docs",
-    "ai-docs": "mkdir -p ../../.github/api/cli/ && cp ./docs/**.md ../../.github/api/cli/ && python -m ../../scripts/flatten_api_docs.py ../../.github/api/cli > ../../.github/api/cli.md && rm -rf ../../.github/api/cli/"
+    "ai-docs": "mkdir -p ../../.github/api/cli/ && cp ./docs/**.md ../../.github/api/cli/ && python ../../scripts/flatten_docs.py ../../.github/api/cli > ../../.github/api/cli.md && rm -rf ../../.github/api/cli/"
   },
   "keywords": [
     "markdown",
@@ -40,14 +39,17 @@
     "url": "https://github.com/Ascot-Software/stampdown.git",
     "directory": "packages/cli"
   },
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@stampdwn/core": "^0.1.0"
+    "@stampdwn/core": "^0.1.2"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.37.0"
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^9.39.4"
   }
 }

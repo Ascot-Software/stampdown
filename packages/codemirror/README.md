@@ -271,4 +271,4 @@ Issues and pull requests are welcome on [GitHub](https://github.com/Ascot-Softwa
 
 ## License
 
-MIT © 2025 Stampdown
+MIT

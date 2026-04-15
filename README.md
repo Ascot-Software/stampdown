@@ -72,7 +72,7 @@ Generated on 2025-11-21
 | Package | Description | Version |
 |---------|-------------|---------|
 | [`@stampdwn/core`](packages/core/) | Core templating engine with built‑in helpers and plugin system | ![npm](https://img.shields.io/npm/v/@stampdwn/core) |
-| [`@stampdwn/cli`](packages/cli/) | CLI for compiling, rendering, batching, project scaffolding | ![npm](https://img.shields.io/npm/v/@stampdwn/cli) |
+| [`@stampdwn/cli`](packages/cli/) | CLI for rendering and precompiling Stampdown templates | ![npm](https://img.shields.io/npm/v/@stampdwn/cli) |
 | [`@stampdwn/llm`](packages/llm/) | LLM prompt engineering helpers (chat normalization, tokens) | ![npm](https://img.shields.io/npm/v/@stampdwn/llm) |
 | [`@stampdwn/codemirror`](packages/codemirror/) | CodeMirror language support (inline highlighting) | ![npm](https://img.shields.io/npm/v/@stampdwn/codemirror) |
 | [`@stampdwn/vscode`](packages/vscode/) | VS Code extension for `.sdt` templates | - |
@@ -98,10 +98,12 @@ Generated on 2025-11-21
 - **Hooks**: Pre/post process transforms for template or output.
 - **Plugins**: Load helper bundles or author your own via `createPlugin/definePlugin`.
 - **Precompiling**: Convert templates to lean JS functions; specify `knownHelpers` for tree‑shaking.
-- **CLI**: Compile, render, batch, watch, strict helper validation, source maps.
+- **CLI**: Render templates, precompile template bundles, watch, strict helper validation, source maps.
 - **Editor Tooling**: VS Code & CodeMirror highlighting for `.sdt`, including helpers & partial syntax.
 
 ## Getting Started
+
+Stampdown targets Node.js 24 or newer for development and supported runtime usage.
 
 ```bash
 npm install @stampdwn/core
@@ -134,9 +136,9 @@ sd.renderPrecompiled('greet', { name: 'Ada' });
 ## CLI
 
 ```bash
-stampdown compile "templates/**/*.sdt" --output dist/ --format esm
-stampdown render template.sdt --data data.json --partials partials/
-stampdown batch templates/ --data-dir data/ --output dist/
+stampdown -D data.json template.sdt
+stampdown -P "partials/*.sdt" -H "helpers/*.js" -D data.json template.sdt
+stampdown --precompile --input "templates/**/*.sdt" -o dist --format esm
 ```
 
 ## Editor Extensions
@@ -147,6 +149,7 @@ stampdown batch templates/ --data-dir data/ --output dist/
 ## Development
 
 ```bash
+nvm use
 npm install
 npm run build
 npm test

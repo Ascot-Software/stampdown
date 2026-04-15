@@ -11,10 +11,11 @@ The Stampdown codebase is organized as a monorepo using npm workspaces. It consi
 - `@stampdwn/core`: The core library implementing the Stampdown parser, renderer, and precompiler.
 - `@stampdwn/cli`: Command-line interface for precompiling and rendering Stampdown templates.
 - `@stampdwn/llm`: Plugin package providing helpers for integrating with large language models (LLMs).
+- `@stampdwn/codemirror`: CodeMirror 6 language support package for Stampdown syntax.
 - `@stampdwn/vscode`: Visual Studio Code extension for Stampdown syntax highlighting and language features.
 
 ## Understanding the Codebase
-You can find the source code for each package under its `src/` directory.
+Core, CLI, LLM, and CodeMirror source live under each package's `src/` directory. The VS Code package is primarily grammar and editor configuration assets under `packages/vscode/`.
 To learn more about each package refer to the `README.md` files located in each package directory.
 
 - [`@stampdwn/core/README.md`](../packages/core/README.md)
@@ -63,17 +64,19 @@ parse(template: string): ASTNode {
 
 **REQUIRED:** Write tests for all new functionality.
 
-**Test Location:** `packages/*/src/__tests__/`
+**Test Location:** `packages/*/src/__tests__/` when the package has automated tests.
 
 **Running Tests:**
 ```bash
 npm test                    # Run all tests
-npm test -- --watch         # Watch mode
-npm test -- stampdown.test  # Run specific test file
+npm run test:watch          # Watch mode
+npm test --workspace @stampdwn/core -- stampdown.test  # Run a specific test file in one package
 ```
 
 **Test Coverage:**
-- Current: 103 tests across 6 test suites (includes 31 LLM plugin tests)
+- Current automated baseline: 186 tests across 9 suites
+- Coverage currently exists for `@stampdwn/core`, `@stampdwn/cli`, and `@stampdwn/llm`
+- `@stampdwn/codemirror` and `@stampdwn/vscode` currently rely on build and manual validation rather than Jest suites
 - All tests must pass before committing
 - Aim for high coverage of edge cases
 
@@ -180,11 +183,11 @@ If modifying `precompiler.ts`:
 - Consider watch mode and file observation
 
 #### Grammar Changes
-If modifying `vscode-extension/syntaxes/stampdown.tmLanguage.json`:
+If modifying `packages/vscode/syntaxes/stampdown.tmLanguage.json`:
 - Test with various syntax combinations
 - Ensure pattern order is correct (more specific first)
 - Validate JSON syntax
-- Test with test files (test-*.sdt)
+- Test with `packages/vscode/test-grammar.sdt`
 - Pattern specificity matters: `{{#*inline` before `{{#`
 
 ### Common Patterns
@@ -290,20 +293,20 @@ Order matters in TextMate grammars:
 
 ## Version
 
-This document reflects the codebase state as of October 6, 2025.
-All 181 tests passing across 4 packages:
+This document reflects the codebase state as of April 14, 2026.
+All current automated tests passing across 3 packages:
 - @stampdwn/core: 133 tests (advanced expressions, variable assignment, partials, precompiler, etc.)
 - @stampdwn/cli: 19 tests (CLI functionality, precompilation, rendering)
-- @stampdwn/llm: 29 tests (LLM plugin helpers, normalization, token management)
-- @stampdwn/vscode: VS Code extension with comprehensive TextMate grammar
+- @stampdwn/llm: 34 tests (LLM plugin helpers, normalization, token management)
 
-100% JSDoc coverage. TypeScript strict mode enabled. ESLint flat config (v9+).
+Additional workspace packages:
+- @stampdwn/codemirror: CodeMirror 6 language support package
+- @stampdwn/vscode: VS Code extension with TextMate grammar and manual validation via `test-grammar.sdt`
+
+TypeScript strict mode enabled. ESLint flat config (v9). Shared tooling currently uses TypeScript 5.9, Jest 29, and Prettier 3.
 
 **Recent Updates:**
-- **Monorepo Migration**: Completed Phase 2 migration to npm workspaces with @stampdwn/* scoped packages
-- **Package Structure**: Split into core, CLI, LLM, and VS Code extension packages
-- **Documentation**: Comprehensive README files for each package with usage examples
-- **Import Paths**: Updated all imports to use @stampdwn/* package naming
-- **LLM Plugin**: Removed mdSection helper (simplified to direct markdown headings)
-- **ESLint**: Upgraded to flat config with proper TypeScript integration
-- **Test Coverage**: Maintained 100% test coverage across all packages during migration
+- **Workspace Refresh**: Shared tooling dependencies were refreshed within current major versions and validated with full build, lint, and test runs
+- **Repo Hygiene**: API doc generation scripts now point at the active flattening script and packaged `.vsix` artifacts are ignored
+- **Current Package Layout**: The workspace contains core, CLI, LLM, CodeMirror, and VS Code packages
+- **Validation Baseline**: Core, CLI, and LLM automated tests currently pass as the active regression suite

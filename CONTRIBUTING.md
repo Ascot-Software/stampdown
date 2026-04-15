@@ -4,23 +4,30 @@ Thank you for your interest in contributing to Stampdown! This document provides
 
 ## Development Setup
 
+Stampdown targets Node.js 24 or newer for local development and package runtime support.
+
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
    cd stampdown
    ```
 
-2. **Install dependencies** (installs all workspace dependencies)
+2. **Use Node.js 24**
+   ```bash
+   nvm use
+   ```
+
+3. **Install dependencies** (installs all workspace dependencies)
    ```bash
    npm install
    ```
 
-3. **Build all packages**
+4. **Build all packages**
    ```bash
    npm run build
    ```
 
-4. **Run all tests**
+5. **Run all tests**
    ```bash
    npm test
    ```
@@ -32,6 +39,7 @@ This project uses npm workspaces with the following packages:
 - **[@stampdwn/core](packages/core/)** - Core templating engine
 - **[@stampdwn/cli](packages/cli/)** - Command-line interface
 - **[@stampdwn/llm](packages/llm/)** - LLM plugin for prompt templates
+- **[@stampdwn/codemirror](packages/codemirror/)** - CodeMirror 6 language support package
 - **[@stampdwn/vscode](packages/vscode/)** - VS Code extension
 
 ## Development Workflow
@@ -59,10 +67,15 @@ npm run dev        # Watch mode
 npm test           # Run LLM tests
 npm run build      # Build LLM package
 
+# Work on CodeMirror package
+cd packages/codemirror
+npm run prepare    # Build the package output
+npm run docs       # Regenerate CodeMirror docs
+
 # Work on VS Code extension
 cd packages/vscode
-npm run build      # Build extension
-npm run package    # Create .vsix file
+# Edit grammar and configuration assets
+# Validate manually with test-grammar.sdt
 ```
 
 ### Running All Package Commands
@@ -79,8 +92,8 @@ npm test
 # Lint all packages
 npm run lint
 
-# Clean all packages
-npm run clean
+# Format all packages
+npm run format
 ```
 
 ### Code Quality
@@ -116,22 +129,33 @@ npm run test:watch
 npm run test:coverage
 ```
 
+Current automated tests cover the core, CLI, and LLM packages. The CodeMirror and VS Code packages currently rely on package build checks and manual validation.
+
 ## Project Structure
 
 ```
 stampdown/
-├── src/
-│   ├── __tests__/          # Test files
-│   ├── helpers/            # Helper-related code
-│   │   ├── builtin.ts     # Built-in helpers
-│   │   └── registry.ts    # Helper registry
-│   ├── evaluator.ts       # Expression evaluator
-│   ├── index.ts           # Main entry point
-│   ├── parser.ts          # Template parser
-│   ├── renderer.ts        # AST renderer
-│   ├── stampdown.ts       # Main Stampdown class
-│   └── types.ts           # TypeScript type definitions
-├── dist/                   # Compiled output (gitignored)
+├── packages/
+│   ├── core/
+│   │   ├── src/
+│   │   ├── docs/
+│   │   └── config/
+│   ├── cli/
+│   │   ├── src/
+│   │   ├── docs/
+│   │   └── bin/
+│   ├── llm/
+│   │   ├── src/
+│   │   ├── docs/
+│   │   └── config/
+│   ├── codemirror/
+│   │   ├── src/
+│   │   └── docs/
+│   └── vscode/
+│       ├── syntaxes/
+│       ├── language-configuration.json
+│       └── test-grammar.sdt
+├── scripts/
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -141,9 +165,9 @@ stampdown/
 
 ### Adding a New Built-in Helper
 
-1. Open `src/helpers/builtin.ts`
+1. Open `packages/core/src/helpers/builtin.ts`
 2. Add your helper to the `registerBuiltInHelpers` function
-3. Write tests in `src/__tests__/stampdown.test.ts`
+3. Write tests in `packages/core/src/__tests__/stampdown.test.ts`
 4. Update the documentation
 
 Example:
@@ -159,16 +183,18 @@ registry.register('myHelper', (context: Context, options: HelperOptions, ...args
 
 If you need to add new syntax:
 
-1. Update `src/parser.ts` to recognize the new syntax
-2. Update `src/types.ts` if new AST node types are needed
-3. Update `src/renderer.ts` to handle the new node types
+1. Update `packages/core/src/parser.ts` to recognize the new syntax
+2. Update `packages/core/src/types.ts` if new AST node types are needed
+3. Update `packages/core/src/renderer.ts` to handle the new node types
 4. Add comprehensive tests
+
+If the syntax affects editor support, also update `packages/vscode/syntaxes/stampdown.tmLanguage.json` and validate the change with `packages/vscode/test-grammar.sdt`.
 
 ### Adding Hooks
 
 Hooks can be added by modifying:
-- `src/types.ts` for type definitions
-- `src/stampdown.ts` for implementation
+- `packages/core/src/types.ts` for type definitions
+- `packages/core/src/stampdown.ts` for implementation
 
 ## Code Style Guidelines
 
@@ -267,7 +293,7 @@ describe('Feature Name', () => {
 6. **Create a Pull Request**
    - Provide a clear description
    - Reference any related issues
-   - Ensure CI passes
+   - Include local verification results for build, lint, and test
 
 ## Reporting Issues
 

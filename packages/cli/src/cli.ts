@@ -102,7 +102,7 @@ export interface CliOptions {
  */
 class StampdownCLI {
   private options: CliOptions;
-  private readonly version = '0.1.0';
+  private readonly version = '0.1.1';
 
   /**
    * Creates a new StampdownCLI instance
@@ -489,7 +489,7 @@ Examples:
         resolve(data);
       });
 
-      process.stdin.on('error', (error) => {
+      process.stdin.on('error', (error: Error) => {
         reject(error);
       });
     });
@@ -798,14 +798,15 @@ Examples:
     }
 
     const precompiler = new Precompiler();
+    const inputPattern = this.options.input;
     const outputDir = this.options.output || './precompiled';
     const format = this.options.format || 'esm';
 
     // Find all template files
-    const files = this.findFiles(this.options.input);
+    const files = this.findFiles(inputPattern);
 
     if (files.length === 0) {
-      console.error(`No template files found matching: ${this.options.input}`);
+      console.error(`No template files found matching: ${inputPattern}`);
       process.exit(1);
     }
 
@@ -817,7 +818,7 @@ Examples:
     const templates: Array<{ id: string; code: string; sourceMap?: string }> = [];
 
     for (const file of files) {
-      const templateId = this.generateTemplateId(file, this.options.input);
+      const templateId = this.generateTemplateId(file, inputPattern);
       const result = this.precompileFile(precompiler, file, templateId);
 
       if (result) {
