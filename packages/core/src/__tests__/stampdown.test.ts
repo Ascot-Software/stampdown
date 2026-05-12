@@ -62,6 +62,24 @@ describe('Stampdown', () => {
       expect(stampdown.render(template, { hide: false })).toBe('Visible');
       expect(stampdown.render(template, { hide: true })).toBe('');
     });
+
+    it('should handle eq helper with strict equality', () => {
+      const stampdown = new Stampdown();
+
+      expect(stampdown.render('{{#eq value other/}}', { value: 'match', other: 'match' })).toBe(
+        'true'
+      );
+      expect(stampdown.render('{{#eq value other/}}', { value: 1, other: '1' })).toBe('false');
+    });
+
+    it('should handle neq helper with strict inequality', () => {
+      const stampdown = new Stampdown();
+
+      expect(stampdown.render('{{#neq value other/}}', { value: 'left', other: 'right' })).toBe(
+        'true'
+      );
+      expect(stampdown.render('{{#neq value other/}}', { value: 1, other: 1 })).toBe('false');
+    });
   });
 
   describe('Partials', () => {

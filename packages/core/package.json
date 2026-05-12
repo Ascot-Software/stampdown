@@ -1,6 +1,6 @@
 {
   "name": "@stampdwn/core",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Stampdown is a Markdown templating language, that is simple and extensible.",
   "main": "dist/server.js",
   "types": "dist/server.d.ts",

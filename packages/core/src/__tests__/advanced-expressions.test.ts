@@ -250,6 +250,14 @@ Senior
       expect(stampdown.render(template, {})).toBe('Yes'); // 5 > 2 = true
     });
 
+    it('should support built-in comparison helpers as subexpressions', () => {
+      const template =
+        '{{#if (eq count expected)}}Match{{else if (neq count expected)}}Different{{/if}}';
+
+      expect(stampdown.render(template, { count: 3, expected: 3 })).toBe('Match');
+      expect(stampdown.render(template, { count: 3, expected: '3' })).toBe('Different');
+    });
+
     it('should support subexpressions with context variables', () => {
       const template = '{{uppercase (concat firstName " " lastName)}}';
       expect(stampdown.render(template, { firstName: 'John', lastName: 'Doe' })).toBe('JOHN DOE');

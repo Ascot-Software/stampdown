@@ -39,6 +39,28 @@ export function registerBuiltInHelpers(registry: HelperRegistry): void {
   });
 
   /**
+   * 'eq' helper - Strict equality comparison
+   * Returns true when both arguments are strictly equal
+   */
+  registry.register(
+    'eq',
+    (_context: Context, _options: HelperOptions, left: unknown, right: unknown) => {
+      return String(left === right);
+    }
+  );
+
+  /**
+   * 'neq' helper - Strict inequality comparison
+   * Returns true when both arguments are not strictly equal
+   */
+  registry.register(
+    'neq',
+    (_context: Context, _options: HelperOptions, left: unknown, right: unknown) => {
+      return String(left !== right);
+    }
+  );
+
+  /**
    * 'each' helper - Array iteration
    * Iterates over an array and renders the block for each item
    * Provides special variables: `@index`, `@first`, `@last`
