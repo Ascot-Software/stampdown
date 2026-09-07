@@ -1,6 +1,6 @@
 {
   "name": "@stampdwn/llm",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "LLM prompt engineering plugin for Stampdown",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -45,7 +45,6 @@
   "dependencies": {
     "@ai-sdk/provider": "^2.0.1",
     "@stampdwn/core": "^0.1.4",
-    "@toon-format/toon": "^0.7.3",
     "gpt-tokenizer": "^3.4.0",
     "yaml": "^2.8.3",
     "zod": "^4.3.6"

@@ -316,18 +316,6 @@ Stringifies a value as YAML, using `yaml` package (https://www.npmjs.com/package
 - First arg: Value to format
 - `yamlOptions` (hash): Options to pass to the YAML parser ([documentation](https://eemeli.org/yaml/#options))
 
-#### `toon`
-Stringifies a value to token-efficient Token-Oriented Object Notation "TOON" format (https://github.com/toon-format/toon)
-
-**Usage:**
-```handlebars
-{{#toon object/}}
-```
-
-**Parameters:**
-- First arg: Value to format
-- `toonOptions` (hash): Options to pass to the TOON encoder ([documentation](https://github.com/toon-format/toon?tab=readme-ov-file#api))
-
 #### `renderChat`
 Renders the normalized chat in various provider formats.
 
@@ -347,7 +335,7 @@ Renders the normalized chat in various provider formats.
 ```
 
 **Parameters:**
-- `format` (hash): 'json', 'yaml', 'toon', 'custom' or 'raw'
+- `format` (hash): 'json', 'yaml', 'custom' or 'raw'
 - `shape` (hash): 'norm', 'openai', or 'anthropic'
 - `formatter` (hash): the formatter function for custom formatting
 

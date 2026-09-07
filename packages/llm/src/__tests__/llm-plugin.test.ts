@@ -5,14 +5,6 @@
 
 import { Stampdown } from '@stampdwn/core/client';
 import { llmPlugin } from '../index';
-import { encode } from '@toon-format/toon';
-
-jest.mock('@toon-format/toon', () => ({
-  encode: jest.fn((obj, options) => {
-    // Simple mock implementation for testing
-    return `toon_encoded(${JSON.stringify(obj)}) with_options(${JSON.stringify(options)})`;
-  }),
-}));
 
 describe('llm plugin', () => {
   let stampdown: Stampdown;
@@ -287,26 +279,6 @@ describe('llm plugin', () => {
       });
       expect(out).toContain('name: test');
       expect(out).toContain('    - 1');
-    });
-
-    it('toon encodes object', () => {
-      const tpl = `{{#toon obj/}}`;
-      const obj = { user: { name: 'Alice', age: 30 } };
-      const out = stampdown.render(tpl, { obj });
-      expect(encode).toHaveBeenCalledWith(expect.any(Object), {});
-      expect(out).toMatch(`toon_encoded(${JSON.stringify(obj)}) with_options({})`);
-    });
-
-    it('accepts toon options', () => {
-      const tpl = `{{#toon obj toonOptions=toonOpts/}}`;
-      const out = stampdown.render(tpl, {
-        obj: { user: { name: 'Alice', age: 30 } },
-        toonOpts: { indent: 4 },
-      });
-      expect(encode).toHaveBeenCalledWith(expect.any(Object), { indent: 4 });
-      expect(out).toMatch(
-        `toon_encoded(${JSON.stringify({ user: { name: 'Alice', age: 30 } })}) with_options(${JSON.stringify({ indent: 4 })})`
-      );
     });
   });
 

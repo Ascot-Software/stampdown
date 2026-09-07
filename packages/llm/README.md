@@ -167,13 +167,12 @@ Truncates by token limit with different modes.
 
 ### Formatting Helpers
 
-#### `json`, `yaml`, `toon`
-Stringifies value as JSON, YAML or TOON
+#### `json`, `yaml`
+Stringifies value as JSON or YAML
 
 ```markdown
 {{#json chat/}}
 {{#yaml config/}}
-{{#toon chat/}}
 ```
 
 #### `renderChat`

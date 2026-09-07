@@ -5,7 +5,6 @@
  */
 
 import YAML from 'yaml';
-import { encode as toonEncode } from '@toon-format/toon';
 import type { Stampdown } from '@stampdwn/core';
 import type { NormChat, NormMessage, NormContent } from './types';
 import { NormChatSchema } from './types';
@@ -412,22 +411,6 @@ export function registerLLMHelpers(stampdown: Stampdown, opts?: LLMHelperOptions
     return YAML.stringify(target, yamlOptions);
   });
 
-  /**
-   * 'toon' helper - Encode value as Toon format
-   * Converts value to Toon format using Toon encoder
-   * Usage: {{#toon value/}}
-   * @param context - Template context (used if no value provided)
-   * @param options - Helper options
-   * @param toonOptions - Optional Toon encoding options
-   * @param value - Optional value to encode (defaults to context)
-   * @returns Toon-encoded string representation
-   */
-  stampdown.registerHelper('toon', (context: Context, options: HelperOptions, value?: unknown) => {
-    const target = value ?? context;
-    const toonOptions = options.hash?.toonOptions ?? {};
-    return toonEncode(target, toonOptions);
-  });
-
   // ### Provider shape emission
   /**
    * 'renderChat' helper - Render chat in provider-specific format (for debugging/API interop)
@@ -439,7 +422,6 @@ export function registerLLMHelpers(stampdown: Stampdown, opts?: LLMHelperOptions
    * @param shape - Output shape (default: 'norm')
    * @param number options.hash.indent - Indentation level for JSON (default: 2)
    * @param boolean options.hash.escape - If true, escapes JSON output for LangChain-like usage (default: false)
-   * @param toonOptions - Optional Toon encoding options
    * @param yamlOptions - Optional YAML stringify options
    * @param chat - Optional chat object (defaults to context)
    * @returns Formatted chat in specified format and shape
@@ -449,15 +431,9 @@ export function registerLLMHelpers(stampdown: Stampdown, opts?: LLMHelperOptions
     (context: Context, options: HelperOptions, chat?: unknown) => {
       const noFormatter = (str: string): string => str;
       const target = (chat ?? context) as NormChat;
-      const format = (options.hash?.format ?? 'json') as
-        | 'json'
-        | 'yaml'
-        | 'toon'
-        | 'custom'
-        | 'raw';
+      const format = (options.hash?.format ?? 'json') as 'json' | 'yaml' | 'custom' | 'raw';
       const indent = (options.hash?.indent as number) ?? 2;
       const escape = (options.hash?.escape as boolean) ?? false;
-      const toonOptions = options.hash?.toonOptions ?? {};
       const yamlOptions = options.hash?.yamlOptions ?? {};
       const formatter = (options.hash?.formatter as Function) ?? noFormatter;
 
@@ -468,9 +444,6 @@ export function registerLLMHelpers(stampdown: Stampdown, opts?: LLMHelperOptions
       }
       if (format === 'custom') {
         return formatter(obj as unknown as string);
-      }
-      if (format === 'toon') {
-        return toonEncode(obj, toonOptions);
       }
       if (format === 'yaml') {
         return YAML.stringify(obj, yamlOptions);
